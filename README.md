@@ -33,8 +33,9 @@ Then open `http://localhost:8080`.
 
 - `index.html` — application markup
 - `styles.css` — responsive visual design
-- `runtime-data.js` — country metadata, map loading and distance engine
-- `app.js` — game state, search, ranking, feedback and persistence
+- `chunks/runtime-*.js` — country metadata, map loading and distance engine
+- `chunks/app-*.js` — game state, search, ranking, feedback and persistence
+- `runtime-loader.js` — assembles and starts the browser modules
 
 ## Geography model
 
