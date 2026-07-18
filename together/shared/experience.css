@@ -1,0 +1,676 @@
+:root {
+  --mode-accent: #ef6b42;
+  --mode-accent-2: #d94d2a;
+  --mode-soft: #fff0e9;
+  --mode-glow: rgba(239, 107, 66, .22);
+  --experience-line: color-mix(in srgb, var(--line-strong) 72%, transparent);
+  --experience-glass: color-mix(in srgb, var(--panel-strong) 82%, transparent);
+  --experience-glass-strong: color-mix(in srgb, var(--panel-strong) 93%, transparent);
+  --experience-shadow: 0 24px 70px rgba(16, 24, 32, .14);
+  --experience-shadow-deep: 0 38px 110px rgba(8, 14, 19, .28);
+  --keyboard-offset: 0px;
+  --visual-viewport-height: 100dvh;
+  --visual-viewport-top: 0px;
+}
+
+body.mode-race {
+  --mode-accent: #f06a3d;
+  --mode-accent-2: #c94725;
+  --mode-soft: #fff0e8;
+  --mode-glow: rgba(240, 106, 61, .24);
+}
+body.mode-relay {
+  --mode-accent: #16896b;
+  --mode-accent-2: #0d6651;
+  --mode-soft: #e6f6f0;
+  --mode-glow: rgba(22, 137, 107, .22);
+}
+body.mode-duel {
+  --mode-accent: #7654c7;
+  --mode-accent-2: #53329d;
+  --mode-soft: #eee9fb;
+  --mode-glow: rgba(118, 84, 199, .24);
+}
+
+html[data-theme="dark"] body.mode-race { --mode-soft: #3c251e; }
+html[data-theme="dark"] body.mode-relay { --mode-soft: #16372e; }
+html[data-theme="dark"] body.mode-duel { --mode-soft: #2c2442; }
+
+body.together-experience {
+  background:
+    radial-gradient(circle at 50% -12rem, color-mix(in srgb, var(--mode-accent) 14%, transparent), transparent 38rem),
+    radial-gradient(circle at 8% 30%, color-mix(in srgb, var(--mode-accent) 7%, transparent), transparent 28rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--bg) 94%, var(--panel-strong)), var(--bg));
+}
+
+body.together-experience .topbar {
+  border-bottom-color: color-mix(in srgb, var(--line) 74%, transparent);
+}
+body.together-experience .brand-mark {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ink) 88%, var(--mode-accent)), var(--ink));
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--mode-accent) 17%, transparent);
+}
+body.together-experience .brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: inherit;
+  pointer-events: none;
+}
+body.together-experience .together-mode-chip,
+body.together-experience .race-mode-chip {
+  border-color: color-mix(in srgb, var(--mode-accent) 26%, var(--line));
+  background: color-mix(in srgb, var(--mode-soft) 42%, var(--panel));
+  color: color-mix(in srgb, var(--mode-accent-2) 84%, var(--ink));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.56);
+}
+
+body.together-experience .mode-setup,
+body.together-experience .setup-view {
+  position: relative;
+  max-width: 1040px;
+  padding-top: 64px;
+}
+body.together-experience .mode-setup::before,
+body.together-experience .setup-view::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 25px;
+  left: 50%;
+  width: min(880px, 90vw);
+  height: 390px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--mode-accent) 14%, transparent), transparent 67%);
+  filter: blur(14px);
+}
+body.together-experience .mode-setup h1,
+body.together-experience .setup-view h1 {
+  max-width: 900px;
+  margin-inline: auto;
+  font-weight: 650;
+  text-wrap: balance;
+}
+body.together-experience .mode-setup-copy,
+body.together-experience .setup-copy {
+  max-width: 680px;
+}
+body.together-experience .mode-setup-card,
+body.together-experience .setup-card {
+  position: relative;
+  overflow: hidden;
+  max-width: 820px;
+  padding: 30px;
+  border-color: color-mix(in srgb, var(--mode-accent) 18%, var(--experience-line));
+  border-radius: 28px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--panel-strong) 94%, var(--mode-soft)), var(--panel));
+  box-shadow: var(--experience-shadow);
+}
+body.together-experience .mode-setup-card::before,
+body.together-experience .setup-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 26px;
+  right: 26px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mode-accent), transparent);
+  opacity: .72;
+}
+body.together-experience select,
+body.together-experience .player-name-grid input {
+  border-color: color-mix(in srgb, var(--mode-accent) 12%, var(--line-strong));
+  background: color-mix(in srgb, var(--panel-strong) 96%, var(--mode-soft));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.66);
+}
+body.together-experience select:focus,
+body.together-experience .player-name-grid input:focus {
+  border-color: color-mix(in srgb, var(--mode-accent) 64%, var(--line-strong));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mode-accent) 12%, transparent);
+  outline: 0;
+}
+
+body.together-experience .mode-game,
+body.together-experience .race-game {
+  padding-top: 32px;
+}
+body.together-experience .mode-heading-row,
+body.together-experience .race-heading-row {
+  position: relative;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 4px 0 4px 18px;
+}
+body.together-experience .mode-heading-row::before,
+body.together-experience .race-heading-row::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--mode-accent), color-mix(in srgb, var(--mode-accent) 12%, transparent));
+  box-shadow: 0 0 24px var(--mode-glow);
+}
+body.together-experience .mode-heading-row h1,
+body.together-experience .race-heading-row h1 {
+  max-width: 850px;
+  font-size: clamp(2.1rem, 4.2vw, 4.2rem);
+  font-weight: 650;
+  text-wrap: balance;
+}
+body.together-experience .mode-heading-row p:not(.eyebrow),
+body.together-experience .race-heading-row p:not(.eyebrow) {
+  max-width: 720px;
+  line-height: 1.5;
+}
+
+body.together-experience .mode-scoreboard,
+body.together-experience .race-scoreboard {
+  gap: 10px;
+  margin-bottom: 16px;
+}
+body.together-experience .mode-player-card,
+body.together-experience .race-player-card {
+  border-color: color-mix(in srgb, var(--line) 80%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  box-shadow: 0 8px 24px rgba(16,24,32,.045);
+}
+body.together-experience .mode-player-card.is-active,
+body.together-experience .race-player-card.is-active {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--player-colour, var(--mode-accent)) 52%, var(--line));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--player-colour, var(--mode-accent)) 10%, var(--panel-strong)), var(--panel));
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--player-colour, var(--mode-accent)) 12%, transparent);
+}
+
+body.together-experience .mode-layout,
+body.together-experience .race-layout {
+  grid-template-columns: minmax(0, 1.78fr) minmax(320px, .72fr);
+  gap: 24px;
+}
+body.together-experience .mode-play-column,
+body.together-experience .race-play-column {
+  gap: 0;
+}
+body.together-experience .mode-map-panel,
+body.together-experience .race-map-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 16%, var(--experience-line));
+  border-radius: 30px;
+  background: var(--panel);
+  box-shadow: var(--experience-shadow-deep);
+}
+body.together-experience .mode-map-panel::after,
+body.together-experience .race-map-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: inherit;
+  pointer-events: none;
+}
+body.together-experience .globe-toolbar {
+  position: absolute;
+  z-index: 7;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  min-height: 48px;
+  padding: 7px 10px 7px 14px;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 60%, transparent);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--panel-strong) 76%, transparent);
+  box-shadow: 0 12px 34px rgba(16,24,32,.12);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+body.together-experience .signal-dot {
+  background: var(--mode-accent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--mode-accent) 15%, transparent), 0 0 18px var(--mode-glow);
+}
+body.together-experience .mode-globe-stage,
+body.together-experience .race-globe-stage {
+  min-height: clamp(540px, 66vw, 760px);
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--mode-accent) 7%, transparent), transparent 38%),
+    radial-gradient(circle at 50% 42%, rgba(106,151,178,.14), transparent 48%),
+    linear-gradient(180deg, color-mix(in srgb, var(--panel) 68%, #dce8ee), color-mix(in srgb, var(--panel) 92%, #b9d0dc));
+}
+html[data-theme="dark"] body.together-experience .mode-globe-stage,
+html[data-theme="dark"] body.together-experience .race-globe-stage {
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--mode-accent) 10%, transparent), transparent 40%),
+    linear-gradient(180deg, #14232d, #0b151d);
+}
+body.together-experience .globe-hint,
+body.together-experience .globe-zoom {
+  border-color: color-mix(in srgb, var(--line-strong) 62%, transparent);
+  background: color-mix(in srgb, var(--panel-strong) 78%, transparent);
+  box-shadow: 0 10px 28px rgba(16,24,32,.12);
+  backdrop-filter: blur(16px) saturate(1.2);
+}
+body.together-experience .globe-hint {
+  padding: 9px 13px;
+  font-weight: 650;
+}
+
+body.together-experience .mode-guess-panel,
+body.together-experience .race-guess-panel {
+  position: relative;
+  z-index: 10;
+  width: calc(100% - 44px);
+  margin: -54px auto 0;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 25%, var(--line-strong));
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--panel-strong) 91%, transparent);
+  box-shadow: 0 22px 56px rgba(16,24,32,.2);
+  backdrop-filter: blur(22px) saturate(1.3);
+}
+body.together-experience .mode-guess-panel::before,
+body.together-experience .race-guess-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mode-accent), transparent);
+  opacity: .72;
+}
+body.together-experience .search-area > label {
+  color: color-mix(in srgb, var(--mode-accent-2) 70%, var(--ink-soft));
+}
+body.together-experience #countryInput {
+  height: 58px;
+  border-color: color-mix(in srgb, var(--mode-accent) 18%, var(--line-strong));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--panel-strong) 96%, var(--mode-soft));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+}
+body.together-experience #countryInput:focus {
+  border-color: var(--mode-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mode-accent) 13%, transparent), inset 0 1px 0 rgba(255,255,255,.72);
+  outline: 0;
+}
+body.together-experience .mode-turn-actions button,
+body.together-experience .race-turn-actions button {
+  height: 58px;
+  border-radius: 15px;
+}
+body.together-experience .primary-button {
+  border-color: color-mix(in srgb, var(--mode-accent-2) 58%, var(--ink));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ink) 78%, var(--mode-accent)), var(--ink));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--mode-accent) 16%, transparent), inset 0 1px 0 rgba(255,255,255,.13);
+}
+body.together-experience .primary-button:hover {
+  box-shadow: 0 14px 32px color-mix(in srgb, var(--mode-accent) 22%, transparent), inset 0 1px 0 rgba(255,255,255,.14);
+}
+body.together-experience .suggestions {
+  border-color: color-mix(in srgb, var(--mode-accent) 18%, var(--line));
+  box-shadow: 0 24px 60px rgba(8,14,19,.22);
+}
+body.together-experience .suggestion-button:hover,
+body.together-experience .suggestion-button.is-active {
+  background: color-mix(in srgb, var(--mode-soft) 72%, var(--panel));
+}
+.mobile-composer-context { display: none; }
+
+body.together-experience .feedback-panel {
+  margin: 14px 22px 0;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(16,24,32,.06);
+}
+body.together-experience .feedback-panel.is-warmer {
+  border-color: color-mix(in srgb, var(--mode-accent) 34%, var(--line));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--mode-soft) 88%, var(--panel)), var(--panel));
+}
+body.together-experience .feedback-icon {
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 18%, var(--line));
+  background: color-mix(in srgb, var(--mode-soft) 68%, var(--panel-strong));
+  color: var(--mode-accent-2);
+}
+
+body.together-experience .mode-results-column,
+body.together-experience .race-results-column {
+  gap: 14px;
+}
+body.together-experience .history-card {
+  border-color: color-mix(in srgb, var(--line) 78%, transparent);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  box-shadow: 0 16px 44px rgba(16,24,32,.08);
+}
+body.together-experience .history-header {
+  padding: 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--panel-strong) 66%, transparent), transparent);
+}
+body.together-experience .mode-rules-card,
+body.together-experience .race-rules-card {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--line-strong) 62%, transparent);
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  box-shadow: none;
+}
+body.together-experience .mode-pressure-card {
+  border-color: color-mix(in srgb, var(--mode-accent) 22%, var(--line));
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--mode-accent) 12%, transparent), transparent 13rem),
+    var(--panel);
+  box-shadow: 0 16px 46px rgba(16,24,32,.09);
+}
+body.together-experience .pressure-radar {
+  border-radius: 20px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.36);
+}
+
+body.together-experience .pass-screen,
+body.together-experience .secret-screen {
+  background:
+    radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--mode-accent) 25%, transparent), transparent 25rem),
+    rgba(6, 11, 16, .9);
+  backdrop-filter: blur(26px) saturate(1.18);
+}
+body.together-experience .pass-card,
+body.together-experience .secret-card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(255,255,255,.18);
+  border-radius: 32px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--panel-strong) 94%, var(--mode-soft)), var(--panel));
+  box-shadow: 0 42px 120px rgba(0,0,0,.46);
+}
+body.together-experience .pass-card::before,
+body.together-experience .secret-card::before,
+body.together-experience .dialog-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 14%;
+  right: 14%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--mode-accent), transparent);
+}
+body.together-experience .pass-lock,
+body.together-experience .secret-lock,
+body.together-experience .win-symbol {
+  border: 1px solid color-mix(in srgb, var(--mode-accent) 34%, var(--line));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ink) 80%, var(--mode-accent)), var(--ink));
+  color: #fff;
+  box-shadow: 0 16px 38px var(--mode-glow);
+}
+body.together-experience .pass-standing,
+body.together-experience .mode-result-stat,
+body.together-experience .race-result-stat,
+body.together-experience .polish-highlight,
+body.together-experience .duel-target-item {
+  border-color: color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--panel-strong) 70%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.42);
+}
+body.together-experience .dialog-card {
+  position: relative;
+  overflow: auto;
+  border-color: color-mix(in srgb, var(--mode-accent) 20%, var(--line));
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--mode-accent) 16%, transparent), transparent 17rem),
+    var(--panel-strong);
+  box-shadow: 0 42px 120px rgba(0,0,0,.34);
+}
+
+.together-main .mode-grid { gap: 20px; }
+.together-main .together-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 330px;
+  border-color: color-mix(in srgb, var(--line-strong) 70%, transparent);
+  border-radius: 30px;
+  background: linear-gradient(155deg, var(--panel-strong), var(--panel));
+  box-shadow: 0 24px 66px rgba(16,24,32,.11);
+}
+.together-main .together-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 210px;
+  height: 210px;
+  top: -92px;
+  right: -75px;
+  border-radius: 50%;
+  background: var(--card-glow, rgba(239,107,66,.16));
+  filter: blur(2px);
+  transition: transform .35s ease;
+}
+.together-main .together-card::after {
+  content: "";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 58px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--card-accent, #ef6b42), transparent);
+  opacity: .36;
+}
+.together-main .together-card:nth-child(1) { --card-accent:#f06a3d; --card-soft:#fff0e8; --card-glow:rgba(240,106,61,.18); }
+.together-main .together-card:nth-child(2) { --card-accent:#16896b; --card-soft:#e6f6f0; --card-glow:rgba(22,137,107,.17); }
+.together-main .together-card:nth-child(3) { --card-accent:#7654c7; --card-soft:#eee9fb; --card-glow:rgba(118,84,199,.18); }
+.together-main .together-card:hover { transform: translateY(-6px); box-shadow: 0 32px 84px rgba(16,24,32,.16); }
+.together-main .together-card:hover::before { transform: scale(1.16); }
+.together-main .mode-icon {
+  width: 58px;
+  height: 58px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 24%, var(--line));
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card-soft) 74%, var(--panel-strong));
+  color: var(--card-accent);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--card-accent) 14%, transparent);
+}
+.together-main .mode-status {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  background: color-mix(in srgb, var(--card-accent) 12%, var(--panel-strong));
+  border: 1px solid color-mix(in srgb, var(--card-accent) 28%, var(--line));
+  color: var(--card-accent);
+  line-height: 1;
+}
+.together-main .mode-cta { color: var(--card-accent); }
+
+@media (max-width: 1080px) {
+  body.together-experience .mode-layout,
+  body.together-experience .race-layout { grid-template-columns: minmax(0, 1.55fr) minmax(290px, .75fr); gap: 18px; }
+}
+
+@media (max-width: 900px) {
+  body.together-experience .mode-layout,
+  body.together-experience .race-layout { grid-template-columns: 1fr; }
+  body.together-experience .mode-results-column,
+  body.together-experience .race-results-column { grid-template-columns: minmax(0, 1.2fr) minmax(240px, .8fr); }
+}
+
+@media (max-width: 820px) {
+  body.together-experience .app-shell { padding-inline: 12px; }
+  body.together-experience .topbar { min-height: 68px; }
+  body.together-experience .mode-game,
+  body.together-experience .race-game { padding-top: 22px; }
+  body.together-experience .mode-heading-row,
+  body.together-experience .race-heading-row { align-items: flex-start; padding-left: 14px; }
+  body.together-experience .mode-heading-row h1,
+  body.together-experience .race-heading-row h1 { font-size: clamp(2rem, 9vw, 3.15rem); }
+  body.together-experience .mode-scoreboard,
+  body.together-experience .race-scoreboard {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 2px 2px 10px;
+    scrollbar-width: none;
+  }
+  body.together-experience .mode-scoreboard::-webkit-scrollbar,
+  body.together-experience .race-scoreboard::-webkit-scrollbar { display: none; }
+  body.together-experience .mode-player-card,
+  body.together-experience .race-player-card { flex: 0 0 min(78vw, 280px); scroll-snap-align: start; }
+  body.together-experience .mode-map-panel,
+  body.together-experience .race-map-panel { border-radius: 24px; }
+  body.together-experience .mode-globe-stage,
+  body.together-experience .race-globe-stage { min-height: 520px; height: 62svh; }
+  body.together-experience .globe-toolbar { top: 10px; left: 10px; right: 10px; }
+  body.together-experience .mode-guess-panel,
+  body.together-experience .race-guess-panel {
+    width: calc(100% - 20px);
+    margin-top: -38px;
+    padding: 13px;
+    border-radius: 20px;
+  }
+  body.together-experience .feedback-panel { margin-inline: 10px; }
+  body.together-experience .mode-results-column,
+  body.together-experience .race-results-column { grid-template-columns: 1fr; }
+  .together-main .together-card { min-height: 260px; }
+}
+
+@media (max-width: 820px) {
+  body.composer-focused .mobile-composer-context {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    grid-column: 1 / -1;
+    margin-bottom: -2px;
+  }
+  .mobile-composer-context span {
+    flex: 0 0 auto;
+    color: var(--mode-accent-2);
+    font-size: .59rem;
+    font-weight: 850;
+    letter-spacing: .11em;
+  }
+  .mobile-composer-context strong {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--ink-soft);
+    font-size: .7rem;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.keyboard-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  body.keyboard-open .topbar,
+  body.keyboard-open .mode-heading-row,
+  body.keyboard-open .race-heading-row,
+  body.keyboard-open .mode-scoreboard,
+  body.keyboard-open .race-scoreboard,
+  body.keyboard-open .feedback-panel,
+  body.keyboard-open .mode-results-column,
+  body.keyboard-open .race-results-column {
+    visibility: hidden;
+    pointer-events: none;
+  }
+  body.keyboard-open .mode-game,
+  body.keyboard-open .race-game,
+  body.keyboard-open main {
+    padding: 0;
+    margin: 0;
+  }
+  body.keyboard-open .mode-layout,
+  body.keyboard-open .race-layout,
+  body.keyboard-open .mode-play-column,
+  body.keyboard-open .race-play-column {
+    display: block;
+  }
+  body.keyboard-open .mode-map-panel,
+  body.keyboard-open .race-map-panel {
+    position: fixed;
+    z-index: 70;
+    top: var(--visual-viewport-top);
+    left: 0;
+    right: 0;
+    height: max(220px, calc(var(--visual-viewport-height) - 94px));
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  body.keyboard-open .mode-globe-stage,
+  body.keyboard-open .race-globe-stage {
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+  body.keyboard-open .globe-toolbar {
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    min-height: 42px;
+  }
+  body.keyboard-open .globe-toolbar-right,
+  body.keyboard-open .globe-hint,
+  body.keyboard-open .globe-zoom { display: none; }
+  body.keyboard-open .mode-guess-panel,
+  body.keyboard-open .race-guess-panel {
+    position: fixed;
+    z-index: 120;
+    left: 7px;
+    right: 7px;
+    bottom: calc(var(--keyboard-offset) + 7px);
+    width: auto;
+    margin: 0;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    border-radius: 19px;
+    background: color-mix(in srgb, var(--panel-strong) 97%, transparent);
+    box-shadow: 0 18px 54px rgba(0,0,0,.28);
+    backdrop-filter: blur(24px) saturate(1.25);
+  }
+  body.keyboard-open .mode-guess-panel::before,
+  body.keyboard-open .race-guess-panel::before { left: 18px; right: 18px; }
+  body.keyboard-open .mobile-composer-context { grid-column: 1 / -1; margin: 0 2px -1px; }
+  body.keyboard-open .search-area > label { display: none; }
+  body.keyboard-open #countryInput { height: 52px; }
+  body.keyboard-open .mode-turn-actions,
+  body.keyboard-open .race-turn-actions { width: auto; align-self: end; }
+  body.keyboard-open .mode-turn-actions button,
+  body.keyboard-open .race-turn-actions button { width: auto; min-width: 104px; height: 52px; padding-inline: 16px; }
+  body.keyboard-open .suggestions {
+    position: absolute;
+    top: auto;
+    bottom: calc(100% + 9px);
+    left: 0;
+    right: 0;
+    max-height: min(38vh, 270px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 16px;
+  }
+  body.keyboard-open .suggestion-button { min-height: 48px; }
+}
+
+@media (max-width: 520px) {
+  body.keyboard-open .mode-turn-actions button,
+  body.keyboard-open .race-turn-actions button { min-width: 94px; padding-inline: 12px; font-size: .8rem; }
+  body.keyboard-open .mobile-composer-context strong { font-size: .66rem; }
+  body.together-experience .pass-card,
+  body.together-experience .secret-card,
+  body.together-experience .dialog-card { border-radius: 26px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .together-main .together-card,
+  body.together-experience .mode-player-card,
+  body.together-experience .race-player-card { transition: none; }
+}
