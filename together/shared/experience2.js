@@ -100,7 +100,15 @@
 
   const queueReleaseAfterAction = () => {
     clearTimeout(releaseTimer);
-    releaseTimer = setTimeout(release, 120);
+    releaseTimer = setTimeout(() => {
+      const accepted = input.value.trim() === "" || submit.classList.contains("is-hidden") || Boolean(endTurn && !endTurn.classList.contains("is-hidden"));
+      if (accepted) {
+        release();
+        return;
+      }
+      syncViewport();
+      input.focus({ preventScroll: true });
+    }, 140);
   };
 
   panel.addEventListener("pointerdown", event => {
