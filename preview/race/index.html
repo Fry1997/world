@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f1eb">
+  <base href="/world/">
+  <meta name="description" content="Nearer Same Target Race pass-and-play preview.">
+  <title>Nearer — Same Target Race</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=20260718-race1">
+  <link rel="stylesheet" href="globe.css?v=20260718-race1">
+  <link rel="stylesheet" href="preview/race/race.css?v=20260718-race1">
+</head>
+<body>
+  <div class="app-shell race-shell">
+    <header class="topbar race-topbar">
+      <a class="brand" href="./" aria-label="Nearer home">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span><strong>NEARER</strong><small>Pass &amp; play preview</small></span>
+      </a>
+      <span class="race-mode-chip">Same Target Race</span>
+      <div class="topbar-actions">
+        <button id="unitButton" class="icon-button text-button" type="button" aria-label="Change distance units">KM</button>
+        <button id="themeButton" class="icon-button" type="button" aria-label="Toggle dark mode">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.4 15.6A8.5 8.5 0 0 1 8.4 3.6 8.5 8.5 0 1 0 20.4 15.6Z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="setupView" class="setup-view">
+        <p class="eyebrow">PASS &amp; PLAY · FIRST BUILD</p>
+        <h1>Race to find the same hidden country.</h1>
+        <p class="setup-copy">Take one private guess each per round. You will see how close the other player is getting, but never which countries they tried.</p>
+
+        <div class="setup-card">
+          <div class="player-name-grid">
+            <label><span>Player 1</span><input id="playerOneName" maxlength="20" value="Player 1" autocomplete="off"></label>
+            <label><span>Player 2</span><input id="playerTwoName" maxlength="20" value="Player 2" autocomplete="off"></label>
+          </div>
+          <div class="setup-actions">
+            <button id="startRaceButton" class="primary-button" type="button">Start race</button>
+            <button id="resumeRaceButton" class="secondary-button is-hidden" type="button">Resume saved race</button>
+          </div>
+          <p class="setup-note">Both players receive the same target and separate guess histories. Player 2 always gets the equalising turn in a round.</p>
+        </div>
+      </section>
+
+      <section id="gameView" class="race-game is-hidden" aria-live="polite">
+        <div class="race-heading-row">
+          <div>
+            <p id="turnEyebrow" class="eyebrow">ROUND 1 · PLAYER 1</p>
+            <h1 id="turnTitle">Player 1, make your guess.</h1>
+            <p id="turnCopy">Your opponent's exact guesses remain private.</p>
+          </div>
+          <button id="quitRaceButton" class="secondary-button" type="button">End race</button>
+        </div>
+
+        <div id="scoreboard" class="race-scoreboard" aria-label="Race standings"></div>
+
+        <div class="race-layout">
+          <section class="race-play-column">
+            <div class="map-panel race-map-panel">
+              <div class="globe-toolbar">
+                <div class="globe-status-group"><span class="signal-dot" aria-hidden="true"></span><span id="globeStatus">Rotate the globe to explore</span></div>
+                <div class="globe-toolbar-right">
+                  <div class="globe-key" aria-label="Map colour key"><span>Far</span><i></i><span>Near</span></div>
+                  <div class="globe-actions">
+                    <button id="globeReset" class="globe-action" type="button" aria-label="Reset globe" title="Reset globe">
+                      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div id="raceGlobeStage" class="globe-stage race-globe-stage" role="application" tabindex="0" aria-label="Interactive globe showing only the current player's guesses. Drag to rotate and pinch or scroll to zoom.">
+                <canvas id="raceGlobeCanvas" class="globe-svg globe-canvas" aria-hidden="true"></canvas>
+                <div class="globe-zoom" aria-label="Zoom controls">
+                  <button id="globeZoomIn" type="button" aria-label="Zoom in">+</button>
+                  <button id="globeZoomOut" type="button" aria-label="Zoom out">−</button>
+                </div>
+                <div id="guessedCountryChip" class="race-country-chip is-hidden" role="status"><span>Already guessed</span><strong></strong></div>
+                <div class="globe-hint">Tap your coloured guesses for names · drag to rotate</div>
+              </div>
+            </div>
+
+            <section class="guess-panel race-guess-panel" aria-labelledby="guessLabel">
+              <div class="search-area">
+                <label id="guessLabel" for="countryInput">Name a country</label>
+                <div class="search-control">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+                  <input id="countryInput" type="text" autocomplete="off" spellcheck="false" placeholder="Start typing a country…" aria-controls="raceSuggestions" aria-expanded="false">
+                  <button id="clearInputButton" class="clear-button is-hidden" type="button" aria-label="Clear country">×</button>
+                </div>
+                <div id="raceSuggestions" class="suggestions is-hidden" role="listbox" aria-label="Country suggestions"></div>
+              </div>
+              <button id="makeGuessButton" class="primary-button" type="button">Make guess</button>
+            </section>
+
+            <div id="raceFeedback" class="feedback-panel is-empty">
+              <div class="feedback-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M12 7v5l3 2"/></svg>
+              </div>
+              <div><strong>Your first guess sets the course.</strong><p>Only your own route is shown on this globe.</p></div>
+            </div>
+          </section>
+
+          <aside class="race-results-column">
+            <section class="history-card race-history-card">
+              <div class="history-header"><div><h2 id="historyHeading">Your guesses</h2><p>Nearest first</p></div><span id="guessCount" class="count-pill">0</span></div>
+              <div id="historyEmpty" class="history-empty"><div class="empty-lines" aria-hidden="true"><i></i><i></i><i></i></div><p>Your private route will appear here.</p></div>
+              <ol id="raceGuessHistory" class="guess-history"></ol>
+            </section>
+
+            <section class="race-rules-card">
+              <p class="eyebrow">RACE RULES</p>
+              <h2>Fewest guesses wins.</h2>
+              <p>One guess each per round. If Player 1 finds the country, Player 2 receives the final equalising turn.</p>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="passScreen" class="pass-screen is-hidden" role="dialog" aria-modal="true" aria-labelledby="passTitle">
+    <div class="pass-card">
+      <span class="pass-lock" aria-hidden="true">↔</span>
+      <p id="passEyebrow" class="eyebrow">PASS THE PHONE</p>
+      <h2 id="passTitle">Pass to Player 2</h2>
+      <p id="passCopy">The previous player's route is hidden.</p>
+      <div id="passStandings" class="pass-standings"></div>
+      <button id="beginTurnButton" class="primary-button" type="button">Start Player 2's turn</button>
+    </div>
+  </div>
+
+  <dialog id="resultDialog" class="dialog-card race-result-dialog">
+    <div class="win-symbol" aria-hidden="true">◎</div>
+    <p id="resultEyebrow" class="eyebrow">RACE COMPLETE</p>
+    <h2 id="resultTitle">Country found.</h2>
+    <p id="resultSummary" class="dialog-copy"></p>
+    <div id="resultStats" class="race-result-stats"></div>
+    <div class="dialog-button-row">
+      <button id="rematchButton" class="primary-button" type="button">Rematch</button>
+      <button id="closeResultButton" class="secondary-button" type="button">Back to setup</button>
+    </div>
+  </dialog>
+
+  <div id="raceToast" class="toast" role="status" aria-live="polite"></div>
+  <div id="raceLoading" class="race-loading">Preparing pass-and-play…</div>
+
+  <script src="chunks/runtime-01.js?v=20260718-race1"></script>
+  <script src="chunks/runtime-02.js?v=20260718-race1"></script>
+  <script src="chunks/runtime-03.js?v=20260718-race1"></script>
+  <script src="chunks/runtime-04.js?v=20260718-race1"></script>
+  <script src="chunks/runtime-05.js?v=20260718-race1"></script>
+  <script src="chunks/runtime-06.js?v=20260718-race1"></script>
+  <script src="preview/race/race-loader.js?v=20260718-race1"></script>
+</body>
+</html>
