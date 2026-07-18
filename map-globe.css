@@ -1,0 +1,23 @@
+/* Globe-first map experience: larger working area, mobile-safe MapLibre sizing. */
+.world-map,
+#worldMap {
+  height: clamp(560px, 68vh, 780px);
+  max-height: none;
+}
+
+.game-layout {
+  grid-template-columns: minmax(0, 2.45fr) minmax(300px, .72fr);
+}
+
+.maplibregl-canvas-container,
+.maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 680px) {
+  .world-map,
+  #worldMap {
+    height: 520px;
+  }
+}
