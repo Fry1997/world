@@ -1,0 +1,73 @@
+:root {
+  --experience5-mobile-gap: 10px;
+}
+
+/* Experience 5 normalises the compact mobile board after the desktop grid is
+   converted to a flex column. Every primary surface shares the same edges. */
+@media (max-width: 820px) {
+  body.experience-five .game-layout,
+  body.experience-five .mode-layout,
+  body.experience-five .race-layout {
+    width: 100%;
+    min-width: 0;
+    align-items: stretch !important;
+  }
+
+  body.experience-five .guess-panel,
+  body.experience-five .map-panel,
+  body.experience-five .closest-card,
+  body.experience-five .feedback-panel,
+  body.experience-five .history-card,
+  body.experience-five .stat-strip,
+  body.experience-five .mode-guess-panel,
+  body.experience-five .mode-map-panel,
+  body.experience-five .mode-pressure-card,
+  body.experience-five .mode-history-card,
+  body.experience-five .mode-rules-card,
+  body.experience-five .race-guess-panel,
+  body.experience-five .race-map-panel,
+  body.experience-five .race-history-card,
+  body.experience-five .race-rules-card {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0;
+    align-self: stretch !important;
+  }
+
+  body.experience-five .results-column,
+  body.experience-five .mode-results-column,
+  body.experience-five .race-results-column {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.experience-five .history-card,
+  body.experience-five .mode-history-card,
+  body.experience-five .race-history-card {
+    min-height: 0;
+  }
+
+  body.experience-five .history-empty {
+    min-height: 138px;
+    padding: 20px 14px;
+  }
+
+  body.experience-five .history-empty .empty-lines {
+    width: min(112px, 42vw);
+  }
+
+  body.experience-five .history-empty p {
+    max-width: 260px;
+    margin: 15px auto 0;
+    line-height: 1.4;
+  }
+
+  body.experience-five .stat-strip {
+    min-height: 72px;
+    padding: 12px 6px;
+  }
+
+  body.experience-five footer {
+    width: 100%;
+  }
+}
