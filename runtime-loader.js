@@ -1,14 +1,12 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-canvas4";
+  const VERSION = "20260718-experience2";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
 
-  // Prevent the retired flat SVG patch from starting, even if an older cached
-  // copy of index.html still contains its script tags.
   window.__NEARER_SVG_PATCH_STARTED = true;
 
   const showFailure = error => {
@@ -39,7 +37,15 @@
     document.head.appendChild(script);
   });
 
+  const loadStyle = source => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = source;
+    document.head.appendChild(link);
+  };
+
   const start = async () => {
+    loadStyle(`together/shared/experience2.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -65,8 +71,6 @@
         throw new Error("The globe projection factory is unavailable.");
       }
 
-      // ES module namespace objects are read-only. Create a normal object for
-      // the globe instead of attempting to overwrite an imported D3 export.
       window.NEARER_D3 = {
         ...importedD3,
         geoOrthographic: (...args) => {
@@ -92,6 +96,11 @@
       await loadScript(`guessed-country-info.js?v=${VERSION}`);
       if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
         throw new Error("Guessed-country identification did not initialise.");
+      }
+
+      await loadScript(`together/shared/experience2.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE2_STARTED) {
+        throw new Error("The visual experience layer did not initialise.");
       }
     } finally {
       URL.revokeObjectURL(url);
