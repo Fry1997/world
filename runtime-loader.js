@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-globe2";
+  const VERSION = "20260718-name-only1";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -62,6 +62,11 @@
 
       if (!window.__NEARER_REAL_GLOBE_STARTED || !document.getElementById("globeStage")) {
         throw new Error("The 3D globe script loaded but did not initialise.");
+      }
+
+      await loadScript(`guess-rules.js?v=${VERSION}`);
+      if (!document.querySelector("style[data-nearer-guess-rules]")) {
+        throw new Error("The name-only guessing rules did not initialise.");
       }
     } finally {
       URL.revokeObjectURL(url);
