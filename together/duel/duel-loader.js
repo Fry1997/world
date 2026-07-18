@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const VERSION = "20260718-experience5";
+  const VERSION = "20260719-experience6";
   const tailFiles = Array.from({ length: 9 }, (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`);
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -29,6 +29,7 @@
     loadStyle(`together/shared/experience3.css?v=${VERSION}`);
     loadStyle(`together/shared/experience4.css?v=${VERSION}`);
     loadStyle(`together/shared/experience5.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience6.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -48,6 +49,8 @@
       if (!window.__NEARER_EXPERIENCE4_STARTED) throw new Error("The compact visual experience layer did not initialise.");
       await loadScript(`together/shared/experience5.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE5_STARTED) throw new Error("The width-normalised visual layer did not initialise.");
+      await loadScript(`together/shared/experience6.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
     }
