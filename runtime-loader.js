@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-canvas1";
+  const VERSION = "20260718-canvas2";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
