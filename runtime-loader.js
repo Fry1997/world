@@ -59,14 +59,18 @@
       const safeAppSource = appSource.replace("initializeMap();", "");
       (0, eval)(safeAppSource);
 
-      const originalOrthographic = window.NEARER_D3?.geoOrthographic;
+      const importedD3 = window.NEARER_D3;
+      const originalOrthographic = importedD3?.geoOrthographic;
       if (typeof originalOrthographic !== "function") {
         throw new Error("The globe projection factory is unavailable.");
       }
-      window.NEARER_D3.geoOrthographic = (...args) => {
-        const projection = originalOrthographic(...args);
-        window.__NEARER_GLOBE_PROJECTION = projection;
-        return projection;
+      window.NEARER_D3 = {
+        ...importedD3,
+        geoOrthographic: (...args) => {
+          const projection = originalOrthographic(...args);
+          window.__NEARER_GLOBE_PROJECTION = projection;
+          return projection;
+        }
       };
 
       await loadScript(`globe-canvas.js?v=${VERSION}`);
