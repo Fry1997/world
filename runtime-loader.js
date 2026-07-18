@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-canvas3";
+  const VERSION = "20260718-canvas4";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -59,14 +59,21 @@
       const safeAppSource = appSource.replace("initializeMap();", "");
       (0, eval)(safeAppSource);
 
-      const originalOrthographic = window.NEARER_D3?.geoOrthographic;
+      const importedD3 = window.NEARER_D3;
+      const originalOrthographic = importedD3?.geoOrthographic;
       if (typeof originalOrthographic !== "function") {
         throw new Error("The globe projection factory is unavailable.");
       }
-      window.NEARER_D3.geoOrthographic = (...args) => {
-        const projection = originalOrthographic(...args);
-        window.__NEARER_GLOBE_PROJECTION = projection;
-        return projection;
+
+      // ES module namespace objects are read-only. Create a normal object for
+      // the globe instead of attempting to overwrite an imported D3 export.
+      window.NEARER_D3 = {
+        ...importedD3,
+        geoOrthographic: (...args) => {
+          const projection = originalOrthographic(...args);
+          window.__NEARER_GLOBE_PROJECTION = projection;
+          return projection;
+        }
       };
 
       await loadScript(`globe-canvas.js?v=${VERSION}`);
