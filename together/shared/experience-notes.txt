@@ -1,0 +1,7 @@
+Nearer Together experience1
+
+- Keyboard-aware mobile composer using VisualViewport.
+- Mode-specific visual identities for Race, Relay and Duel.
+- Globe-first active game composition.
+- Redesigned setup, scorecards, guess console, side panels, handovers and results.
+- No game-state, turn, target or distance logic changes.
