@@ -8,7 +8,7 @@
   <title>Nearer — Find the hidden country</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="map-upgrade.css">
+  <link rel="stylesheet" href="map-upgrade.css?v=20260718-svgpatch1">
 </head>
 <body>
   <div class="app-shell">
@@ -175,8 +175,8 @@
     <button class="dialog-close" type="button" data-close-dialog aria-label="Close">×</button>
     <p class="eyebrow">DISTANCE MODEL</p>
     <h2>Built for fast, consistent play.</h2>
-    <p class="dialog-copy">Distances are calculated from sampled country borders using spherical distance measurements. Shared land borders return 0 km. Overseas geometry counts where it is present in the source map.</p>
-    <p class="dialog-copy">Natural Earth low-resolution geometry is loaded from a pinned world-atlas package and supplemented with mapped point approximations where a country is absent at this scale. These distances are designed for consistent gameplay rather than survey-grade measurement.</p>
+    <p class="dialog-copy">Distances are precomputed between sampled country borders using WGS84 geodesic measurements. Shared land borders return 0 km. Overseas geometry counts where it is present in the source map.</p>
+    <p class="dialog-copy">The bundled Natural Earth low-resolution geometry is supplemented with mapped point approximations for 28 microstates and small island nations. This makes every country playable, although those particular distances should be treated as close estimates rather than survey-grade measurements.</p>
     <button class="secondary-button dialog-action" type="button" data-close-dialog>Close</button>
   </dialog>
 
@@ -214,5 +214,18 @@
   <script src="chunks/runtime-05.js"></script>
   <script src="chunks/runtime-06.js"></script>
   <script src="runtime-loader.js"></script>
+  <script src="svg-map-patch-01.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-02.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-03.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-04.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-05.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-06.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-07.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-08.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-09.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-10.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-11.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-12.js?v=20260718-svgpatch2"></script>
+  <script src="svg-map-patch-loader.js?v=20260718-svgpatch2"></script>
 </body>
 </html>
