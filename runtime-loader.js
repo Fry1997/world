@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-canvas2";
+  const VERSION = "20260718-canvas3";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -59,6 +59,16 @@
       const safeAppSource = appSource.replace("initializeMap();", "");
       (0, eval)(safeAppSource);
 
+      const originalOrthographic = window.NEARER_D3?.geoOrthographic;
+      if (typeof originalOrthographic !== "function") {
+        throw new Error("The globe projection factory is unavailable.");
+      }
+      window.NEARER_D3.geoOrthographic = (...args) => {
+        const projection = originalOrthographic(...args);
+        window.__NEARER_GLOBE_PROJECTION = projection;
+        return projection;
+      };
+
       await loadScript(`globe-canvas.js?v=${VERSION}`);
       if (
         !window.__NEARER_CANVAS_GLOBE_STARTED ||
@@ -70,6 +80,11 @@
       await loadScript(`guess-rules.js?v=${VERSION}`);
       if (!document.querySelector("style[data-nearer-guess-rules]")) {
         throw new Error("The name-only guessing rules did not initialise.");
+      }
+
+      await loadScript(`guessed-country-info.js?v=${VERSION}`);
+      if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
+        throw new Error("Guessed-country identification did not initialise.");
       }
     } finally {
       URL.revokeObjectURL(url);
