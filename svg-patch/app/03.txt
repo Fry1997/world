@@ -1,0 +1,72 @@
+s: [], complete: false, secretCode: null };
+    const key = localDateKey();
+    return preferences.dailyGames?.[key] || { mode, dateKey: key, guesses: [], complete: false, secretCode: null };
+  }
+
+  function currentUnit() {
+    return document.getElementById("unitButton")?.textContent?.trim().toLowerCase() === "mi" ? "mi" : "km";
+  }
+
+  function formatDistance(kilometres) {
+    const unit = currentUnit();
+    const value = unit === "km" ? kilometres : kilometres * 0.621371;
+    const rounded = value < 10 ? Math.round(value * 10) / 10 : Math.round(value);
+    return `${new Intl.NumberFormat().format(rounded)} ${unit}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[character]);
+  }
+
+  function mercatorPoint(point) {
+    const longitude = Number(point[0]);
+    const latitude = Math.max(-85.05112878, Math.min(85.05112878, Number(point[1])));
+    const x = (longitude + 180) / 360;
+    const sin = Math.sin(latitude * Math.PI / 180);
+    const y = 0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI);
+    return [x, y];
+  }
+
+  function normaliseWrappedX(x, reference) {
+    let result = x;
+    while (result - reference > 0.5) result -= 1;
+    while (result - reference < -0.5) result += 1;
+    return result;
+  }
+
+  function ringToPath(ring) {
+    let previousX = null;
+    return ring.map((point, index) => {
+      let [x, y] = mercatorPoint(point);
+      if (previousX !== null) x = normaliseWrappedX(x, previousX);
+      previousX = x;
+      return `${index ? "L" : "M"}${x.toFixed(6)},${y.toFixed(6)}`;
+    }).join(" ") + " Z";
+  }
+
+  function geometryToPath(geometry) {
+    if (geometry.type === "Polygon") return geometry.coordinates.map(ringToPath).join(" ");
+    if (geometry.type === "MultiPolygon") return geometry.coordinates.flatMap(polygon => polygon.map(ringToPath)).join(" ");
+    return "";
+  }
+
+  function featureBounds(feature) {
+    if (feature.geometry.type === "Point") {
+      const [x, y] = mercatorPoint(feature.geometry.coordinates);
+      return { minX: x - 0.012, maxX: x + 0.012, minY: y - 0.012, maxY: y + 0.012, centerX: x, centerY: y };
+    }
+    const xs = [];
+    let minY = Infinity;
+    let maxY = -Infinity;
+    const visit = value => {
+      if (typeof value?.[0] === "number") {
+        const [x, y] = mercatorPoint(value);
+        xs.push(x); minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+      } else if (Array.isArray(value)) value.forEach(visit);
+    };
+    visit(feature.geometry.coordinates);
+    if (!xs.length) return null;
+    xs.sort((a, b) => a - b);
+    let largestGap = -1, gapIndex = 0;
+    for (let index = 0; index < xs.length; index += 1) {
+      const current = xs[inde

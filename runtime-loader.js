@@ -24,7 +24,9 @@
     const url = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
     try {
       await import(url);
-      (0, eval)(appSource);
+      const safeAppSource = appSource.replace("initializeMap();", "");
+      (0, eval)(safeAppSource);
+      await loadScript("svg-map-loader.js?v=20260718-svg3");
     } finally {
       URL.revokeObjectURL(url);
     }

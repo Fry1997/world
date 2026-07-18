@@ -1,0 +1,46 @@
+ountries.children, ...elements.points.children].forEach(node => {
+      const code = node.dataset.code, guess = guessed.get(code), answer = state.complete && code === state.secretCode;
+      node.classList.toggle("is-guessed", Boolean(guess)); node.classList.toggle("is-latest", code === latest);
+      node.classList.toggle("is-answer", answer); node.classList.toggle("is-selected", code === selectedCode);
+      node.style.fill = answer ? "#16845b" : guess ? heatColour(guess.distance) : "";
+      node.style.fillOpacity = answer || guess ? "1" : "";
+    });
+    const best = guesses.length ? [...guesses].sort((a, b) => a.distance - b.distance || a.order - b.order)[0] : null;
+    elements.focus.disabled = !best;
+    if (state.complete && state.secretCode) elements.status.textContent = `${countryByCode.get(state.secretCode)?.name || "Country"} located`;
+    else if (guesses.length) elements.status.textContent = `${guesses.length} signal${guesses.length === 1 ? "" : "s"} mapped · drag and zoom`;
+    else elements.status.textContent = "Drag and zoom to explore";
+    scheduleRender();
+  }
+
+  function selectCountry(code) {
+    const country = countryByCode.get(code), state = currentState();
+    if (!country) return;
+    selectedCode = code;
+    const guess = (state.guesses || []).find(item => item.code === code);
+    elements.selectionName.textContent = country.name;
+    elements.selectionMeta.textContent = guess ? `Already guessed · ${formatDistance(guess.distance)} away` : state.complete ? "This game is complete" : "Use this as your next guess";
+    elements.selectionUse.disabled = Boolean(guess || state.complete);
+    elements.selection.classList.remove("is-hidden"); refreshMap();
+  }
+
+  function clearSelection() {
+    selectedCode = null; elements.selection.classList.add("is-hidden"); refreshMap();
+  }
+
+  function useSelection() {
+    if (!selectedCode) return;
+    const country = countryByCode.get(selectedCode), state = currentState();
+    if (!country || state.complete || (state.guesses || []).some(item => item.code === selectedCode)) return;
+    countryInput.value = country.name;
+    countryInput.dispatchEvent(new Event("input", { bubbles: true }));
+    clearSelection();
+    countryInput.scrollIntoView({ behavior: "smooth", block: "center" }); countryInput.focus();
+  }
+
+  function showTooltip(code, clientX, clientY) {
+    if (matchMedia("(hover: none)").matches) return;
+    const country = countryByCode.get(code), guess = (currentState().guesses || []).find(item => item.code === code);
+    if (!country) return;
+    elements.tooltip.innerHTML = `<strong>${escapeHtml(country.name)}</strong><span>${guess ? escapeHtml(formatDistance(guess.distance)) + " away" : "Click to select"}</span>`;
+    const rect = 

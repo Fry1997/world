@@ -1,0 +1,35 @@
+inters.delete(event.pointerId);
+      if (moved > 8) suppressMapClickUntil = performance.now() + 240;
+      if (mapPointers.size === 1) { const point = [...mapPointers.values()][0]; mapGesture = { type: "pan", x: point.x, y: point.y, moved: 0 }; }
+      else if (!mapPointers.size) mapGesture = null;
+    };
+    elements.world.addEventListener("pointerup", endPointer); elements.world.addEventListener("pointercancel", endPointer);
+    elements.world.addEventListener("click", event => { if ([elements.world, elements.svg].includes(event.target) || event.target.classList.contains("map-backdrop")) clearSelection(); });
+    elements.world.addEventListener("keydown", event => {
+      const step = 0.08 / Math.pow(2, Math.max(0, mapCamera.zoom - 1));
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) event.preventDefault();
+      if (event.key === "ArrowLeft") mapCamera.x -= step; else if (event.key === "ArrowRight") mapCamera.x += step;
+      else if (event.key === "ArrowUp") mapCamera.y -= step; else if (event.key === "ArrowDown") mapCamera.y += step;
+      else if (event.key === "+" || event.key === "=") zoom(0.5); else if (event.key === "-") zoom(-0.5); else return;
+      scheduleRender();
+    });
+  }
+
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer); refreshTimer = setTimeout(refreshMap, 60);
+  }
+
+  buildMap(); bindGestures(); resetView(); refreshMap();
+  elements.zoomIn.addEventListener("click", () => zoom(0.55)); elements.zoomOut.addEventListener("click", () => zoom(-0.55));
+  elements.reset.addEventListener("click", resetView);
+  elements.focus.addEventListener("click", () => {
+    const guesses = currentState().guesses || [];
+    if (guesses.length) focusCountry([...guesses].sort((a, b) => a.distance - b.distance || a.order - b.order)[0].code);
+  });
+  elements.expand.addEventListener("click", toggleExpanded); elements.selectionClose.addEventListener("click", clearSelection); elements.selectionUse.addEventListener("click", useSelection);
+  window.addEventListener("resize", scheduleRender);
+  guessButton.addEventListener("click", () => { setTimeout(scheduleRefresh, 0); setTimeout(scheduleRefresh, 180); });
+  document.querySelectorAll(".mode-button, #newGameButton, #unitButton, #themeButton").forEach(button => button.addEventListener("click", () => { setTimeout(() => { clearSelection(); refreshMap(); if (button.matches(".mode-button, #newGameButton")) resetView(); }, 80); }));
+  new MutationObserver(scheduleRefresh).observe(document.getElementById("guessHistory") || document.body, { childList: true, subtree: true });
+  new MutationObserver(() => { refreshMap(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();

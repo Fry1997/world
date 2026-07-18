@@ -1,0 +1,52 @@
+vent => showTooltip(code, event.clientX, event.clientY));
+      node.addEventListener("mouseleave", hideTooltip);
+      node.addEventListener("click", event => {
+        if (performance.now() < suppressMapClickUntil) return;
+        event.stopPropagation(); selectCountry(code);
+      });
+      const label = document.createElementNS(SVG_NS, "text");
+      label.setAttribute("class", "map-country-label is-hidden"); label.setAttribute("text-anchor", "middle");
+      label.setAttribute("dominant-baseline", "middle"); label.dataset.code = code; label.textContent = feature.properties.name;
+      elements.labels.appendChild(label); labelNodeByCode.set(code, label);
+    }
+  }
+
+  function fitZoom() {
+    const rect = elements.world.getBoundingClientRect();
+    if (!rect.width || !rect.height) return 0.5;
+    return Math.max(0.25, Math.min(2, Math.log2(Math.min(rect.width / 256, rect.height / (256 * 0.78)))));
+  }
+
+  function clampCamera() {
+    const rect = elements.world.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    mapCamera.zoom = Math.max(0.25, Math.min(7, mapCamera.zoom));
+    const worldSize = 256 * Math.pow(2, mapCamera.zoom);
+    const halfX = rect.width / (2 * worldSize), halfY = rect.height / (2 * worldSize);
+    mapCamera.x = halfX >= 0.5 ? 0.5 : Math.max(halfX, Math.min(1 - halfX, mapCamera.x));
+    mapCamera.y = halfY >= 0.5 ? 0.5 : Math.max(halfY, Math.min(1 - halfY, mapCamera.y));
+  }
+
+  function scheduleRender() {
+    if (renderFrame) return;
+    renderFrame = requestAnimationFrame(() => { renderFrame = 0; renderScene(); });
+  }
+
+  function screenX(worldX, worldSize, width) {
+    const wrapped = normaliseWrappedX(worldX, mapCamera.x);
+    return width / 2 + (wrapped - mapCamera.x) * worldSize;
+  }
+
+  function renderLabels(rect, worldSize, top) {
+    const state = currentState();
+    const guessed = new Map((state.guesses || []).map(item => [item.code, item]));
+    for (const [code, label] of labelNodeByCode) {
+      const bounds = featureBoundsByCode.get(code), country = countryByCode.get(code);
+      if (!bounds || !country) continue;
+      const important = guessed.has(code) || selectedCode === code || (state.complete && state.secretCode === code);
+      const width = Math.max(0.001, bounds.maxX - bounds.minX) * worldSize;
+      const height = Math.max(0.001, bounds.maxY - bounds.minY) * worldSize;
+      const visible = important || (mapCamera.zoom >= 1.9 && width > 46 && height > 15) || (mapCamera.zoom >= 3.4 && width > 22);
+      if (!visible) { label.classList.add("is-hidden"); continue; }
+      const x = screenX(bounds.centerX, worldSize, rect.width), y = bounds.centerY * worldSize - top;
+      if (x < -80 || x > rect.width + 80 || y < -30 || y > rect.height +

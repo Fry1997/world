@@ -1,0 +1,50 @@
+x];
+      const next = index === xs.length - 1 ? xs[0] + 1 : xs[index + 1];
+      if (next - current > largestGap) { largestGap = next - current; gapIndex = index; }
+    }
+    const minX = gapIndex === xs.length - 1 ? xs[0] : xs[gapIndex + 1];
+    const maxX = gapIndex === xs.length - 1 ? xs[xs.length - 1] : xs[gapIndex] + 1;
+    return { minX, maxX, minY, maxY, centerX: ((minX + maxX) / 2) % 1, centerY: (minY + maxY) / 2 };
+  }
+
+  function buildGraticule() {
+    const fragment = document.createDocumentFragment();
+    for (let longitude = -150; longitude <= 150; longitude += 30) {
+      const points = [];
+      for (let latitude = -80; latitude <= 80; latitude += 4) points.push([longitude, latitude]);
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", ringToPath(points).replace(/ Z$/, ""));
+      path.setAttribute("class", longitude === 0 ? "map-grid-line is-major" : "map-grid-line");
+      path.setAttribute("vector-effect", "non-scaling-stroke"); fragment.appendChild(path);
+    }
+    for (let latitude = -60; latitude <= 60; latitude += 30) {
+      const points = [];
+      for (let longitude = -180; longitude <= 180; longitude += 5) points.push([longitude, latitude]);
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", ringToPath(points).replace(/ Z$/, ""));
+      path.setAttribute("class", latitude === 0 ? "map-grid-line is-major" : "map-grid-line");
+      path.setAttribute("vector-effect", "non-scaling-stroke"); fragment.appendChild(path);
+    }
+    elements.graticule.appendChild(fragment);
+  }
+
+  function buildMap() {
+    buildGraticule();
+    for (const feature of geoData.features) {
+      const code = feature.properties.code;
+      const bounds = featureBounds(feature);
+      if (bounds) featureBoundsByCode.set(code, bounds);
+      let node;
+      if (feature.geometry.type === "Point") {
+        const [x, y] = mercatorPoint(feature.geometry.coordinates);
+        node = document.createElementNS(SVG_NS, "circle");
+        node.setAttribute("cx", x.toFixed(6)); node.setAttribute("cy", y.toFixed(6)); node.setAttribute("r", "0.005");
+        node.setAttribute("class", "micro-country"); elements.points.appendChild(node);
+      } else {
+        node = document.createElementNS(SVG_NS, "path");
+        node.setAttribute("d", geometryToPath(feature.geometry)); node.setAttribute("class", "country-shape");
+        node.setAttribute("fill-rule", "evenodd"); node.setAttribute("vector-effect", "non-scaling-stroke"); elements.countries.appendChild(node);
+      }
+      node.dataset.code = code;
+      node.addEventListener("mouseenter", event => showTooltip(code, event.clientX, event.clientY));
+      node.addEventListener("mousemove", e
