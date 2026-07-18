@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-polish1";
+  const VERSION = "20260718-prestige1";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
@@ -32,6 +32,7 @@
 
   const start = async () => {
     loadStyle(`together/shared/polish.css?v=${VERSION}`);
+    loadStyle(`together/shared/prestige.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
