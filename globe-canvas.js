@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-canvas1";
+  const VERSION = "20260718-canvas2";
   const STORAGE_KEY = "nearer-game-v1";
   const d3 = window.NEARER_D3;
   const gameData = window.NEARER_GAME_DATA;
@@ -78,6 +78,29 @@
   const pointFeatures = features.filter(feature => feature.geometry.type === "Point");
   const polygonCollection = { type: "FeatureCollection", features: polygonFeatures };
 
+  function visitCoordinates(value, callback) {
+    if (Array.isArray(value) && typeof value[0] === "number") {
+      callback(value);
+      return;
+    }
+    if (Array.isArray(value)) value.forEach(item => visitCoordinates(item, callback));
+  }
+
+  const polygonMeta = polygonFeatures.map(feature => {
+    const centroid = d3.geoCentroid(feature);
+    let angularRadius = 0;
+    visitCoordinates(feature.geometry.coordinates, coordinate => {
+      angularRadius = Math.max(angularRadius, d3.geoDistance(centroid, coordinate));
+    });
+    return {
+      feature,
+      code: feature.properties.code,
+      centroid,
+      angularRadius: Math.min(Math.PI, angularRadius + 0.035)
+    };
+  });
+  const polygonMetaByCode = new Map(polygonMeta.map(meta => [meta.code, meta]));
+
   const projection = d3.geoOrthographic()
     .clipAngle(90)
     .precision(0.45);
@@ -98,6 +121,11 @@
   let lastCssWidth = 0;
   let lastCssHeight = 0;
   let lastPixelRatio = 0;
+  let lastFrameTime = 0;
+  let refineTimer = 0;
+  let wheelTimer = 0;
+  let displayScaleBaseZoom = null;
+  let renderCache = null;
 
   function localDateKey(date = new Date()) {
     const year = date.getFullYear();
@@ -130,10 +158,9 @@
     };
   }
 
-  function heatColour(distance) {
+  function heatColour(distance, dark = document.documentElement.dataset.theme === "dark") {
     const closeness = 1 - Math.min(distance, 9000) / 9000;
     const eased = Math.pow(closeness, 0.72);
-    const dark = document.documentElement.dataset.theme === "dark";
     return `hsl(${(218 - eased * 210).toFixed(0)} ${(58 + eased * 28).toFixed(0)}% ${(dark ? 45 + eased * 9 : 57 - eased * 5).toFixed(0)}%)`;
   }
 
@@ -173,7 +200,7 @@
 
   function pixelRatio() {
     const mobile = matchMedia("(max-width: 680px)").matches;
-    return Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.6);
+    return Math.min(window.devicePixelRatio || 1, mobile ? 1.1 : 1.45);
   }
 
   function syncCanvasSize(rect) {
@@ -203,7 +230,73 @@
   }
 
   function isInteracting() {
-    return pointers.size > 0 || Boolean(viewAnimation);
+    return pointers.size > 0 || Boolean(viewAnimation) || displayScaleBaseZoom !== null;
+  }
+
+  function scheduleRefine() {
+    clearTimeout(refineTimer);
+    refineTimer = setTimeout(() => {
+      refineTimer = 0;
+      queueRender({ force: true });
+    }, 110);
+  }
+
+  function setDisplayScale(baseZoom) {
+    displayScaleBaseZoom = baseZoom;
+    elements.canvas.style.transformOrigin = "50% 50%";
+    elements.canvas.style.willChange = "transform";
+  }
+
+  function updateDisplayScale() {
+    if (displayScaleBaseZoom === null) return;
+    const scale = zoom / displayScaleBaseZoom;
+    elements.canvas.style.transform = `scale(${scale})`;
+  }
+
+  function clearDisplayScale({ render = true } = {}) {
+    if (displayScaleBaseZoom === null) return;
+    displayScaleBaseZoom = null;
+    elements.canvas.style.transform = "";
+    elements.canvas.style.willChange = "";
+    if (render) queueRender({ force: true });
+  }
+
+  function buildRenderCache() {
+    const state = currentState();
+    const colours = themeColours();
+    const dark = document.documentElement.dataset.theme === "dark";
+    const guesses = (state.guesses || []).map(guess => ({
+      ...guess,
+      feature: featureByCode.get(guess.code),
+      colour: heatColour(guess.distance, dark)
+    }));
+    return {
+      state,
+      colours,
+      guesses,
+      guessByCode: new Map(guesses.map(guess => [guess.code, guess])),
+      latestCode: guesses.at(-1)?.code || null
+    };
+  }
+
+  function visiblePolygonCollection(width, height, radius) {
+    if (zoom < 1.35) return polygonCollection;
+    const halfDiagonal = Math.hypot(width / 2, height / 2);
+    const viewRadius = Math.asin(Math.min(1, halfDiagonal / Math.max(1, radius)));
+    const centre = centreCoordinate();
+    const visible = polygonMeta
+      .filter(meta => d3.geoDistance(centre, meta.centroid) <= viewRadius + meta.angularRadius + 0.08)
+      .map(meta => meta.feature);
+    return { type: "FeatureCollection", features: visible };
+  }
+
+  function isPolygonVisible(code, width, height, radius) {
+    if (zoom < 1.35) return true;
+    const meta = polygonMetaByCode.get(code);
+    if (!meta) return true;
+    const halfDiagonal = Math.hypot(width / 2, height / 2);
+    const viewRadius = Math.asin(Math.min(1, halfDiagonal / Math.max(1, radius)));
+    return d3.geoDistance(centreCoordinate(), meta.centroid) <= viewRadius + meta.angularRadius + 0.08;
   }
 
   function drawSphere(width, height, radius, colours) {
@@ -227,18 +320,22 @@
     context.arc(centerX, centerY, radius, 0, Math.PI * 2);
     context.clip();
 
-    const gradient = context.createRadialGradient(
-      centerX - radius * 0.34,
-      centerY - radius * 0.30,
-      radius * 0.05,
-      centerX,
-      centerY,
-      radius * 1.05
-    );
-    gradient.addColorStop(0, colours.oceanHighlight);
-    gradient.addColorStop(0.58, colours.ocean);
-    gradient.addColorStop(1, colours.oceanShadow);
-    context.fillStyle = gradient;
+    if (isInteracting()) {
+      context.fillStyle = colours.ocean;
+    } else {
+      const gradient = context.createRadialGradient(
+        centerX - radius * 0.34,
+        centerY - radius * 0.30,
+        radius * 0.05,
+        centerX,
+        centerY,
+        radius * 1.05
+      );
+      gradient.addColorStop(0, colours.oceanHighlight);
+      gradient.addColorStop(0.58, colours.ocean);
+      gradient.addColorStop(1, colours.oceanShadow);
+      context.fillStyle = gradient;
+    }
     context.fillRect(centerX - radius, centerY - radius, radius * 2, radius * 2);
     context.restore();
   }
@@ -281,74 +378,92 @@
     context.restore();
   }
 
-  function draw() {
+  function draw(timestamp = performance.now()) {
     renderQueued = false;
     if (document.hidden) {
       needsRenderWhenVisible = true;
       return;
     }
 
+    const moving = isInteracting();
+    const targetInterval = moving && zoom > 1.8 ? 32 : moving ? 22 : 0;
+    if (targetInterval && timestamp - lastFrameTime < targetInterval) {
+      renderQueued = true;
+      requestAnimationFrame(draw);
+      return;
+    }
+    lastFrameTime = timestamp;
+
     const rect = elements.stage.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
     const { width, height } = syncCanvasSize(rect);
-    const colours = themeColours();
+    renderCache ||= buildRenderCache();
+    const { state, colours, guesses, guessByCode, latestCode } = renderCache;
     const radius = Math.min(width, height) * 0.43 * zoom;
+    const zoomFactor = Math.max(1, zoom);
+    const precision = moving
+      ? Math.min(7, 1.65 + zoomFactor * 0.95)
+      : Math.min(2.2, 0.48 + zoomFactor * 0.18);
 
     projection
       .translate([width / 2, height / 2])
       .scale(radius)
       .rotate(rotation)
-      .precision(isInteracting() ? 1.15 : 0.45);
+      .precision(precision);
 
     drawSphere(width, height, radius, colours);
 
-    context.save();
-    context.beginPath();
-    path(graticule);
-    context.strokeStyle = colours.grid;
-    context.lineWidth = isInteracting() ? 0.45 : 0.7;
-    context.stroke();
-    context.restore();
+    if (!(moving && zoom > 1.45)) {
+      context.save();
+      context.beginPath();
+      path(graticule);
+      context.strokeStyle = colours.grid;
+      context.lineWidth = moving ? 0.4 : 0.7;
+      context.stroke();
+      context.restore();
+    }
 
+    const land = visiblePolygonCollection(width, height, radius);
     drawPath(
-      polygonCollection,
+      land,
       colours.land,
-      colours.border,
-      isInteracting() ? 0.45 : 0.68
+      moving && zoom > 1.35 ? null : colours.border,
+      moving ? 0.4 : 0.68
     );
 
-    const state = currentState();
-    const guesses = state.guesses || [];
-    const latestCode = guesses.at(-1)?.code || null;
-
     for (const guess of guesses) {
-      const feature = featureByCode.get(guess.code);
+      const feature = guess.feature;
       if (!feature || feature.geometry.type === "Point") continue;
+      if (!isPolygonVisible(guess.code, width, height, radius)) continue;
       const latest = guess.code === latestCode;
       drawPath(
         feature,
-        heatColour(guess.distance),
+        guess.colour,
         latest ? colours.ink : "rgba(255,255,255,.78)",
-        latest ? 2.25 : 1.15,
+        latest ? (moving ? 1.45 : 2.25) : (moving ? 0.8 : 1.15),
         latest
       );
     }
 
     if (state.complete && state.secretCode) {
       const answer = featureByCode.get(state.secretCode);
-      if (answer && answer.geometry.type !== "Point") {
-        drawPath(answer, "#16845b", "#ffffff", 2.6, true);
+      if (
+        answer &&
+        answer.geometry.type !== "Point" &&
+        isPolygonVisible(state.secretCode, width, height, radius)
+      ) {
+        drawPath(answer, "#16845b", "#ffffff", moving ? 1.7 : 2.6, true);
       }
     }
 
     for (const feature of pointFeatures) {
       const code = feature.properties.code;
-      const guess = guesses.find(item => item.code === code);
+      const guess = guessByCode.get(code);
       const answer = Boolean(state.complete && state.secretCode === code);
       if (!guess && !answer) continue;
       drawPointMarker(
         feature,
-        answer ? "#16845b" : heatColour(guess.distance),
+        answer ? "#16845b" : guess.colour,
         code === latestCode,
         answer,
         colours
@@ -359,16 +474,19 @@
     context.beginPath();
     context.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
     context.strokeStyle = colours.rim;
-    context.lineWidth = 1.4;
+    context.lineWidth = moving ? 0.9 : 1.4;
     context.stroke();
     context.restore();
+
+    if (moving) scheduleRefine();
   }
 
-  function queueRender() {
+  function queueRender({ force = false } = {}) {
     if (document.hidden) {
       needsRenderWhenVisible = true;
       return;
     }
+    if (force) lastFrameTime = 0;
     if (renderQueued) return;
     renderQueued = true;
     requestAnimationFrame(draw);
@@ -390,6 +508,8 @@
       cancelAnimationFrame(viewAnimation);
       viewAnimation = 0;
     }
+    clearTimeout(wheelTimer);
+    wheelTimer = 0;
   }
 
   function animateView(targetRotation, targetZoom, duration = 480) {
@@ -448,9 +568,8 @@
   }
 
   function refresh({ focusLatest = true } = {}) {
-    const state = currentState();
-    const guesses = state.guesses || [];
-    const latest = guesses.at(-1)?.code || null;
+    renderCache = buildRenderCache();
+    const { state, guesses, latestCode: latest } = renderCache;
     const best = guesses.length
       ? [...guesses].sort((a, b) => a.distance - b.distance || a.order - b.order)[0]
       : null;
@@ -483,6 +602,7 @@
   elements.stage.addEventListener("pointerdown", event => {
     if (event.target.closest("button")) return;
     stopAnimation();
+    clearDisplayScale({ render: false });
     elements.stage.setPointerCapture?.(event.pointerId);
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
 
@@ -499,6 +619,7 @@
         distance: pointerDistance([...pointers.values()]),
         zoom
       };
+      setDisplayScale(zoom);
     }
   });
 
@@ -511,11 +632,12 @@
       const distance = pointerDistance([...pointers.values()].slice(0, 2));
       if (gesture.type !== "pinch") {
         gesture = { type: "pinch", distance, zoom };
+        setDisplayScale(zoom);
       }
       if (gesture.distance > 0) {
         zoom = clampZoom(gesture.zoom * distance / gesture.distance);
       }
-      queueRender();
+      updateDisplayScale();
       return;
     }
 
@@ -535,6 +657,8 @@
 
   const finishPointer = event => {
     pointers.delete(event.pointerId);
+    const wasPinching = gesture?.type === "pinch" || displayScaleBaseZoom !== null;
+    if (wasPinching) clearDisplayScale({ render: false });
     if (pointers.size === 1) {
       const remaining = [...pointers.values()][0];
       gesture = {
@@ -543,9 +667,10 @@
         startY: remaining.y,
         rotation: [...rotation]
       };
+      queueRender({ force: true });
     } else if (!pointers.size) {
       gesture = null;
-      queueRender();
+      queueRender({ force: true });
     }
   };
 
@@ -555,27 +680,36 @@
   elements.stage.addEventListener("wheel", event => {
     event.preventDefault();
     stopAnimation();
+    if (displayScaleBaseZoom === null) setDisplayScale(zoom);
     zoom = clampZoom(zoom * Math.exp(-event.deltaY * 0.0012));
-    queueRender();
+    updateDisplayScale();
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => {
+      wheelTimer = 0;
+      clearDisplayScale({ render: true });
+    }, 85);
   }, { passive: false });
 
   elements.stage.addEventListener("dblclick", event => {
     event.preventDefault();
     stopAnimation();
+    clearDisplayScale({ render: false });
     zoom = clampZoom(zoom * 1.4);
-    queueRender();
+    queueRender({ force: true });
   });
 
   elements.zoomIn.addEventListener("click", () => {
     stopAnimation();
+    clearDisplayScale({ render: false });
     zoom = clampZoom(zoom * 1.25);
-    queueRender();
+    queueRender({ force: true });
   });
 
   elements.zoomOut.addEventListener("click", () => {
     stopAnimation();
+    clearDisplayScale({ render: false });
     zoom = clampZoom(zoom / 1.25);
-    queueRender();
+    queueRender({ force: true });
   });
 
   elements.reset.addEventListener("click", () => {
@@ -637,6 +771,7 @@
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       stopAnimation();
+      clearDisplayScale({ render: false });
       return;
     }
     if (needsRenderWhenVisible) {
