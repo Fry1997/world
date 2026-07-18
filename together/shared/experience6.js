@@ -35,9 +35,18 @@
 
   const heading = document.querySelector(".game-heading");
   const help = document.getElementById("helpButton");
+  const newGame = document.getElementById("newGameButton");
   if (heading && help) {
+    const actions = document.createElement("div");
+    actions.className = "heading-actions";
+    actions.style.display = "flex";
+    actions.style.alignItems = "center";
+    actions.style.justifyContent = "flex-end";
+    actions.style.gap = "8px";
+    if (newGame) actions.appendChild(newGame);
     help.classList.add("heading-help");
-    heading.appendChild(help);
+    actions.appendChild(help);
+    heading.appendChild(actions);
   }
 
   window.__NEARER_EXPERIENCE6_STARTED = true;
