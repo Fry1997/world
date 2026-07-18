@@ -15,6 +15,7 @@
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let lastFeedback = "";
   let lastDialogSignature = "";
+  let refreshQueued = false;
 
   function state() {
     try { return JSON.parse(localStorage.getItem(config.key) || "null"); }
@@ -197,10 +198,10 @@
     if (mode === "cooperative") {
       const guesses = current.guesses || [];
       const opening = guesses[0];
-      const leap = biggestLeap(guesses);
       const finisher = guesses.at(-1);
+      const setup = guesses.length > 1 ? guesses.at(-2) : null;
       if (opening) grid.append(highlight("Opening clue", `${opening.name} · ${distance(opening.distance, current.units)}`));
-      if (leap) grid.append(highlight("Biggest breakthrough", `${current.players[leap.guess.playerIndex].name} closed ${distance(leap.closed, current.units)}`));
+      if (setup && finisher?.distance === 0) grid.append(highlight("Final setup", `${current.players[setup.playerIndex].name} left the team ${distance(setup.distance, current.units)} away`));
       if (finisher) grid.append(highlight("Finishing move", `${current.players[finisher.playerIndex].name} chose ${finisher.name}`));
       const streak = closerStreak(guesses);
       if (streak >= 2) grid.append(highlight("Team momentum", `${streak} consecutive closer moves`));
@@ -247,10 +248,19 @@
     animateFeedback();
   }
 
-  const observer = new MutationObserver(() => requestAnimationFrame(refresh));
+  function queueRefresh() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+    requestAnimationFrame(() => {
+      refreshQueued = false;
+      refresh();
+    });
+  }
+
+  const observer = new MutationObserver(queueRefresh);
   observer.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class", "open"] });
-  window.addEventListener("storage", refresh);
-  document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh(); });
+  window.addEventListener("storage", queueRefresh);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) queueRefresh(); });
   refresh();
   window.__NEARER_TOGETHER_POLISH_STARTED = true;
 })();
