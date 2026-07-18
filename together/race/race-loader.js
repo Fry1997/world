@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-experience2";
+  const VERSION = "20260718-experience3";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
@@ -35,6 +35,7 @@
     loadStyle(`together/shared/prestige.css?v=${VERSION}`);
     loadStyle(`together/shared/experience.css?v=${VERSION}`);
     loadStyle(`together/shared/experience2.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience3.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -57,7 +58,8 @@
       (0, eval)(raceSource);
       if (!window.__NEARER_RACE_V2_STARTED) throw new Error("The race game did not initialise.");
       await loadScript(`together/shared/polish-ui.js?v=${VERSION}`);
-      await loadScript(`together/shared/experience2.js?v=${VERSION}`);
+      await loadScript(`together/shared/experience3.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE3_STARTED) throw new Error("The visual experience layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
       delete window.NEARER_RACE_SOURCE;
