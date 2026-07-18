@@ -1,8 +1,7 @@
 (() => {
-  const ASSET_VERSION = "20260718-map4";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
-    `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${ASSET_VERSION}`
+    `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js`
   );
   const fail = error => {
     console.error(error);
