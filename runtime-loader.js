@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-experience3";
+  const VERSION = "20260718-experience4";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -47,6 +47,7 @@
   const start = async () => {
     loadStyle(`together/shared/experience2.css?v=${VERSION}`);
     loadStyle(`together/shared/experience3.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience4.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -99,9 +100,9 @@
         throw new Error("Guessed-country identification did not initialise.");
       }
 
-      await loadScript(`together/shared/experience3.js?v=${VERSION}`);
-      if (!window.__NEARER_EXPERIENCE3_STARTED) {
-        throw new Error("The visual experience layer did not initialise.");
+      await loadScript(`together/shared/experience4.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE4_STARTED) {
+        throw new Error("The compact visual experience layer did not initialise.");
       }
     } finally {
       URL.revokeObjectURL(url);
