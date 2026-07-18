@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-name-only1";
+  const VERSION = "20260718-canvas1";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -58,10 +58,13 @@
       await import(url);
       const safeAppSource = appSource.replace("initializeMap();", "");
       (0, eval)(safeAppSource);
-      await loadScript(`globe.js?v=${VERSION}`);
 
-      if (!window.__NEARER_REAL_GLOBE_STARTED || !document.getElementById("globeStage")) {
-        throw new Error("The 3D globe script loaded but did not initialise.");
+      await loadScript(`globe-canvas.js?v=${VERSION}`);
+      if (
+        !window.__NEARER_CANVAS_GLOBE_STARTED ||
+        !document.getElementById("globeCanvas")
+      ) {
+        throw new Error("The Canvas globe script loaded but did not initialise.");
       }
 
       await loadScript(`guess-rules.js?v=${VERSION}`);
