@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260718-race2";
+  const VERSION = "20260718-polish1";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
@@ -17,6 +17,12 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
+  const loadStyle = source => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = source;
+    document.head.appendChild(link);
+  };
 
   const fail = error => {
     console.error(error);
@@ -25,6 +31,7 @@
   };
 
   const start = async () => {
+    loadStyle(`together/shared/polish.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -46,6 +53,7 @@
       }
       (0, eval)(raceSource);
       if (!window.__NEARER_RACE_V2_STARTED) throw new Error("The race game did not initialise.");
+      await loadScript(`together/shared/polish-ui.js?v=${VERSION}`);
     } finally {
       URL.revokeObjectURL(url);
       delete window.NEARER_RACE_SOURCE;
