@@ -1,1 +1,0 @@
-Map recovery branch uses MapLibre with OpenFreeMap direct styles. This temporary note may be removed after review.
