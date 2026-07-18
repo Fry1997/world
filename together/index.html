@@ -8,53 +8,44 @@
   <meta name="description" content="Play Nearer together on one device.">
   <title>Nearer Together</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260718-together2">
+  <link rel="stylesheet" href="styles.css?v=20260718-together3">
   <style>
-    .together-shell{padding-bottom:56px}.together-topbar{grid-template-columns:1fr auto}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em}.together-intro{max-width:720px;margin:22px 0 34px;color:var(--ink-soft);font-size:1.05rem;line-height:1.65}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{min-height:270px;padding:24px;border:1px solid var(--line);border-radius:var(--radius-xl);background:var(--panel);display:flex;flex-direction:column;text-decoration:none;color:inherit}.together-card.is-live{box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--accent) 28%,var(--line))}.together-card.is-disabled{opacity:.68}.mode-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:var(--accent-soft);font-size:1.25rem}.mode-status{width:max-content;margin:20px 0 12px;padding:5px 9px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:.66rem;font-weight:800;letter-spacing:.08em}.is-disabled .mode-status{background:var(--panel-strong);color:var(--ink-soft);border:1px solid var(--line)}.together-card h2{margin:0;font-size:1.45rem}.together-card p{margin:12px 0 0;color:var(--ink-soft);line-height:1.55}.mode-cta{margin-top:auto;padding-top:24px;font-weight:760}.together-note{margin-top:24px;padding:18px 20px;border:1px dashed var(--line-strong);border-radius:18px;color:var(--ink-soft);line-height:1.55}.is-hidden{display:none!important}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:220px}}@media(max-width:680px){.together-shell{padding:0 14px 34px}.together-topbar{min-height:74px}}
+    .together-shell{padding-bottom:56px}.together-topbar{grid-template-columns:1fr auto}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em}.together-intro{max-width:720px;margin:22px 0 34px;color:var(--ink-soft);font-size:1.05rem;line-height:1.65}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{min-height:290px;padding:24px;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));border-radius:var(--radius-xl);background:var(--panel);display:flex;flex-direction:column;text-decoration:none;color:inherit;box-shadow:var(--shadow);transition:transform .16s ease,border-color .16s ease}.together-card:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 58%,var(--line))}.mode-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:var(--accent-soft);font-size:1.25rem}.mode-status{width:max-content;margin:20px 0 12px;padding:5px 9px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:.66rem;font-weight:800;letter-spacing:.08em}.together-card h2{margin:0;font-size:1.45rem}.together-card p{margin:12px 0 0;color:var(--ink-soft);line-height:1.55}.mode-meta{margin-top:14px;color:var(--ink-soft);font-size:.75rem;font-weight:680}.mode-cta{margin-top:auto;padding-top:24px;font-weight:760}.together-note{margin-top:24px;padding:18px 20px;border:1px dashed var(--line-strong);border-radius:18px;color:var(--ink-soft);line-height:1.55}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:230px}}@media(max-width:680px){.together-shell{padding:0 14px 34px}.together-topbar{min-height:74px}}
   </style>
 </head>
 <body>
   <div class="app-shell together-shell">
     <header class="topbar together-topbar">
-      <a class="brand together-back" href="./" aria-label="Back to Nearer">
-        <span class="brand-mark" aria-hidden="true">N</span>
-        <span><strong>NEARER</strong><small>Play together</small></span>
-      </a>
+      <a class="brand together-back" href="./" aria-label="Back to Nearer"><span class="brand-mark" aria-hidden="true">N</span><span><strong>NEARER</strong><small>Play together</small></span></a>
       <a class="secondary-button" href="./" style="text-decoration:none">Solo game</a>
     </header>
 
     <main class="together-main">
       <p class="eyebrow">ONE DEVICE · MULTIPLAYER</p>
       <h1>Choose how you want to play together.</h1>
-      <p class="together-intro">Pass one phone between players. Every mode uses the same country-distance clues, but changes what information is shared and what you are racing to achieve.</p>
+      <p class="together-intro">Pass one phone between players. Every mode uses the same border-distance clues, but changes what is shared, what stays private and how you win.</p>
 
       <section class="mode-grid" aria-label="Together game modes">
-        <a class="together-card is-live" href="together/race/">
-          <span class="mode-icon" aria-hidden="true">◎</span>
-          <span class="mode-status">PLAY NOW</span>
-          <h2>Same Target Race</h2>
-          <p>Everyone hunts the same hidden country on a private route. Complete the round, then the player who found it in the fewest guesses wins.</p>
-          <span class="mode-cta">Choose players and start →</span>
+        <a class="together-card" href="together/race/">
+          <span class="mode-icon" aria-hidden="true">◎</span><span class="mode-status">PLAY NOW</span><h2>Same Target Race</h2>
+          <p>Everyone privately hunts the same country. Complete the round, then the player who reached it in the fewest guesses wins.</p>
+          <span class="mode-meta">2–6 players · private routes</span><span class="mode-cta">Choose players and start →</span>
         </a>
 
-        <article class="together-card is-disabled" aria-disabled="true">
-          <span class="mode-icon" aria-hidden="true">↔</span>
-          <span class="mode-status">COMING NEXT</span>
-          <h2>Cooperative Relay</h2>
-          <p>Share one globe and one trail of clues. Take turns making the next move and solve the country as a team.</p>
-          <span class="mode-cta">Shared route · combined score</span>
-        </article>
+        <a class="together-card" href="together/cooperative/">
+          <span class="mode-icon" aria-hidden="true">↔</span><span class="mode-status">PLAY NOW</span><h2>Cooperative Relay</h2>
+          <p>Share one globe and one trail of clues. Take turns choosing the team's next country and solve the target together.</p>
+          <span class="mode-meta">2–6 players · shared route</span><span class="mode-cta">Build a team and start →</span>
+        </a>
 
-        <article class="together-card is-disabled" aria-disabled="true">
-          <span class="mode-icon" aria-hidden="true">◆</span>
-          <span class="mode-status">PLANNED</span>
-          <h2>Hidden Country Duel</h2>
-          <p>Each player protects a different country while trying to locate everyone else before they are found.</p>
-          <span class="mode-cta">Private targets · head-to-head</span>
-        </article>
+        <a class="together-card" href="together/duel/">
+          <span class="mode-icon" aria-hidden="true">◆</span><span class="mode-status">PLAY NOW</span><h2>Hidden Country Duel</h2>
+          <p>Each player protects a secret country while hunting the other's. Watch them close in without seeing their guesses.</p>
+          <span class="mode-meta">2 players · private targets</span><span class="mode-cta">Set up a duel →</span>
+        </a>
       </section>
 
-      <div class="together-note"><strong>More modes can sit here without crowding the solo game.</strong> The next build can add Cooperative Relay using the same player and handover framework.</div>
+      <div class="together-note"><strong>All three modes save separately on this browser.</strong> Starting or resuming a multiplayer game does not alter Daily, Random or another Together mode.</div>
     </main>
   </div>
 </body>
