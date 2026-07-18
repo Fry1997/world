@@ -5,6 +5,9 @@
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
+  const raceFiles = Array.from({ length: 6 }, (_, index) =>
+    `together/race/chunks/race-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
+  );
 
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -34,10 +37,18 @@
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) {
         throw new Error("Nearer game data did not initialise.");
       }
-      await loadScript(`together/race/race.js?v=${VERSION}`);
+
+      window.NEARER_RACE_SOURCE = "";
+      for (const file of raceFiles) await loadScript(file);
+      const raceSource = window.NEARER_RACE_SOURCE || "";
+      if (!raceSource.includes("window.__NEARER_RACE_V2_STARTED = true")) {
+        throw new Error("Same Target Race source chunks are incomplete.");
+      }
+      (0, eval)(raceSource);
       if (!window.__NEARER_RACE_V2_STARTED) throw new Error("The race game did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
+      delete window.NEARER_RACE_SOURCE;
     }
   };
 
