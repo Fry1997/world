@@ -1,0 +1,41 @@
+elements.world.getBoundingClientRect();
+    elements.tooltip.style.left = `${Math.min(rect.width - 170, Math.max(8, clientX - rect.left + 12))}px`;
+    elements.tooltip.style.top = `${Math.min(rect.height - 65, Math.max(8, clientY - rect.top + 12))}px`;
+    elements.tooltip.classList.remove("is-hidden");
+  }
+
+  function hideTooltip() { elements.tooltip.classList.add("is-hidden"); }
+
+  function toggleExpanded() {
+    expanded = !expanded;
+    document.body.classList.toggle("map-expanded", expanded); panel.classList.toggle("is-expanded", expanded);
+    elements.expand.classList.toggle("is-active", expanded); elements.expand.setAttribute("aria-label", expanded ? "Close expanded map" : "Expand map");
+    setTimeout(resetView, 35);
+  }
+
+  function bindGestures() {
+    elements.world.addEventListener("wheel", event => { event.preventDefault(); zoom(event.deltaY < 0 ? 0.38 : -0.38, event.clientX, event.clientY); }, { passive: false });
+    elements.world.addEventListener("dblclick", event => { event.preventDefault(); zoom(0.8, event.clientX, event.clientY); });
+    elements.world.addEventListener("pointerdown", event => {
+      elements.world.setPointerCapture?.(event.pointerId); mapPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (mapPointers.size === 1) mapGesture = { type: "pan", x: event.clientX, y: event.clientY, moved: 0 };
+      else if (mapPointers.size === 2) {
+        const points = [...mapPointers.values()]; mapGesture = { type: "pinch", distance: Math.max(1, Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y)), zoom: mapCamera.zoom };
+      }
+    });
+    elements.world.addEventListener("pointermove", event => {
+      if (!mapPointers.has(event.pointerId)) return;
+      mapPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      if (mapPointers.size === 1 && mapGesture?.type === "pan") {
+        const dx = event.clientX - mapGesture.x, dy = event.clientY - mapGesture.y;
+        mapGesture.x = event.clientX; mapGesture.y = event.clientY; mapGesture.moved += Math.abs(dx) + Math.abs(dy);
+        const size = 256 * Math.pow(2, mapCamera.zoom); mapCamera.x -= dx / size; mapCamera.y -= dy / size; scheduleRender();
+      } else if (mapPointers.size === 2) {
+        const points = [...mapPointers.values()];
+        const distance = Math.max(1, Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y));
+        if (mapGesture?.type !== "pinch") mapGesture = { type: "pinch", distance, zoom: mapCamera.zoom };
+        mapCamera.zoom = Math.max(0.25, Math.min(7, mapGesture.zoom + Math.log2(distance / mapGesture.distance))); scheduleRender();
+      }
+    });
+    const endPointer = event => {
+      const moved = mapGesture?.moved || 0; mapPo

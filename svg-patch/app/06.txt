@@ -1,0 +1,55 @@
+ 30) { label.classList.add("is-hidden"); continue; }
+      label.classList.remove("is-hidden"); label.classList.toggle("is-emphasised", important);
+      label.setAttribute("x", x.toFixed(2)); label.setAttribute("y", y.toFixed(2));
+      label.textContent = mapCamera.zoom < 3.1 && !important ? country.code : country.name;
+    }
+  }
+
+  function renderScene() {
+    const rect = elements.world.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    clampCamera();
+    const worldSize = 256 * Math.pow(2, mapCamera.zoom);
+    const left = mapCamera.x * worldSize - rect.width / 2, top = mapCamera.y * worldSize - rect.height / 2;
+    elements.scene.setAttribute("transform", `translate(${-left} ${-top}) scale(${worldSize})`);
+    renderLabels(rect, worldSize, top);
+  }
+
+  function resetView() {
+    mapCamera = { x: 0.5, y: 0.5, zoom: fitZoom() };
+    scheduleRender();
+  }
+
+  function zoom(delta, clientX = null, clientY = null) {
+    const rect = elements.world.getBoundingClientRect();
+    const oldSize = 256 * Math.pow(2, mapCamera.zoom);
+    const anchorX = clientX === null ? rect.width / 2 : clientX - rect.left;
+    const anchorY = clientY === null ? rect.height / 2 : clientY - rect.top;
+    const worldX = mapCamera.x + (anchorX - rect.width / 2) / oldSize;
+    const worldY = mapCamera.y + (anchorY - rect.height / 2) / oldSize;
+    mapCamera.zoom = Math.max(0.25, Math.min(7, mapCamera.zoom + delta));
+    const newSize = 256 * Math.pow(2, mapCamera.zoom);
+    mapCamera.x = worldX - (anchorX - rect.width / 2) / newSize;
+    mapCamera.y = worldY - (anchorY - rect.height / 2) / newSize;
+    scheduleRender();
+  }
+
+  function focusCountry(code) {
+    const bounds = featureBoundsByCode.get(code), rect = elements.world.getBoundingClientRect();
+    if (!bounds || !rect.width || !rect.height) return;
+    const width = Math.max(0.018, bounds.maxX - bounds.minX), height = Math.max(0.018, bounds.maxY - bounds.minY);
+    const targetSize = Math.min(rect.width / (width * 1.8), rect.height / (height * 1.8));
+    mapCamera = { x: bounds.centerX, y: bounds.centerY, zoom: Math.max(fitZoom(), Math.min(5.2, Math.log2(targetSize / 256))) };
+    scheduleRender();
+  }
+
+  function heatColour(distance) {
+    const closeness = 1 - Math.min(distance, 9000) / 9000;
+    const eased = Math.pow(closeness, 0.72), dark = document.documentElement.dataset.theme === "dark";
+    return `hsl(${(218 - eased * 210).toFixed(0)} ${(58 + eased * 28).toFixed(0)}% ${(dark ? 42 + eased * 10 : 57 - eased * 5).toFixed(0)}%)`;
+  }
+
+  function refreshMap() {
+    const state = currentState(), guesses = state.guesses || [], latest = guesses.at(-1)?.code;
+    const guessed = new Map(guesses.map(item => [item.code, item]));
+    [...elements.c
