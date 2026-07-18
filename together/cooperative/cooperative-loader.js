@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const VERSION = "20260718-together3";
+  const VERSION = "20260718-polish1";
   const tailFiles = Array.from({ length: 9 }, (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`);
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -10,12 +10,19 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
+  const loadStyle = source => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = source;
+    document.head.appendChild(link);
+  };
   const fail = error => {
     console.error(error);
     const loading = document.getElementById("modeLoading");
     if (loading) loading.textContent = "Cooperative Relay could not start. Please reload the page.";
   };
   const start = async () => {
+    loadStyle(`together/shared/polish.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -29,6 +36,7 @@
       if (!window.NEARER_TOGETHER_CORE) throw new Error("Together core did not initialise.");
       await loadScript(`together/cooperative/cooperative.js?v=${VERSION}`);
       if (!window.__NEARER_COOPERATIVE_STARTED) throw new Error("Cooperative Relay did not initialise.");
+      await loadScript(`together/shared/polish-ui.js?v=${VERSION}`);
     } finally {
       URL.revokeObjectURL(url);
     }
