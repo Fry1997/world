@@ -19,14 +19,18 @@
   });
   const start = async () => {
     for (const file of tailFiles) await loadScript(file);
-    const source = window.NEARER_RUNTIME_SOURCE || "";
+    const rawSource = window.NEARER_RUNTIME_SOURCE || "";
+    const source = rawSource.replace(
+      "const COUNTRY_METADATA =",
+      "window.NEARER_D3 = d3;\nwindow.NEARER_TOPO_FEATURE = topoFeature;\nwindow.NEARER_WORLD_TOPOLOGY = world;\nconst COUNTRY_METADATA ="
+    );
     if (!source || !appSource) throw new Error("Nearer source chunks are missing.");
     const url = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
     try {
       await import(url);
       const safeAppSource = appSource.replace("initializeMap();", "");
       (0, eval)(safeAppSource);
-      await loadScript("svg-map-loader.js?v=20260718-svg3");
+      await loadScript("globe.js?v=20260718-globe1");
     } finally {
       URL.revokeObjectURL(url);
     }
