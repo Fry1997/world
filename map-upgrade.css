@@ -62,3 +62,10 @@ body.map-expanded { overflow: hidden; }
   .map-panel.is-expanded { inset: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); border-radius: 18px; }
   .map-panel.is-expanded .map-toolbar { min-height: 56px; }
 }
+
+/* Keep the MapLibre canvas sized to the responsive map panel on mobile Safari. */
+.maplibregl-canvas-container,
+.maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
