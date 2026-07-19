@@ -3,6 +3,7 @@
   if (window.__NEARER_PLATFORM_STARTED) return;
 
   const VERSION = "20260719-platform4";
+  const CLOUD_VERSION = "20260719-cloud1";
   const path = location.pathname.replace(/\/index\.html$/, "/");
   const rootUrl = new URL("./", document.baseURI);
   rootUrl.search = "";
@@ -39,6 +40,24 @@
     mastery: new URL("mastery/", rootUrl),
     together: new URL("together/", rootUrl)
   };
+
+  function loadCloudLayer() {
+    const styleUrl = new URL(`cloud.css?v=${CLOUD_VERSION}`, rootUrl);
+    if (!document.querySelector("link[data-nearer-cloud-style]")) {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = styleUrl.href;
+      link.dataset.nearerCloudStyle = "true";
+      document.head.appendChild(link);
+    }
+    if (!window.__NEARER_CLOUD_STARTED && !document.querySelector("script[data-nearer-cloud-script]")) {
+      const script = document.createElement("script");
+      script.src = new URL(`cloud.js?v=${CLOUD_VERSION}`, rootUrl).href;
+      script.dataset.nearerCloudScript = "true";
+      script.onerror = () => console.error("Nearer account services could not load.");
+      document.head.appendChild(script);
+    }
+  }
 
   function prefetchDocument(value) {
     const url = value instanceof URL ? value : new URL(value, document.baseURI);
@@ -179,6 +198,7 @@
 
   addMobileDock();
   if (isRoot) addLaunchpad();
+  loadCloudLayer();
 
   document.querySelectorAll("a[data-platform-section]").forEach(primeNavigation);
   const idle = window.requestIdleCallback || (callback => setTimeout(callback, 650));
