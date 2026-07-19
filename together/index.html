@@ -3,24 +3,25 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#08131e">
+  <meta name="theme-color" content="#07111b">
   <base href="/world/">
   <meta name="description" content="Play Nearer together on one device.">
   <title>Nearer Together</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260719-experience6">
+  <link rel="stylesheet" href="styles.css?v=20260719-experience7">
   <style>
-    .together-shell{padding-bottom:56px}.together-topbar{grid-template-columns:1fr auto}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;color:#fffaf2;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em;text-shadow:0 4px 24px rgba(0,0,0,.2)}.together-intro{max-width:720px;margin:22px 0 34px;color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.65}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{position:relative;min-height:300px;padding:24px;overflow:hidden;border:1px solid rgba(255,255,255,.2);border-radius:28px;background:linear-gradient(145deg,rgba(255,250,244,.96),rgba(225,217,210,.91));display:flex;flex-direction:column;text-decoration:none;color:#111a22;box-shadow:0 24px 65px rgba(2,8,14,.28),inset 0 1px 0 rgba(255,255,255,.96);transition:transform .16s ease,border-color .16s ease}.together-card::before{content:"";position:absolute;width:230px;height:230px;left:-65px;top:-85px;border-radius:50%;background:radial-gradient(circle,var(--card-glow,rgba(255,118,89,.28)),transparent 68%);pointer-events:none}.together-card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.5)}.together-card:nth-child(2){--card-glow:rgba(89,206,164,.3)}.together-card:nth-child(3){--card-glow:rgba(151,124,225,.28)}.mode-icon{position:relative;width:52px;height:52px;display:grid;place-items:center;border:1px solid rgba(20,35,46,.14);border-radius:16px;background:rgba(255,255,255,.52);font-size:1.25rem;box-shadow:0 10px 25px rgba(5,15,23,.09)}.mode-status{position:relative;width:max-content;margin:20px 0 12px;padding:5px 10px;border:1px solid rgba(21,37,49,.1);border-radius:999px;background:rgba(255,255,255,.42);color:#c94d34;font-size:.66rem;font-weight:850;letter-spacing:.1em}.together-card:nth-child(2) .mode-status{color:#17765a}.together-card:nth-child(3) .mode-status{color:#634da8}.together-card h2{position:relative;margin:0;font-size:1.45rem}.together-card p{position:relative;margin:12px 0 0;color:#606b74;line-height:1.55}.mode-meta{position:relative;margin-top:14px;color:#4e5b64;font-size:.75rem;font-weight:720}.mode-cta{position:relative;margin-top:auto;padding-top:24px;font-weight:780}.together-note{margin-top:24px;padding:18px 20px;border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(10,24,35,.58);color:rgba(255,255,255,.72);line-height:1.55;backdrop-filter:blur(16px)}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:230px}}@media(max-width:680px){.together-shell{padding:0 14px 34px}.together-topbar{min-height:74px}.together-main h1{font-size:clamp(2.45rem,13vw,4rem)}}
+    .together-shell{padding-bottom:56px}.together-topbar{grid-template-columns:1fr auto}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;color:#fffaf2;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em;text-shadow:0 4px 24px rgba(0,0,0,.2)}.together-intro{max-width:720px;margin:22px 0 34px;color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.65}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{position:relative;min-height:300px;padding:24px;overflow:hidden;border-radius:28px;display:flex;flex-direction:column;text-decoration:none;transition:transform .16s ease,border-color .16s ease}.together-card::before{content:"";position:absolute;width:230px;height:230px;left:-65px;top:-85px;border-radius:50%;background:radial-gradient(circle,var(--card-glow,rgba(255,118,89,.28)),transparent 68%);pointer-events:none}.together-card:nth-child(2){--card-glow:rgba(89,206,164,.3)}.together-card:nth-child(3){--card-glow:rgba(151,124,225,.28)}.mode-icon{position:relative;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;font-size:1.25rem}.mode-status{position:relative;width:max-content;margin:20px 0 12px;padding:5px 10px;border-radius:999px;font-size:.66rem;font-weight:850;letter-spacing:.1em}.together-card h2{position:relative;margin:0;font-size:1.45rem}.together-card p{position:relative;margin:12px 0 0;line-height:1.55}.mode-meta{position:relative;margin-top:14px;font-size:.75rem;font-weight:720}.mode-cta{position:relative;margin-top:auto;padding-top:24px;font-weight:780}.together-note{margin-top:24px;padding:18px 20px;border-radius:18px;line-height:1.55}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:230px}}@media(max-width:680px){.together-shell{padding-left:14px;padding-right:14px;padding-bottom:34px}.together-topbar{min-height:74px}.together-main h1{font-size:clamp(2.45rem,13vw,4rem)}}
   </style>
-  <link rel="stylesheet" href="together/shared/prestige.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience2.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience3.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience4.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience5.css?v=20260719-experience6">
-  <link rel="stylesheet" href="together/shared/experience6.css?v=20260719-experience6">
+  <link rel="stylesheet" href="together/shared/prestige.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience2.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience3.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience4.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience5.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience6.css?v=20260719-experience7">
+  <link rel="stylesheet" href="together/shared/experience7.css?v=20260719-experience7">
 </head>
-<body class="experience-six">
+<body class="experience-six experience-seven">
   <div class="app-shell together-shell">
     <header class="topbar together-topbar">
       <a class="brand together-back" href="./" aria-label="Back to Nearer"><span class="brand-mark" aria-hidden="true">N</span><span><strong>NEARER</strong><small>Play together</small></span></a>
@@ -35,7 +36,7 @@
       <section class="mode-grid" aria-label="Together game modes">
         <a class="together-card" href="together/race/">
           <span class="mode-icon" aria-hidden="true">◎</span><span class="mode-status">PLAY NOW</span><h2>Same Target Race</h2>
-          <p>Everyone privately hunts the same country. Complete the round, then the player who reached it in the fewest guesses wins.</p>
+          <p>Everyone privately searches for the same country. Complete the round, then the player who reached it in the fewest guesses wins.</p>
           <span class="mode-meta">2–6 players · private routes</span><span class="mode-cta">Choose players and start →</span>
         </a>
 
@@ -55,5 +56,6 @@
       <div class="together-note"><strong>All three modes save separately on this browser.</strong> Starting or resuming a multiplayer game does not alter Daily, Random or another Together mode.</div>
     </main>
   </div>
+  <script src="together/shared/experience7.js?v=20260719-experience7"></script>
 </body>
 </html>

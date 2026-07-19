@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience6";
+  const VERSION = "20260719-experience7";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -50,6 +50,7 @@
     loadStyle(`together/shared/experience4.css?v=${VERSION}`);
     loadStyle(`together/shared/experience5.css?v=${VERSION}`);
     loadStyle(`together/shared/experience6.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience7.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -84,6 +85,9 @@
         }
       };
 
+      await loadScript(`together/shared/hd-canvas-preflight.js?v=${VERSION}`);
+      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
+
       await loadScript(`globe-canvas.js?v=${VERSION}`);
       if (
         !window.__NEARER_CANVAS_GLOBE_STARTED ||
@@ -115,6 +119,11 @@
       await loadScript(`together/shared/experience6.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE6_STARTED) {
         throw new Error("The elevated visual layer did not initialise.");
+      }
+
+      await loadScript(`together/shared/experience7.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE7_STARTED) {
+        throw new Error("The final responsive visual layer did not initialise.");
       }
     } finally {
       URL.revokeObjectURL(url);

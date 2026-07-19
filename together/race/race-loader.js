@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience6";
+  const VERSION = "20260719-experience7";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
@@ -39,6 +39,8 @@
     loadStyle(`together/shared/experience4.css?v=${VERSION}`);
     loadStyle(`together/shared/experience5.css?v=${VERSION}`);
     loadStyle(`together/shared/experience6.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience7.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience7-multiplayer.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -51,6 +53,9 @@
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) {
         throw new Error("Nearer game data did not initialise.");
       }
+
+      await loadScript(`together/shared/hd-canvas-preflight.js?v=${VERSION}`);
+      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
 
       window.NEARER_RACE_SOURCE = "";
       for (const file of raceFiles) await loadScript(file);
@@ -67,6 +72,8 @@
       if (!window.__NEARER_EXPERIENCE5_STARTED) throw new Error("The width-normalised visual layer did not initialise.");
       await loadScript(`together/shared/experience6.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
+      await loadScript(`together/shared/experience7.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
       delete window.NEARER_RACE_SOURCE;
