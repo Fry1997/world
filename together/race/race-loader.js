@@ -8,8 +8,10 @@
   const raceFiles = Array.from({ length: 6 }, (_, index) =>
     `together/race/chunks/race-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
+  const hdFile = `together/shared/hd-canvas-preflight.js?v=${VERSION}`;
   const styleFiles = ["polish.css", "prestige.css", "experience.css", "experience2.css", "experience3.css", "experience4.css", "experience5.css", "experience6.css", "experience7.css", "experience7-multiplayer.css"].map(file => `together/shared/${file}?v=${VERSION}`);
   const enhancementFiles = [
+    hdFile,
     `together/shared/polish-ui.js?v=${VERSION}`,
     `together/shared/experience4.js?v=${VERSION}`,
     `together/shared/experience5.js?v=${VERSION}`,
@@ -60,6 +62,9 @@
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) {
         throw new Error("Nearer game data did not initialise.");
       }
+
+      await loadScript(hdFile);
+      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
 
       window.NEARER_RACE_SOURCE = "";
       for (const file of raceFiles) await loadScript(file);
