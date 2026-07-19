@@ -20,4 +20,17 @@ jobs:
       - name: Check JavaScript syntax
         run: find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
       - name: Check HTML references and duplicate IDs
-        run: node scripts/validate-static.mjs
+        id: static
+        continue-on-error: true
+        run: node scripts/validate-static.mjs > validation-report.txt 2>&1
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-validation-report
+          path: validation-report.txt
+      - name: Report validation result
+        if: always()
+        run: |
+          cat validation-report.txt
+          test "${{ steps.static.outcome }}" = "success"
