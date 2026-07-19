@@ -9,7 +9,6 @@
     `together/race/chunks/race-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
   const hdFile = `together/shared/hd-canvas-preflight.js?v=${VERSION}`;
-  const styleFiles = ["polish.css", "prestige.css", "experience.css", "experience2.css", "experience3.css", "experience4.css", "experience5.css", "experience6.css", "experience7.css", "experience7-multiplayer.css"].map(file => `together/shared/${file}?v=${VERSION}`);
   const enhancementFiles = [
     hdFile,
     `together/shared/polish-ui.js?v=${VERSION}`,
@@ -27,12 +26,6 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
-  const loadStyle = source => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = source;
-    document.head.appendChild(link);
-  };
   const preloadScript = source => {
     const link = document.createElement("link");
     link.rel = "preload";
@@ -48,7 +41,6 @@
   };
 
   const start = async () => {
-    styleFiles.forEach(loadStyle);
     [...tailFiles, ...raceFiles, ...enhancementFiles].forEach(preloadScript);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
