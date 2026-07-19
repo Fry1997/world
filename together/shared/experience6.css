@@ -1,0 +1,533 @@
+:root {
+  --e6-navy-950: #07111b;
+  --e6-navy-900: #0c1926;
+  --e6-navy-800: #13283a;
+  --e6-cream: #f1e9df;
+  --e6-cream-strong: #fffaf3;
+  --e6-coral: #ff7659;
+  --e6-green: #66d6a2;
+  --e6-glass: rgba(17, 31, 44, .72);
+  --e6-glass-line: rgba(255, 255, 255, .16);
+  --e6-soft-shadow: 0 18px 50px rgba(3, 10, 18, .22);
+  --e6-deep-shadow: 0 24px 70px rgba(2, 8, 14, .38);
+}
+
+body.experience-six {
+  --bg: #d8e1e6;
+  --panel: rgba(248, 244, 238, .94);
+  --panel-strong: #fffaf4;
+  --ink: #0e1720;
+  --ink-soft: #59646d;
+  --line: rgba(21, 37, 49, .16);
+  --line-strong: rgba(21, 37, 49, .28);
+  --accent: #ff694b;
+  --accent-dark: #e94d31;
+  --accent-soft: #fde2d8;
+  --success: #258b68;
+  --success-soft: #dcefe6;
+  --globe-ocean-highlight: #42667c;
+  --globe-ocean: #173a52;
+  --globe-ocean-shadow: #071724;
+  --globe-land: #e7e2d7;
+  --globe-border: rgba(20, 31, 39, .42);
+  --globe-grid: rgba(255, 255, 255, .09);
+  --globe-rim: rgba(241, 248, 252, .36);
+  min-height: 100svh;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(127, 180, 211, .46), transparent 30rem),
+    radial-gradient(circle at 8% 42%, rgba(38, 83, 116, .38), transparent 31rem),
+    linear-gradient(155deg, #1a3042 0%, #7f9dad 45%, #d9e0df 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="dark"] body.experience-six {
+  --bg: #08131e;
+  --panel: rgba(240, 234, 226, .96);
+  --panel-strong: #fff9f2;
+  --ink: #101820;
+  --ink-soft: #657078;
+  --line: rgba(255,255,255,.16);
+  --line-strong: rgba(255,255,255,.24);
+  --globe-ocean-highlight: #345b75;
+  --globe-ocean: #12354e;
+  --globe-ocean-shadow: #06131f;
+  --globe-land: #e8e1d4;
+  --globe-border: rgba(26, 38, 48, .44);
+  --globe-grid: rgba(255, 255, 255, .08);
+  --globe-rim: rgba(220, 239, 250, .28);
+  color: #f5f2ec;
+  background:
+    radial-gradient(circle at 74% 8%, rgba(59, 111, 148, .43), transparent 28rem),
+    radial-gradient(circle at 16% 48%, rgba(19, 57, 84, .55), transparent 34rem),
+    linear-gradient(155deg, #07121d 0%, #102638 48%, #526f82 100%);
+  background-attachment: fixed;
+}
+
+body.experience-six::before,
+body.experience-six::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body.experience-six::before {
+  background:
+    radial-gradient(ellipse at 58% 34%, transparent 0 24%, rgba(3, 10, 18, .14) 62%, rgba(3, 9, 15, .4) 100%),
+    repeating-linear-gradient(112deg, rgba(255,255,255,.018) 0 1px, transparent 1px 12px);
+  mix-blend-mode: soft-light;
+}
+
+body.experience-six::after {
+  inset: auto -20vw -36vh -20vw;
+  height: 58vh;
+  border-radius: 50% 50% 0 0;
+  background: rgba(5, 13, 20, .22);
+  filter: blur(54px);
+}
+
+body.experience-six .app-shell {
+  position: relative;
+  width: min(1120px, 100%);
+}
+
+body.experience-six .topbar {
+  border-bottom: 0;
+  color: #f8f5ef;
+}
+
+body.experience-six .brand-mark,
+body.experience-six .icon-button,
+body.experience-six .together-mode-chip,
+body.experience-six .race-mode-chip {
+  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(145deg, rgba(25,40,54,.82), rgba(9,19,29,.72));
+  color: #fffaf2;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 10px 28px rgba(3,10,18,.2);
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+
+body.experience-six .brand strong,
+body.experience-six .brand small {
+  color: #f8f5ef;
+}
+
+body.experience-six .mode-switch {
+  border: 1px solid rgba(255,255,255,.17);
+  background: rgba(14,28,40,.48);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 14px 35px rgba(3,10,18,.16);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+body.experience-six .mode-button {
+  color: rgba(255,255,255,.78);
+}
+
+body.experience-six .mode-button.is-active {
+  background: linear-gradient(145deg, #fffaf3, #ebe4dc);
+  color: #111a22;
+  box-shadow: 0 6px 18px rgba(2,8,14,.2), inset 0 1px 0 #fff;
+}
+
+body.experience-six .game-heading,
+body.experience-six .mode-heading-row,
+body.experience-six .race-heading-row {
+  color: #f8f5ef;
+}
+
+body.experience-six .game-heading h1,
+body.experience-six .mode-heading-row h1,
+body.experience-six .race-heading-row h1 {
+  color: #fffaf2;
+  text-shadow: 0 3px 18px rgba(0,0,0,.16);
+}
+
+body.experience-six .game-heading p:not(.eyebrow),
+body.experience-six .mode-heading-row p:not(.eyebrow),
+body.experience-six .race-heading-row p:not(.eyebrow) {
+  color: rgba(255,255,255,.74);
+}
+
+body.experience-six .eyebrow {
+  color: rgba(255,220,209,.86);
+}
+
+body.experience-six .guess-panel,
+body.experience-six .mode-guess-panel,
+body.experience-six .race-guess-panel {
+  border: 1px solid rgba(255,255,255,.52);
+  background: linear-gradient(145deg, rgba(255,250,243,.96), rgba(225,215,207,.91));
+  box-shadow: var(--e6-soft-shadow), inset 0 1px 0 rgba(255,255,255,.94);
+  backdrop-filter: blur(20px) saturate(1.12);
+}
+
+body.experience-six .search-control {
+  border-color: rgba(27,40,50,.13);
+  background: rgba(255,252,248,.7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 5px 14px rgba(20,31,40,.05);
+}
+
+body.experience-six #countryInput {
+  color: #18212a;
+  background: transparent;
+}
+
+body.experience-six .primary-button {
+  border-color: rgba(255,255,255,.12);
+  background: linear-gradient(145deg, #172331, #07111b);
+  color: #fff4ec;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 10px 25px rgba(7,17,27,.2);
+}
+
+body.experience-six .secondary-button {
+  background: rgba(19,34,47,.68);
+  border-color: rgba(255,255,255,.16);
+  color: #fff8f1;
+  backdrop-filter: blur(16px);
+}
+
+body.experience-six .map-panel,
+body.experience-six .mode-map-panel,
+body.experience-six .race-map-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.2);
+  background: linear-gradient(155deg, rgba(28,53,70,.72), rgba(3,13,22,.84));
+  box-shadow: var(--e6-deep-shadow), inset 0 1px 0 rgba(255,255,255,.1);
+}
+
+body.experience-six .globe-stage,
+body.experience-six .mode-globe-stage,
+body.experience-six .race-globe-stage {
+  background:
+    radial-gradient(circle at 58% 36%, rgba(101,150,180,.2), transparent 36%),
+    linear-gradient(155deg, rgba(16,38,55,.88), rgba(4,14,23,.96));
+}
+
+body.experience-six .globe-stage::after,
+body.experience-six .mode-globe-stage::after,
+body.experience-six .race-globe-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(4,12,20,.3), transparent 30% 73%, rgba(255,255,255,.035)),
+    radial-gradient(circle at 54% 44%, transparent 30%, rgba(2,9,15,.18) 82%);
+  mix-blend-mode: soft-light;
+}
+
+body.experience-six .globe-toolbar,
+body.experience-six .map-toolbar {
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(12,27,39,.7);
+  color: rgba(255,255,255,.9);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 12px 30px rgba(1,8,14,.24);
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+body.experience-six .globe-action,
+body.experience-six .globe-zoom {
+  border-color: rgba(255,255,255,.17);
+  background: rgba(10,22,33,.78);
+  color: #fffaf2;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.09), 0 8px 20px rgba(2,8,14,.25);
+  backdrop-filter: blur(18px);
+}
+
+body.experience-six .globe-zoom button + button {
+  border-color: rgba(255,255,255,.14);
+}
+
+body.experience-six .closest-card {
+  border: 1px solid rgba(255,255,255,.15);
+  background:
+    radial-gradient(circle at 94% 10%, rgba(255,119,87,.12), transparent 34%),
+    linear-gradient(145deg, rgba(20,34,48,.97), rgba(6,15,24,.97));
+  color: #fff8f1;
+  box-shadow: var(--e6-deep-shadow), inset 0 1px 0 rgba(255,255,255,.1);
+}
+
+body.experience-six .closest-label-row,
+body.experience-six .closest-empty,
+body.experience-six .closest-empty p {
+  color: rgba(255,255,255,.76);
+}
+
+body.experience-six .status-badge {
+  background: rgba(205,169,93,.18);
+  color: #e9d4a3;
+  border: 1px solid rgba(225,194,126,.14);
+}
+
+body.experience-six .country-code-block {
+  background: linear-gradient(145deg, #fff7ea, #eadccc);
+  color: #18212a;
+  box-shadow: inset 0 1px 0 #fff, 0 8px 20px rgba(0,0,0,.18);
+}
+
+body.experience-six .closest-copy strong {
+  color: #fffaf3;
+}
+
+body.experience-six .closest-copy span {
+  color: var(--e6-coral);
+  text-shadow: 0 0 22px rgba(255,118,89,.22);
+}
+
+body.experience-six .distance-orbit {
+  border-color: rgba(255,255,255,.28);
+}
+
+body.experience-six .distance-orbit span,
+body.experience-six .radar-graphic i:nth-child(3) {
+  background: var(--e6-coral);
+  box-shadow: 0 0 0 8px rgba(255,118,89,.11), 0 0 22px rgba(255,118,89,.35);
+}
+
+body.experience-six .feedback-panel {
+  border: 1px solid rgba(113,220,172,.24);
+  background:
+    radial-gradient(circle at 10% 20%, rgba(102,214,162,.18), transparent 34%),
+    linear-gradient(145deg, rgba(25,80,67,.88), rgba(11,45,40,.9));
+  color: #f2fff9;
+  box-shadow: 0 16px 40px rgba(5,25,22,.26), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body.experience-six .feedback-panel p {
+  color: rgba(235,255,247,.78);
+}
+
+body.experience-six .feedback-icon {
+  background: rgba(102,214,162,.12);
+  border: 1px solid rgba(134,235,190,.23);
+  color: #d6ffeb;
+}
+
+body.experience-six .history-card,
+body.experience-six .stat-strip,
+body.experience-six .mode-pressure-card,
+body.experience-six .mode-rules-card,
+body.experience-six .race-rules-card {
+  border: 1px solid rgba(255,255,255,.46);
+  background: linear-gradient(145deg, rgba(255,250,244,.96), rgba(226,219,212,.93));
+  color: #111a22;
+  box-shadow: var(--e6-soft-shadow), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+body.experience-six .history-header,
+body.experience-six .guess-row,
+body.experience-six .stat-strip div {
+  border-color: rgba(21,37,49,.12);
+}
+
+body.experience-six .history-header p,
+body.experience-six .guess-name span,
+body.experience-six .guess-distance small,
+body.experience-six .stat-strip span,
+body.experience-six .history-empty,
+body.experience-six .mode-rules-card p,
+body.experience-six .race-rules-card p,
+body.experience-six .mode-pressure-card p {
+  color: #667078;
+}
+
+body.experience-six .guess-row.is-latest {
+  background: linear-gradient(90deg, rgba(255,118,89,.12), rgba(255,255,255,.14));
+  box-shadow: inset 0 0 0 1px rgba(220,85,57,.42);
+}
+
+body.experience-six .guess-rank,
+body.experience-six .count-pill {
+  background: rgba(19,31,42,.07);
+  color: #45515a;
+}
+
+body.experience-six .guess-row:first-child .guess-rank {
+  background: linear-gradient(145deg, #1a2733, #08111a);
+  color: #fff8ef;
+}
+
+body.experience-six footer {
+  color: rgba(255,255,255,.64);
+  border-color: rgba(255,255,255,.16);
+}
+
+body.experience-six .dialog-card,
+body.experience-six .pass-card,
+body.experience-six .secret-card {
+  border: 1px solid rgba(255,255,255,.48);
+  background: linear-gradient(145deg, #fffaf4, #e4ddd5);
+  color: #111a22;
+  box-shadow: 0 35px 100px rgba(2,8,14,.48), inset 0 1px 0 #fff;
+}
+
+body.experience-six .dialog-card::backdrop {
+  background: rgba(4,12,19,.74);
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 821px) {
+  body.experience-six main {
+    padding-top: 30px;
+  }
+
+  body.experience-six .game-layout,
+  body.experience-six .mode-layout,
+  body.experience-six .race-layout {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 820px) {
+  body.experience-six .app-shell {
+    padding-inline: 15px;
+  }
+
+  body.experience-six .topbar {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+
+  body.experience-six .brand-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+  }
+
+  body.experience-six .icon-button {
+    width: 43px;
+    height: 43px;
+    border-radius: 13px;
+  }
+
+  body.experience-six .mode-switch {
+    min-height: 48px;
+    padding: 4px;
+    border-radius: 24px;
+  }
+
+  body.experience-six .mode-button {
+    min-height: 38px;
+    padding-inline: 10px;
+    font-size: .82rem;
+  }
+
+  body.experience-six main {
+    padding-top: 17px;
+  }
+
+  body.experience-six .game-heading,
+  body.experience-six .mode-heading-row,
+  body.experience-six .race-heading-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  body.experience-six .game-heading h1 {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+  }
+
+  body.experience-six .heading-help {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+    margin-bottom: 2px;
+  }
+
+  body.experience-six .guess-panel,
+  body.experience-six .mode-guess-panel,
+  body.experience-six .race-guess-panel {
+    padding: 10px;
+    border-radius: 17px;
+    gap: 9px;
+  }
+
+  body.experience-six .search-control,
+  body.experience-six #countryInput {
+    min-height: 49px;
+  }
+
+  body.experience-six #guessButton,
+  body.experience-six #makeGuessButton,
+  body.experience-six .mode-turn-actions button,
+  body.experience-six .race-turn-actions button {
+    min-width: 112px;
+    height: 49px;
+    min-height: 49px;
+    border-radius: 13px;
+  }
+
+  body.experience-six .map-panel,
+  body.experience-six .mode-map-panel,
+  body.experience-six .race-map-panel {
+    border-radius: 20px;
+  }
+
+  body.experience-six .globe-stage,
+  body.experience-six .mode-globe-stage,
+  body.experience-six .race-globe-stage {
+    height: clamp(370px, 47svh, 470px);
+    min-height: 370px;
+  }
+
+  body.experience-six .globe-toolbar,
+  body.experience-six .map-toolbar {
+    min-height: 45px;
+    border-radius: 13px;
+  }
+
+  body.experience-six .closest-card {
+    border-radius: 18px;
+    padding: 12px 14px;
+  }
+
+  body.experience-six .feedback-panel {
+    border-radius: 16px;
+    padding: 10px 13px;
+  }
+
+  body.experience-six .history-card,
+  body.experience-six .stat-strip,
+  body.experience-six .mode-pressure-card,
+  body.experience-six .mode-rules-card,
+  body.experience-six .race-rules-card {
+    border-radius: 18px;
+  }
+
+  body.experience-six .history-empty {
+    min-height: 112px;
+  }
+
+  body.experience-six .stat-strip {
+    min-height: 76px;
+  }
+}
+
+@media (max-width: 420px) {
+  body.experience-six .app-shell {
+    padding-inline: 11px;
+  }
+
+  body.experience-six .brand strong {
+    font-size: .78rem;
+  }
+
+  body.experience-six #guessButton,
+  body.experience-six #makeGuessButton,
+  body.experience-six .mode-turn-actions button,
+  body.experience-six .race-turn-actions button {
+    min-width: 102px;
+    padding-inline: 12px;
+    font-size: .76rem;
+  }
+
+  body.experience-six .globe-stage,
+  body.experience-six .mode-globe-stage,
+  body.experience-six .race-globe-stage {
+    height: clamp(350px, 45svh, 430px);
+    min-height: 350px;
+  }
+}
