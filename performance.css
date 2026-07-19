@@ -1,0 +1,62 @@
+/* Performance-only refinements. Visual design remains unchanged. */
+html {
+  background: #07111b;
+}
+
+html[data-theme="light"] {
+  background: #f3f1eb;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(.2, .7, .2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: nearer-page-out;
+}
+
+::view-transition-new(root) {
+  animation-name: nearer-page-in;
+}
+
+@keyframes nearer-page-out {
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
+@keyframes nearer-page-in {
+  from { opacity: 0; transform: translateY(5px); }
+}
+
+.map-panel,
+.globe-stage,
+.history-card,
+.closest-card,
+.stat-strip,
+.platform-launchpad {
+  contain: layout paint style;
+}
+
+.globe-canvas {
+  transform: translateZ(0);
+}
+
+.map-panel:has(.is-globe-dragging) .globe-toolbar,
+.map-panel:has(.is-globe-dragging) .globe-zoom,
+.map-panel:has(.is-globe-dragging) .globe-hint {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 1ms;
+  }
+}
