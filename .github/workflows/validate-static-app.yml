@@ -112,3 +112,15 @@ jobs:
 
           print('Static HTML validation passed.')
           PY
+
+      - name: Install application dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build the Vercel output
+        run: npm run build
+
+      - name: Install Chromium for smoke testing
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test the mobile application
+        run: npm run smoke
