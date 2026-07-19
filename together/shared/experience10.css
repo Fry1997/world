@@ -1,1 +1,188 @@
-/* Nearer experience 10 stabilisation layer. */
+:root {
+  --e10-dialog-ink: #111c25;
+  --e10-dialog-muted: #5f6a72;
+  --e10-dialog-line: rgba(20, 34, 44, .15);
+  --e10-graphite: #4d5053;
+}
+
+/* Result dialogs are intentionally light. Every descendant therefore receives
+   an explicit light-surface colour rather than inheriting the dark game UI. */
+body.experience-ten .mode-result-dialog,
+body.experience-ten .race-result-dialog {
+  border-color: rgba(255,255,255,.72) !important;
+  background:
+    radial-gradient(circle at 50% 0, rgba(238,116,89,.095), transparent 29%),
+    linear-gradient(150deg, #fffaf4 0%, #eee5dc 100%) !important;
+  color: var(--e10-dialog-ink) !important;
+  box-shadow: 0 38px 110px rgba(1,7,12,.58), inset 0 1px 0 #fff !important;
+}
+
+body.experience-ten .mode-result-dialog h2,
+body.experience-ten .race-result-dialog h2,
+body.experience-ten .mode-result-dialog strong,
+body.experience-ten .race-result-dialog strong {
+  color: var(--e10-dialog-ink) !important;
+}
+
+body.experience-ten .mode-result-dialog .eyebrow,
+body.experience-ten .race-result-dialog .eyebrow {
+  color: #d9664e !important;
+}
+
+body.experience-ten .mode-result-dialog .dialog-copy,
+body.experience-ten .race-result-dialog .dialog-copy {
+  color: var(--e10-dialog-muted) !important;
+}
+
+body.experience-ten .mode-result-stat,
+body.experience-ten .race-result-stat,
+body.experience-ten .duel-target-item,
+body.experience-ten .polish-highlight {
+  border: 1px solid var(--e10-dialog-line) !important;
+  background: rgba(255,255,255,.48) !important;
+  color: var(--e10-dialog-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+body.experience-ten .mode-result-stat span,
+body.experience-ten .race-result-stat span,
+body.experience-ten .duel-target-item span,
+body.experience-ten .polish-highlight span {
+  color: var(--e10-dialog-muted) !important;
+}
+
+body.experience-ten .mode-result-stat strong,
+body.experience-ten .race-result-stat strong,
+body.experience-ten .duel-target-item strong,
+body.experience-ten .polish-highlight strong {
+  color: var(--e10-dialog-ink) !important;
+}
+
+body.experience-ten .mode-result-dialog .player-avatar,
+body.experience-ten .race-result-dialog .player-avatar {
+  background: color-mix(in srgb, var(--player-colour) 13%, white) !important;
+  border-color: color-mix(in srgb, var(--player-colour) 58%, #d8d0c7) !important;
+  color: color-mix(in srgb, var(--player-colour) 84%, #17212a) !important;
+  box-shadow: none !important;
+}
+
+body.experience-ten .mode-result-dialog .primary-button,
+body.experience-ten .race-result-dialog .primary-button {
+  background: linear-gradient(145deg, #172735, #06111b) !important;
+  color: #fff8ef !important;
+}
+
+body.experience-ten .mode-result-dialog .secondary-button,
+body.experience-ten .race-result-dialog .secondary-button {
+  border-color: rgba(20,34,44,.2) !important;
+  background: rgba(255,255,255,.45) !important;
+  color: var(--e10-dialog-ink) !important;
+}
+
+/* A completed match should not cause the scoreboard to fall back to light
+   theme variables when its active state disappears. */
+body.experience-ten.result-open .mode-player-card,
+body.experience-ten.result-open .race-player-card {
+  border-color: rgba(222,238,247,.17) !important;
+  background: linear-gradient(145deg, rgba(19,44,60,.96), rgba(5,18,28,.98)) !important;
+  color: #fff9f1 !important;
+}
+
+body.experience-ten.result-open .mode-player-card.is-solved,
+body.experience-ten.result-open .race-player-card.is-solved {
+  border-color: rgba(94,184,149,.56) !important;
+  background: linear-gradient(145deg, rgba(18,61,51,.96), rgba(5,26,28,.98)) !important;
+}
+
+body.experience-ten.result-open .mode-player-card strong,
+body.experience-ten.result-open .race-player-card strong,
+body.experience-ten.result-open .mode-player-metrics b,
+body.experience-ten.result-open .race-player-metrics b {
+  color: #fff9f1 !important;
+}
+
+body.experience-ten.result-open .mode-player-card span,
+body.experience-ten.result-open .race-player-card span,
+body.experience-ten.result-open .mode-player-detail,
+body.experience-ten.result-open .race-trend {
+  color: rgba(235,241,244,.72) !important;
+}
+
+/* The floating toolbar is one contained component. Its right-hand control can
+   no longer protrude beyond the rounded globe frame. */
+body.experience-ten .map-panel,
+body.experience-ten .mode-map-panel,
+body.experience-ten .race-map-panel {
+  container-type: inline-size;
+}
+
+body.experience-ten .globe-toolbar {
+  box-sizing: border-box !important;
+  left: 10px !important;
+  right: 10px !important;
+  width: auto !important;
+  max-width: calc(100% - 20px) !important;
+  min-width: 0 !important;
+  padding: 6px 6px 6px 14px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+}
+
+body.experience-ten .globe-status-group {
+  min-width: 0 !important;
+  overflow: hidden;
+}
+
+body.experience-ten #globeStatus {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.experience-ten .globe-toolbar-right,
+body.experience-ten .globe-actions {
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+body.experience-ten .globe-action {
+  flex: 0 0 44px;
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 !important;
+  border-radius: 12px !important;
+}
+
+body.experience-ten .globe-action svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Opponent information is deliberately neutral and cannot be confused with
+   Nearer's blue/terracotta/gold distance scale. */
+body.experience-ten.mode-duel .duel-route-legend .opponent i {
+  background: var(--e10-graphite) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.34);
+}
+
+@media (max-width: 680px) {
+  body.experience-ten .globe-toolbar {
+    left: 9px !important;
+    right: 9px !important;
+    max-width: calc(100% - 18px) !important;
+  }
+
+  body.experience-ten .globe-key {
+    display: none !important;
+  }
+
+  body.experience-ten .mode-result-dialog,
+  body.experience-ten .race-result-dialog {
+    padding: 25px 20px max(25px, env(safe-area-inset-bottom)) !important;
+  }
+}
