@@ -3,6 +3,7 @@
   if (window.__NEARER_EXPERIENCE8_BOOTSTRAP) return;
   window.__NEARER_EXPERIENCE8_BOOTSTRAP = true;
   const VERSION = "20260719-experience10";
+  const PLATFORM_VERSION = "20260719-platform3";
   const load = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = source;
@@ -12,12 +13,17 @@
     document.head.appendChild(script);
   });
   const loadStyle = source => {
+    if (Array.from(document.styleSheets).some(sheet => sheet.href?.includes(source.split("?")[0]))) return;
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = source;
     link.dataset.nearerExperience8Final = "true";
     document.head.appendChild(link);
   };
+
+  loadStyle(`platform.css?v=${PLATFORM_VERSION}`);
+  if (!window.__NEARER_PLATFORM_STARTED) load(`platform.js?v=${PLATFORM_VERSION}`).catch(console.error);
+
   let attempts = 0;
   const start = async () => {
     if (window.__NEARER_EXPERIENCE10_STARTED) return;
