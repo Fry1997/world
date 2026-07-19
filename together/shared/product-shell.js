@@ -28,15 +28,20 @@
     if (!/^\/?world\/?$/.test(location.pathname) && !location.pathname.endsWith("/world/")) return;
     const requested = new URLSearchParams(location.search).get("mode");
     if (!requested || !["daily", "random"].includes(requested)) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem("nearer-game-v1") || "null") || {};
+      saved.mode = requested;
+      localStorage.setItem("nearer-game-v1", JSON.stringify(saved));
+    } catch {}
     let attempts = 0;
     const timer = setInterval(() => {
       attempts += 1;
       const button = document.querySelector(`.mode-button[data-mode="${requested}"]`);
-      if (button) {
+      if (button && !button.classList.contains("is-active")) button.click();
+      if (button?.classList.contains("is-active") || attempts > 250) {
         clearInterval(timer);
-        if (!button.classList.contains("is-active")) button.click();
-        history.replaceState({}, "", location.pathname);
-      } else if (attempts > 100) clearInterval(timer);
+        if (button?.classList.contains("is-active")) history.replaceState({}, "", location.pathname);
+      }
     }, 40);
   }
 
