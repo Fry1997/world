@@ -16,6 +16,8 @@
   canvas.className = oldCanvas.className;
   canvas.setAttribute("aria-hidden", "true");
   canvas.dataset.premiumRenderer = "true";
+  canvas.style.touchAction = "none";
+  stage.style.touchAction = "none";
   oldCanvas.replaceWith(canvas);
 
   const countryByCode = new Map(gameData.countries.map(country => [country.code, country]));
@@ -33,6 +35,7 @@
   let zoom = 1;
   let gesture = null;
   let queued = false;
+  let interacting = false;
   let lastWidth = 0;
   let lastHeight = 0;
   let lastRatio = 0;
@@ -41,8 +44,8 @@
   const pathname = location.pathname;
   const kind = pathname.includes("/together/duel/") ? "duel"
     : pathname.includes("/together/cooperative/") ? "cooperative"
-    : pathname.includes("/together/race/") ? "race"
-    : "solo";
+      : pathname.includes("/together/race/") ? "race"
+        : "solo";
 
   function readJson(key) {
     try { return JSON.parse(localStorage.getItem(key) || "null"); }
@@ -59,11 +62,8 @@
       const mode = document.querySelector(".mode-button.is-active")?.dataset.mode || saved.mode || "daily";
       const current = mode === "random" ? saved.randomGame : saved.dailyGames?.[localDateKey()];
       return {
-        guesses: current?.guesses || [],
-        opponentGuesses: [],
-        homeCode: null,
-        answerCode: current?.secretCode || null,
-        finished: Boolean(current?.complete)
+        guesses: current?.guesses || [], opponentGuesses: [], homeCode: null,
+        answerCode: current?.secretCode || null, finished: Boolean(current?.complete)
       };
     }
     if (kind === "cooperative") {
@@ -125,7 +125,8 @@
       border: "rgba(31,45,55,.52)",
       grid: "rgba(212,235,247,.085)",
       rim: "rgba(222,240,250,.34)",
-      opponent: "#7892a7",
+      opponent: "#4d5053",
+      opponentStroke: "rgba(245,241,234,.68)",
       home: "#f0d6c7",
       homeStroke: "#ee7459"
     };
@@ -170,7 +171,7 @@
       context.strokeStyle = stroke;
       context.lineWidth = width;
       context.setLineDash(options.dash || []);
-      if (options.glow) {
+      if (options.glow && !interacting) {
         context.shadowColor = options.glow;
         context.shadowBlur = options.blur || 10;
       }
@@ -186,8 +187,8 @@
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fillStyle = p.oceanBottom;
     context.shadowColor = "rgba(0,5,10,.68)";
-    context.shadowBlur = 30;
-    context.shadowOffsetY = 17;
+    context.shadowBlur = interacting ? 14 : 30;
+    context.shadowOffsetY = interacting ? 8 : 17;
     context.fill();
     context.restore();
 
@@ -230,7 +231,8 @@
     const { width, height } = resize();
     const p = palette();
     const radius = Math.min(width, height) * .43 * zoom;
-    projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(.38);
+    projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interacting ? .76 : .38);
+    window.__NEARER_GLOBE_PROJECTION = projection;
     drawSphere(width, height, radius, p);
 
     context.save();
@@ -253,7 +255,7 @@
       for (const guess of opponent) {
         const feature = featureByCode.get(guess.code);
         if (!feature || feature.geometry.type === "Point") continue;
-        drawPath(feature, p.opponent, "rgba(222,234,241,.72)", 1.15, { alpha: .58 });
+        drawPath(feature, p.opponent, p.opponentStroke, 1.2, { alpha: .82, dash: [4, 2] });
       }
 
       const home = featureByCode.get(current.homeCode);
@@ -266,7 +268,7 @@
         if (best && centroid && best.distance <= 3219) {
           const radiusDegrees = Math.max(.8, best.distance / 111.195);
           const circle = d3.geoCircle().center(centroid).radius(radiusDegrees).precision(2)();
-          drawPath(circle, "rgba(120,146,167,.055)", "rgba(151,177,196,.78)", 1.8, { dash: [7, 6] });
+          drawPath(circle, "rgba(77,80,83,.07)", "rgba(192,194,194,.78)", 1.8, { dash: [7, 6] });
         }
       }
     }
@@ -287,7 +289,7 @@
       const code = feature.properties.code;
       const ownGuess = own.find(item => item.code === code);
       const opponentGuess = opponent.find(item => item.code === code);
-      if (opponentGuess && kind === "duel") drawPoint(feature, p.opponent, false, "rgba(230,240,246,.78)");
+      if (opponentGuess && kind === "duel") drawPoint(feature, p.opponent, false, p.opponentStroke);
       if (ownGuess) drawPoint(feature, heatColour(ownGuess.distance), code === latestCode);
       if (current.finished && current.answerCode === code) drawPoint(feature, "#4ea985", true);
     }
@@ -307,9 +309,11 @@
     context.save();
     context.beginPath(); context.arc(x, y, radius, 0, Math.PI * 2);
     context.strokeStyle = p.rim; context.lineWidth = 1.45; context.stroke();
-    context.beginPath(); context.arc(x, y, radius - .6, -1.28, .26);
-    context.strokeStyle = "rgba(225,244,255,.44)"; context.lineWidth = 2.1;
-    context.shadowColor = "rgba(177,222,246,.36)"; context.shadowBlur = 12; context.stroke();
+    if (!interacting) {
+      context.beginPath(); context.arc(x, y, radius - .6, -1.28, .26);
+      context.strokeStyle = "rgba(225,244,255,.44)"; context.lineWidth = 2.1;
+      context.shadowColor = "rgba(177,222,246,.36)"; context.shadowBlur = 12; context.stroke();
+    }
     context.restore();
   }
 
@@ -322,43 +326,152 @@
   function clampZoom(value) { return Math.max(.72, Math.min(4.8, value)); }
   function pointerDistance(values) { const [a, b] = values; return Math.hypot(a.x - b.x, a.y - b.y); }
 
+  function hideGuessInfo() {
+    document.getElementById("globeGuessInfo")?.classList.add("is-hidden");
+    document.getElementById("guessedCountryChip")?.classList.add("is-hidden");
+  }
+
+  function showGuessInfo(guess) {
+    if (!guess) { hideGuessInfo(); return; }
+    const country = countryByCode.get(guess.code);
+    if (!country) { hideGuessInfo(); return; }
+    const info = document.getElementById("globeGuessInfo");
+    const chip = document.getElementById("guessedCountryChip");
+    const target = info || chip;
+    const name = target?.querySelector("strong");
+    if (name) name.textContent = country.name;
+    target?.classList.remove("is-hidden");
+  }
+
+  function guessedAt(clientX, clientY) {
+    const rect = stage.getBoundingClientRect();
+    const point = [clientX - rect.left, clientY - rect.top];
+    const translate = projection.translate();
+    const radius = projection.scale();
+    if (Math.hypot(point[0] - translate[0], point[1] - translate[1]) > radius) return null;
+    const guesses = [...(view().guesses || [])].reverse();
+    for (const guess of guesses) {
+      const feature = featureByCode.get(guess.code);
+      if (!feature || feature.geometry.type !== "Point") continue;
+      const coordinate = feature.geometry.coordinates;
+      if (!visible(coordinate)) continue;
+      const projected = projection(coordinate);
+      if (projected && Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= 16) return guess;
+    }
+    const coordinate = projection.invert(point);
+    if (!coordinate) return null;
+    return guesses.find(guess => {
+      const feature = featureByCode.get(guess.code);
+      return feature && feature.geometry.type !== "Point" && d3.geoContains(feature, coordinate);
+    }) || null;
+  }
+
+  function consumePointer(event) {
+    if (event.target.closest("button")) return false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    return true;
+  }
+
   stage.addEventListener("pointerdown", event => {
-    if (event.target.closest("button")) return;
+    if (!consumePointer(event)) return;
+    interacting = true;
+    stage.classList.add("is-globe-dragging");
     stage.setPointerCapture?.(event.pointerId);
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointers.size === 1) gesture = { type: "rotate", x: event.clientX, y: event.clientY, rotation: [...rotation] };
-    else if (pointers.size === 2) gesture = { type: "pinch", distance: pointerDistance([...pointers.values()]), zoom };
-  });
+    if (pointers.size === 1) {
+      gesture = { type: "rotate", x: event.clientX, y: event.clientY, rotation: [...rotation], moved: false };
+    } else if (pointers.size === 2) {
+      gesture = { type: "pinch", distance: pointerDistance([...pointers.values()]), zoom, moved: true };
+    }
+    queue();
+  }, { capture: true, passive: false });
 
   stage.addEventListener("pointermove", event => {
-    if (!pointers.has(event.pointerId) || !gesture) return;
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (!pointers.has(event.pointerId) || !gesture || !consumePointer(event)) return;
+    const samples = event.getCoalescedEvents?.() || [event];
+    const latest = samples.at(-1) || event;
+    pointers.set(event.pointerId, { x: latest.clientX, y: latest.clientY });
     if (pointers.size >= 2) {
       const distance = pointerDistance([...pointers.values()].slice(0, 2));
-      if (gesture.type !== "pinch") gesture = { type: "pinch", distance, zoom };
+      if (gesture.type !== "pinch") gesture = { type: "pinch", distance, zoom, moved: true };
       if (gesture.distance > 0) zoom = clampZoom(gesture.zoom * distance / gesture.distance);
-      queue(); return;
+      gesture.moved = true;
+      queue();
+      return;
     }
     if (gesture.type === "rotate") {
+      const dx = latest.clientX - gesture.x;
+      const dy = latest.clientY - gesture.y;
+      if (Math.hypot(dx, dy) > 5) gesture.moved = true;
       const rect = stage.getBoundingClientRect();
       const sensitivity = 180 / Math.max(300, Math.min(rect.width, rect.height) * zoom);
-      rotation = [gesture.rotation[0] + (event.clientX - gesture.x) * sensitivity, Math.max(-82, Math.min(82, gesture.rotation[1] - (event.clientY - gesture.y) * sensitivity)), 0];
+      rotation = [gesture.rotation[0] + dx * sensitivity, Math.max(-82, Math.min(82, gesture.rotation[1] - dy * sensitivity)), 0];
       queue();
     }
-  });
+  }, { capture: true, passive: false });
 
-  const finish = event => {
+  const finishPointer = event => {
+    if (!pointers.has(event.pointerId) || !consumePointer(event)) return;
+    const tap = pointers.size === 1 && gesture?.type === "rotate" && !gesture.moved
+      ? { x: event.clientX, y: event.clientY }
+      : null;
     pointers.delete(event.pointerId);
-    if (!pointers.size) gesture = null;
+    if (!pointers.size) {
+      interacting = false;
+      stage.classList.remove("is-globe-dragging");
+      gesture = null;
+      if (tap) showGuessInfo(guessedAt(tap.x, tap.y));
+    }
     queue();
   };
-  stage.addEventListener("pointerup", finish);
-  stage.addEventListener("pointercancel", finish);
-  stage.addEventListener("wheel", event => { event.preventDefault(); zoom = clampZoom(zoom * Math.exp(-event.deltaY * .0012)); queue(); }, { passive: false });
 
-  document.getElementById("globeZoomIn")?.addEventListener("click", () => { zoom = clampZoom(zoom * 1.25); queue(); });
-  document.getElementById("globeZoomOut")?.addEventListener("click", () => { zoom = clampZoom(zoom / 1.25); queue(); });
-  document.getElementById("globeReset")?.addEventListener("click", () => { rotation = [...initialRotation]; zoom = 1; queue(); });
+  stage.addEventListener("pointerup", finishPointer, { capture: true, passive: false });
+  stage.addEventListener("pointercancel", event => {
+    if (!pointers.has(event.pointerId) || !consumePointer(event)) return;
+    pointers.delete(event.pointerId);
+    if (!pointers.size) {
+      interacting = false;
+      stage.classList.remove("is-globe-dragging");
+      gesture = null;
+    }
+    queue();
+  }, { capture: true, passive: false });
+
+  stage.addEventListener("wheel", event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    zoom = clampZoom(zoom * Math.exp(-event.deltaY * .0012));
+    queue();
+  }, { capture: true, passive: false });
+
+  function centreHome() {
+    const current = view();
+    const feature = featureByCode.get(current.homeCode);
+    if (!feature) {
+      rotation = [...initialRotation];
+      zoom = 1;
+      queue();
+      return;
+    }
+    const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature);
+    rotation = [-coordinate[0], -coordinate[1], 0];
+    zoom = Math.max(1.18, Math.min(zoom, 1.5));
+    queue();
+  }
+
+  const captureButton = (button, action) => button?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    action();
+  }, true);
+
+  captureButton(document.getElementById("globeZoomIn"), () => { zoom = clampZoom(zoom * 1.25); queue(); });
+  captureButton(document.getElementById("globeZoomOut"), () => { zoom = clampZoom(zoom / 1.25); queue(); });
+  captureButton(document.getElementById("globeReset"), () => {
+    if (kind === "duel") centreHome();
+    else { rotation = [...initialRotation]; zoom = 1; queue(); }
+  });
 
   new ResizeObserver(queue).observe(stage);
   const observerTargets = [document.querySelector(".guess-history"), document.querySelector(".mode-scoreboard"), document.querySelector(".race-scoreboard"), document.querySelector(".feedback-panel")].filter(Boolean);
@@ -371,8 +484,9 @@
     const current = view();
     const signature = JSON.stringify([current.guesses, current.opponentGuesses, current.homeCode, current.answerCode, current.finished]);
     if (signature !== stateSignature) { stateSignature = signature; queue(); }
-  }, 450);
+  }, 350);
 
+  window.NEARER_PREMIUM_GLOBE = { queue, centreHome, reset: () => { rotation = [...initialRotation]; zoom = 1; queue(); } };
   window.__NEARER_PREMIUM_GLOBE_STARTED = true;
   queue();
 })();

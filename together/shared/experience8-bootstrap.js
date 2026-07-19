@@ -2,7 +2,7 @@
   "use strict";
   if (window.__NEARER_EXPERIENCE8_BOOTSTRAP) return;
   window.__NEARER_EXPERIENCE8_BOOTSTRAP = true;
-  const VERSION = "20260719-experience9";
+  const VERSION = "20260719-experience10";
   const load = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = source;
@@ -20,6 +20,7 @@
   };
   let attempts = 0;
   const start = async () => {
+    if (window.__NEARER_EXPERIENCE10_STARTED) return;
     attempts += 1;
     if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3 || !document.querySelector("canvas.globe-canvas")) {
       if (attempts < 120) setTimeout(start, 50);
@@ -27,9 +28,11 @@
     }
     loadStyle(`together/shared/experience8.css?v=${VERSION}`);
     loadStyle(`together/shared/experience9.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience10.css?v=${VERSION}`);
     await load(`together/shared/premium-globe.js?v=${VERSION}`);
     await load(`together/shared/experience8.js?v=${VERSION}`);
     await load(`together/shared/experience9.js?v=${VERSION}`);
+    await load(`together/shared/experience10.js?v=${VERSION}`);
   };
   start().catch(console.error);
 })();

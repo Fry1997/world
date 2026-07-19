@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience9";
+  const VERSION = "20260719-experience10";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -53,6 +53,7 @@
     loadStyle(`together/shared/experience7.css?v=${VERSION}`);
     loadStyle(`together/shared/experience8.css?v=${VERSION}`);
     loadStyle(`together/shared/experience9.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience10.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -121,6 +122,8 @@
       if (!window.__NEARER_EXPERIENCE8_STARTED) throw new Error("The contrast refinement layer did not initialise.");
       await loadScript(`together/shared/experience9.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE9_STARTED) throw new Error("The globe overlay correction layer did not initialise.");
+      await loadScript(`together/shared/experience10.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE10_STARTED) throw new Error("The final stabilisation layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
     }
