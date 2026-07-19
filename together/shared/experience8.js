@@ -16,6 +16,8 @@
   let homeReference = null;
   if (isDuel) {
     const panel = document.querySelector(".mode-map-panel");
+    const hint = panel?.querySelector(".globe-hint");
+    if (hint) hint.textContent = "Gold: your route · steel: opponent route · coral: your country";
     if (panel && !panel.querySelector(".duel-home-reference")) {
       homeReference = document.createElement("section");
       homeReference.className = "duel-home-reference";
