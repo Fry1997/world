@@ -1,6 +1,6 @@
 (() => {
   "use strict";
-  const VERSION = "20260719-experience7";
+  const VERSION = "20260719-experience10";
   const tailFiles = Array.from({ length: 9 }, (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`);
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -32,6 +32,9 @@
     loadStyle(`together/shared/experience6.css?v=${VERSION}`);
     loadStyle(`together/shared/experience7.css?v=${VERSION}`);
     loadStyle(`together/shared/experience7-multiplayer.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience8.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience9.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience10.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -56,6 +59,12 @@
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
+      await loadScript(`together/shared/premium-globe.js?v=${VERSION}`);
+      if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
+      await loadScript(`together/shared/experience8.js?v=${VERSION}`);
+      await loadScript(`together/shared/experience9.js?v=${VERSION}`);
+      await loadScript(`together/shared/experience10.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE10_STARTED) throw new Error("The final stabilisation layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
     }
