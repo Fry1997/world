@@ -1,11 +1,23 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience10";
+  const VERSION = "20260719-platform4";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
+  const enhancementFiles = [
+    `together/shared/premium-globe-v2.js?v=${VERSION}`,
+    `guess-rules.js?v=${VERSION}`,
+    `together/shared/experience4.js?v=${VERSION}`,
+    `together/shared/experience5.js?v=${VERSION}`,
+    `together/shared/experience6.js?v=${VERSION}`,
+    `together/shared/experience7.js?v=${VERSION}`,
+    `guessed-country-info.js?v=${VERSION}`,
+    `together/shared/experience8.js?v=${VERSION}`,
+    `together/shared/experience9.js?v=${VERSION}`,
+    `together/shared/experience10.js?v=${VERSION}`
+  ];
 
   window.__NEARER_SVG_PATCH_STARTED = true;
 
@@ -17,12 +29,21 @@
         <div style="min-height:360px;display:grid;place-items:center;padding:2rem;text-align:center;border:1px solid rgba(196,74,49,.3);border-radius:24px;background:rgba(196,74,49,.08);font-family:system-ui,sans-serif">
           <div>
             <strong style="display:block;font-size:1.1rem;margin-bottom:.5rem">The globe could not start.</strong>
-            <span style="color:#6b7280">Please reload the page. The retired flat map will not be shown as a substitute.</span>
+            <span style="color:#6b7280">Please reload the page.</span>
           </div>
         </div>`;
       return;
     }
     document.body.innerHTML = "<p style=\"padding:2rem;font-family:system-ui\">The game could not load. Please refresh and check your connection.</p>";
+  };
+
+  const preloadScript = source => {
+    if (document.querySelector(`link[rel="preload"][href="${source}"]`)) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "script";
+    link.href = source;
+    document.head.appendChild(link);
   };
 
   const loadScript = source => new Promise((resolve, reject) => {
@@ -37,23 +58,8 @@
     document.head.appendChild(script);
   });
 
-  const loadStyle = source => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = source;
-    document.head.appendChild(link);
-  };
-
   const start = async () => {
-    loadStyle(`together/shared/experience2.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience3.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience4.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience5.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience6.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience7.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience8.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience9.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience10.css?v=${VERSION}`);
+    [...tailFiles, ...enhancementFiles].forEach(preloadScript);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -88,12 +94,9 @@
         }
       };
 
-      await loadScript(`together/shared/hd-canvas-preflight.js?v=${VERSION}`);
-      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
-
-      await loadScript(`globe-canvas.js?v=${VERSION}`);
-      if (!window.__NEARER_CANVAS_GLOBE_STARTED || !document.getElementById("globeCanvas")) {
-        throw new Error("The Canvas globe script loaded but did not initialise.");
+      await loadScript(`together/shared/premium-globe-v2.js?v=${VERSION}`);
+      if (!window.__NEARER_PREMIUM_GLOBE_V2_STARTED || !document.getElementById("globeCanvas")) {
+        throw new Error("The adaptive globe renderer did not initialise.");
       }
 
       await loadScript(`guess-rules.js?v=${VERSION}`);
@@ -110,9 +113,6 @@
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
 
-      await loadScript(`together/shared/premium-globe.js?v=${VERSION}`);
-      if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
-
       await loadScript(`guessed-country-info.js?v=${VERSION}`);
       if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
         throw new Error("Guessed-country identification did not initialise.");
@@ -124,6 +124,8 @@
       if (!window.__NEARER_EXPERIENCE9_STARTED) throw new Error("The globe overlay correction layer did not initialise.");
       await loadScript(`together/shared/experience10.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE10_STARTED) throw new Error("The final stabilisation layer did not initialise.");
+
+      document.documentElement.classList.add("nearer-runtime-ready");
     } finally {
       URL.revokeObjectURL(url);
     }

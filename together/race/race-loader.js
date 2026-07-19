@@ -1,13 +1,20 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience7";
+  const VERSION = "20260719-platform4";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
   const raceFiles = Array.from({ length: 6 }, (_, index) =>
     `together/race/chunks/race-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
+  const enhancementFiles = [
+    `together/shared/polish-ui.js?v=${VERSION}`,
+    `together/shared/experience4.js?v=${VERSION}`,
+    `together/shared/experience5.js?v=${VERSION}`,
+    `together/shared/experience6.js?v=${VERSION}`,
+    `together/shared/experience7.js?v=${VERSION}`
+  ];
 
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
@@ -17,9 +24,10 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
-  const loadStyle = source => {
+  const preloadScript = source => {
     const link = document.createElement("link");
-    link.rel = "stylesheet";
+    link.rel = "preload";
+    link.as = "script";
     link.href = source;
     document.head.appendChild(link);
   };
@@ -31,16 +39,7 @@
   };
 
   const start = async () => {
-    loadStyle(`together/shared/polish.css?v=${VERSION}`);
-    loadStyle(`together/shared/prestige.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience2.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience3.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience4.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience5.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience6.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience7.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience7-multiplayer.css?v=${VERSION}`);
+    [...tailFiles, ...raceFiles, ...enhancementFiles].forEach(preloadScript);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -53,9 +52,6 @@
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) {
         throw new Error("Nearer game data did not initialise.");
       }
-
-      await loadScript(`together/shared/hd-canvas-preflight.js?v=${VERSION}`);
-      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
 
       window.NEARER_RACE_SOURCE = "";
       for (const file of raceFiles) await loadScript(file);
@@ -74,6 +70,7 @@
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
+      document.documentElement.classList.add("nearer-runtime-ready");
     } finally {
       URL.revokeObjectURL(url);
       delete window.NEARER_RACE_SOURCE;

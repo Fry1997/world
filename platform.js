@@ -2,7 +2,7 @@
   "use strict";
   if (window.__NEARER_PLATFORM_STARTED) return;
 
-  const VERSION = "20260719-platform3";
+  const VERSION = "20260719-platform4";
   const path = location.pathname.replace(/\/index\.html$/, "/");
   const rootUrl = new URL("./", document.baseURI);
   rootUrl.search = "";
@@ -15,6 +15,7 @@
   const initialQuery = new URLSearchParams(location.search);
   const THEME_KEY = "nearer-together-theme";
   const savedTheme = localStorage.getItem(THEME_KEY) || localStorage.getItem("nearer-race-theme");
+  const prefetchedUrls = new Set();
 
   document.body.classList.add("platform-shell-enabled");
   document.documentElement.dataset.platformVersion = VERSION;
@@ -38,6 +39,25 @@
     mastery: new URL("mastery/", rootUrl),
     together: new URL("together/", rootUrl)
   };
+
+  function prefetchDocument(value) {
+    const url = value instanceof URL ? value : new URL(value, document.baseURI);
+    if (url.origin !== location.origin || url.href === location.href || prefetchedUrls.has(url.href)) return;
+    prefetchedUrls.add(url.href);
+    const link = document.createElement("link");
+    link.rel = "prefetch";
+    link.as = "document";
+    link.href = url.href;
+    document.head.appendChild(link);
+  }
+
+  function primeNavigation(link) {
+    if (!link?.href) return;
+    const prime = () => prefetchDocument(link.href);
+    link.addEventListener("pointerenter", prime, { once: true, passive: true });
+    link.addEventListener("touchstart", prime, { once: true, passive: true });
+    link.addEventListener("focus", prime, { once: true, passive: true });
+  }
 
   function currentSection() {
     if (isMastery) return "mastery";
@@ -90,8 +110,9 @@
     }
 
     event.preventDefault();
+    prefetchDocument(item.href);
     document.body.classList.add("platform-is-leaving");
-    setTimeout(() => location.assign(item.href), 115);
+    setTimeout(() => location.assign(item.href), 40);
   }
 
   function addMobileDock() {
@@ -113,7 +134,10 @@
         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="8" cy="9" r="3"/><circle cx="16.5" cy="10" r="2.5"/><path d="M3 20c.4-4 2.1-6 5-6s4.6 2 5 6M13 15c3.7-.7 6.2 1 7 5"/></svg><span>Together</span>
       </a>`;
 
-    dock.querySelectorAll("[data-platform-section]").forEach(item => item.addEventListener("click", navigateFluidly));
+    dock.querySelectorAll("[data-platform-section]").forEach(item => {
+      item.addEventListener("click", navigateFluidly);
+      primeNavigation(item);
+    });
     document.body.append(dock);
     markActive(dock);
 
@@ -147,12 +171,21 @@
         </div>
       </div>
       <a class="platform-launch-action" href="${sectionUrls.mastery.href}" data-platform-section="mastery"><span>Explore Mastery</span><b aria-hidden="true">→</b></a>`;
-    launchpad.querySelector("a")?.addEventListener("click", navigateFluidly);
+    const action = launchpad.querySelector("a");
+    action?.addEventListener("click", navigateFluidly);
+    primeNavigation(action);
     main.prepend(launchpad);
   }
 
   addMobileDock();
   if (isRoot) addLaunchpad();
+
+  document.querySelectorAll("a[data-platform-section]").forEach(primeNavigation);
+  const idle = window.requestIdleCallback || (callback => setTimeout(callback, 650));
+  idle(() => {
+    Object.values(sectionUrls).forEach(prefetchDocument);
+    document.querySelectorAll(".mode-grid a, .together-card").forEach(link => prefetchDocument(link.href));
+  }, { timeout: 1600 });
 
   if (isRoot && initialQuery.get("mode") === "random") {
     let attempts = 0;
