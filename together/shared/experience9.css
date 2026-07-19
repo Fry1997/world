@@ -1,0 +1,192 @@
+:root {
+  --e9-cream: #fff7ee;
+  --e9-ink: #111c25;
+  --e9-panel: rgba(7, 20, 31, .9);
+  --e9-panel-strong: rgba(5, 16, 25, .96);
+  --e9-line: rgba(222, 238, 247, .2);
+  --e9-coral: #ee7459;
+}
+
+/* The dimensional lighting belongs to the canvas renderer. A fixed circular
+   pseudo-element becomes a false "planet" when the real globe is zoomed. */
+body.experience-nine .globe-stage::before,
+body.experience-nine .mode-globe-stage::before,
+body.experience-nine .race-globe-stage::before,
+body.experience-nine .globe-stage::after,
+body.experience-nine .mode-globe-stage::after,
+body.experience-nine .race-globe-stage::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.experience-nine .globe-stage,
+body.experience-nine .mode-globe-stage,
+body.experience-nine .race-globe-stage {
+  background:
+    radial-gradient(105% 78% at 76% 8%, rgba(86, 148, 184, .25), transparent 58%),
+    radial-gradient(82% 78% at 8% 92%, rgba(1, 10, 17, .9), transparent 70%),
+    linear-gradient(150deg, #13364d 0%, #071925 52%, #020a11 100%);
+}
+
+body.experience-nine .globe-canvas {
+  z-index: 2 !important;
+  filter: saturate(.92) contrast(1.04);
+}
+
+body.experience-nine .globe-toolbar {
+  position: relative;
+  z-index: 12;
+  border-bottom-color: rgba(222, 238, 247, .14);
+  background: linear-gradient(180deg, rgba(8, 24, 36, .96), rgba(6, 19, 29, .9));
+  color: rgba(244, 248, 250, .82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+body.experience-nine .globe-action,
+body.experience-nine .globe-zoom {
+  border-color: rgba(222, 238, 247, .26) !important;
+  background: rgba(5, 17, 27, .92) !important;
+  color: #fff8ef !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .1),
+    0 10px 28px rgba(0, 5, 10, .34) !important;
+  opacity: 1 !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.12);
+  backdrop-filter: blur(14px) saturate(1.12);
+}
+
+body.experience-nine .globe-zoom {
+  z-index: 14 !important;
+  right: 13px;
+  bottom: 13px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+body.experience-nine .globe-zoom button {
+  width: 43px;
+  height: 43px;
+  background: rgba(8, 24, 36, .95) !important;
+  color: #fff8ef !important;
+  font-size: 1.35rem;
+  font-weight: 540;
+  opacity: 1 !important;
+  text-shadow: 0 1px 8px rgba(255, 255, 255, .18);
+}
+
+body.experience-nine .globe-zoom button + button {
+  border-top: 1px solid rgba(222, 238, 247, .2) !important;
+}
+
+body.experience-nine .globe-zoom button:active,
+body.experience-nine .globe-action:active {
+  background: rgba(28, 51, 67, .98) !important;
+}
+
+body.experience-nine .globe-hint,
+body.experience-nine .mode-country-chip,
+body.experience-nine .race-country-chip,
+body.experience-nine .globe-guess-info {
+  z-index: 13 !important;
+}
+
+/* Duel's permanent reference is a separate information row, not an overlay
+   inside the globe's toolbar/control area. */
+body.experience-nine.mode-duel .mode-play-column > .duel-home-reference {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid rgba(222, 238, 247, .17);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 8% 24%, rgba(238, 116, 89, .14), transparent 36%),
+    linear-gradient(145deg, rgba(12, 34, 48, .96), rgba(5, 18, 28, .97));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 14px 34px rgba(0, 6, 11, .22);
+}
+
+body.experience-nine.mode-duel .duel-home-reference.is-concealed {
+  display: none;
+}
+
+body.experience-nine.mode-duel .mode-map-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Active cards remain dark and legible. Older light-theme colour-mix rules
+   could otherwise create a near-white card while retaining white text. */
+body.experience-nine .mode-player-card,
+body.experience-nine .race-player-card {
+  border-color: rgba(222, 238, 247, .16) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .035), transparent),
+    rgba(6, 20, 31, .82) !important;
+  color: #f7f3ed !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055);
+}
+
+body.experience-nine .mode-player-card.is-active,
+body.experience-nine .race-player-card.is-active {
+  border-color: rgba(238, 116, 89, .68) !important;
+  background:
+    radial-gradient(circle at 5% 12%, rgba(238, 116, 89, .18), transparent 42%),
+    linear-gradient(145deg, rgba(19, 48, 65, .98), rgba(6, 21, 32, .98)) !important;
+  color: #fff9f1 !important;
+  box-shadow:
+    inset 3px 0 0 rgba(238, 116, 89, .92),
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 14px 34px rgba(0, 6, 11, .24) !important;
+}
+
+body.experience-nine .mode-player-card.is-solved,
+body.experience-nine .race-player-card.is-solved {
+  border-color: rgba(94, 184, 149, .52) !important;
+  background: linear-gradient(145deg, rgba(20, 67, 55, .92), rgba(6, 27, 29, .96)) !important;
+}
+
+body.experience-nine .mode-player-card strong,
+body.experience-nine .race-player-card strong,
+body.experience-nine .mode-player-metrics b,
+body.experience-nine .race-player-metrics b {
+  color: #fff9f1 !important;
+}
+
+body.experience-nine .mode-player-metrics,
+body.experience-nine .race-player-metrics,
+body.experience-nine .mode-player-detail,
+body.experience-nine .race-trend {
+  color: rgba(232, 240, 244, .72) !important;
+}
+
+body.experience-nine .mode-player-card.is-active .mode-turn-badge,
+body.experience-nine .race-player-card.is-active .race-turn-badge {
+  border: 1px solid rgba(255, 255, 255, .74);
+  background: #fff3e8 !important;
+  color: #17232d !important;
+}
+
+@media (max-width: 680px) {
+  body.experience-nine .globe-zoom {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  body.experience-nine .globe-zoom button {
+    width: 42px;
+    height: 42px;
+  }
+
+  body.experience-nine.mode-duel .mode-play-column > .duel-home-reference {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 12px 13px;
+  }
+
+  body.experience-nine.mode-duel .duel-route-legend {
+    justify-content: flex-start;
+  }
+}
