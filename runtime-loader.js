@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience7";
+  const VERSION = "20260719-experience8";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -51,6 +51,7 @@
     loadStyle(`together/shared/experience5.css?v=${VERSION}`);
     loadStyle(`together/shared/experience6.css?v=${VERSION}`);
     loadStyle(`together/shared/experience7.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience8.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -89,10 +90,7 @@
       if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
 
       await loadScript(`globe-canvas.js?v=${VERSION}`);
-      if (
-        !window.__NEARER_CANVAS_GLOBE_STARTED ||
-        !document.getElementById("globeCanvas")
-      ) {
+      if (!window.__NEARER_CANVAS_GLOBE_STARTED || !document.getElementById("globeCanvas")) {
         throw new Error("The Canvas globe script loaded but did not initialise.");
       }
 
@@ -101,30 +99,25 @@
         throw new Error("The name-only guessing rules did not initialise.");
       }
 
+      await loadScript(`together/shared/experience4.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE4_STARTED) throw new Error("The compact visual experience layer did not initialise.");
+      await loadScript(`together/shared/experience5.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE5_STARTED) throw new Error("The width-normalised visual layer did not initialise.");
+      await loadScript(`together/shared/experience6.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
+      await loadScript(`together/shared/experience7.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
+
+      await loadScript(`together/shared/premium-globe.js?v=${VERSION}`);
+      if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
+
       await loadScript(`guessed-country-info.js?v=${VERSION}`);
       if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
         throw new Error("Guessed-country identification did not initialise.");
       }
 
-      await loadScript(`together/shared/experience4.js?v=${VERSION}`);
-      if (!window.__NEARER_EXPERIENCE4_STARTED) {
-        throw new Error("The compact visual experience layer did not initialise.");
-      }
-
-      await loadScript(`together/shared/experience5.js?v=${VERSION}`);
-      if (!window.__NEARER_EXPERIENCE5_STARTED) {
-        throw new Error("The width-normalised visual layer did not initialise.");
-      }
-
-      await loadScript(`together/shared/experience6.js?v=${VERSION}`);
-      if (!window.__NEARER_EXPERIENCE6_STARTED) {
-        throw new Error("The elevated visual layer did not initialise.");
-      }
-
-      await loadScript(`together/shared/experience7.js?v=${VERSION}`);
-      if (!window.__NEARER_EXPERIENCE7_STARTED) {
-        throw new Error("The final responsive visual layer did not initialise.");
-      }
+      await loadScript(`together/shared/experience8.js?v=${VERSION}`);
+      if (!window.__NEARER_EXPERIENCE8_STARTED) throw new Error("The contrast refinement layer did not initialise.");
     } finally {
       URL.revokeObjectURL(url);
     }

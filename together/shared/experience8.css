@@ -1,0 +1,302 @@
+:root {
+  --e8-page-x: clamp(15px, 4vw, 28px);
+  --e8-navy-1000: #030a11;
+  --e8-navy-950: #06111b;
+  --e8-navy-900: #0a1a28;
+  --e8-navy-850: #10283a;
+  --e8-cream: #f7f0e7;
+  --e8-cream-soft: #e9e0d6;
+  --e8-coral: #ee7459;
+  --e8-gold: #e4ad54;
+  --e8-steel: #7892a7;
+  --e8-mint: #5eb895;
+  --e8-line: rgba(255,255,255,.15);
+  --e8-deep-shadow: 0 26px 78px rgba(0,5,10,.34);
+}
+
+.nearer-safe-area-shield { display: none !important; }
+
+body.experience-eight {
+  --e7-safe-top: env(safe-area-inset-top, 0px);
+  --globe-ocean-highlight: #315a75;
+  --globe-ocean: #12364f;
+  --globe-ocean-shadow: #030e18;
+  --globe-land: #e9e1d4;
+  --globe-border: rgba(27,41,52,.46);
+  --globe-grid: rgba(210,232,244,.085);
+  --globe-rim: rgba(224,242,250,.32);
+  overscroll-behavior-y: auto;
+}
+
+body.experience-eight .app-shell {
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+}
+
+body.experience-eight .topbar {
+  padding-top: 10px !important;
+}
+
+body.experience-eight .guess-panel,
+body.experience-eight .mode-guess-panel,
+body.experience-eight .race-guess-panel,
+body.experience-eight .suggestions,
+body.experience-eight .suggestion-button,
+body.experience-eight .globe-guess-info {
+  color: #14202a;
+}
+
+body.experience-eight .suggestions {
+  border-color: rgba(27,42,53,.18);
+  background: rgba(250,246,240,.985);
+  box-shadow: 0 22px 58px rgba(1,8,14,.34), inset 0 1px 0 #fff;
+}
+
+body.experience-eight .suggestion-button {
+  background: transparent;
+  border-color: rgba(29,43,54,.11);
+}
+
+body.experience-eight .suggestion-button:hover,
+body.experience-eight .suggestion-button.is-active {
+  background: rgba(232,217,202,.72);
+}
+
+body.experience-eight .suggestion-button span,
+body.experience-eight .suggestion-button strong {
+  color: #14202a !important;
+  font-weight: 760;
+}
+
+body.experience-eight .suggestion-button small {
+  color: #69747d !important;
+}
+
+body.experience-eight .globe-guess-info {
+  border-color: rgba(255,255,255,.2) !important;
+  background: rgba(7,20,31,.92) !important;
+  color: #fff8ef !important;
+  box-shadow: 0 18px 48px rgba(0,6,11,.42) !important;
+}
+
+body.experience-eight .globe-guess-info span {
+  color: rgba(255,255,255,.64) !important;
+}
+
+body.experience-eight .globe-guess-info strong,
+body.experience-eight .globe-guess-info button {
+  color: #fff8ef !important;
+}
+
+body.experience-eight .mode-country-chip,
+body.experience-eight .race-country-chip {
+  border: 1px solid rgba(255,255,255,.18) !important;
+  background: rgba(7,20,31,.93) !important;
+  color: #fff8ef !important;
+  box-shadow: 0 18px 46px rgba(0,6,11,.4), inset 0 1px 0 rgba(255,255,255,.1) !important;
+}
+
+body.experience-eight .mode-country-chip span,
+body.experience-eight .race-country-chip span {
+  color: rgba(255,255,255,.62) !important;
+}
+
+body.experience-eight .mode-country-chip strong,
+body.experience-eight .race-country-chip strong {
+  color: #fff8ef !important;
+}
+
+body.experience-eight .map-panel,
+body.experience-eight .mode-map-panel,
+body.experience-eight .race-map-panel {
+  border-color: rgba(216,235,246,.18);
+  background:
+    radial-gradient(100% 72% at 72% 12%, rgba(78,135,170,.26), transparent 58%),
+    radial-gradient(78% 72% at 8% 86%, rgba(4,18,29,.82), transparent 72%),
+    linear-gradient(150deg, #102b3e 0%, #071722 48%, #020a11 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 -1px 0 rgba(0,0,0,.62),
+    var(--e8-deep-shadow);
+}
+
+body.experience-eight .globe-stage,
+body.experience-eight .mode-globe-stage,
+body.experience-eight .race-globe-stage {
+  isolation: isolate;
+  background:
+    radial-gradient(88% 70% at 72% 10%, rgba(95,155,190,.18), transparent 62%),
+    radial-gradient(75% 66% at 12% 88%, rgba(0,8,14,.8), transparent 72%),
+    linear-gradient(155deg, #102c40 0%, #061722 55%, #020910 100%);
+}
+
+body.experience-eight .globe-stage::before,
+body.experience-eight .mode-globe-stage::before,
+body.experience-eight .race-globe-stage::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: min(86%, 560px);
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 72% 24%, rgba(255,249,226,.16), transparent 29%),
+    linear-gradient(118deg, rgba(0,0,0,.22), transparent 42% 65%, rgba(255,244,215,.07));
+  box-shadow:
+    inset 16px 5px 34px rgba(0,0,0,.24),
+    inset -7px -2px 24px rgba(231,246,255,.08),
+    0 0 0 1px rgba(225,241,250,.13),
+    0 0 32px rgba(164,211,237,.08);
+  mix-blend-mode: soft-light;
+}
+
+body.experience-eight .globe-stage::after,
+body.experience-eight .mode-globe-stage::after,
+body.experience-eight .race-globe-stage::after {
+  background:
+    linear-gradient(90deg, rgba(1,7,12,.32), transparent 25% 72%, rgba(212,236,249,.055)),
+    radial-gradient(circle at 58% 42%, transparent 30%, rgba(0,5,9,.24) 86%);
+}
+
+body.experience-eight .globe-canvas {
+  z-index: 1;
+  filter: saturate(.9) contrast(1.035);
+}
+
+body.experience-eight .feedback-panel {
+  border-color: rgba(255,255,255,.14);
+  background:
+    radial-gradient(circle at 8% 25%, rgba(238,116,89,.11), transparent 34%),
+    linear-gradient(145deg, rgba(15,36,49,.94), rgba(7,22,32,.94));
+  color: #f8f3ec;
+  box-shadow: 0 18px 48px rgba(0,7,12,.24), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body.experience-eight .feedback-panel p { color: rgba(235,241,244,.68); }
+body.experience-eight .feedback-icon {
+  border-color: rgba(238,116,89,.22);
+  background: rgba(238,116,89,.09);
+  color: #f2b09f;
+}
+body.experience-eight .feedback-panel.is-warmer {
+  border-color: rgba(226,173,84,.28);
+  background:
+    radial-gradient(circle at 8% 25%, rgba(226,173,84,.16), transparent 35%),
+    linear-gradient(145deg, rgba(48,41,27,.94), rgba(17,27,33,.96));
+}
+body.experience-eight .feedback-panel.is-colder {
+  border-color: rgba(120,146,167,.27);
+  background:
+    radial-gradient(circle at 8% 25%, rgba(120,146,167,.16), transparent 35%),
+    linear-gradient(145deg, rgba(24,40,54,.94), rgba(8,23,34,.96));
+}
+body.experience-eight .feedback-panel.is-success {
+  border-color: rgba(94,184,149,.3);
+  background:
+    radial-gradient(circle at 8% 25%, rgba(94,184,149,.17), transparent 35%),
+    linear-gradient(145deg, rgba(24,62,52,.95), rgba(7,29,28,.96));
+}
+
+body.experience-eight .globe-key i,
+body.experience-eight .map-key i {
+  background: linear-gradient(90deg, #55758e 0%, #a27661 48%, #d08c54 70%, #e5ad50 100%);
+}
+
+body.experience-eight .together-card,
+body.experience-eight .mode-setup-card,
+body.experience-eight .setup-card,
+body.experience-eight .mode-player-card,
+body.experience-eight .race-player-card,
+body.experience-eight .mode-pressure-card,
+body.experience-eight .mode-rules-card,
+body.experience-eight .race-rules-card {
+  color: #f8f3ec;
+}
+body.experience-eight .together-card h2,
+body.experience-eight .mode-setup-card h2,
+body.experience-eight .setup-card h2,
+body.experience-eight .mode-player-card strong,
+body.experience-eight .race-player-card strong,
+body.experience-eight .mode-pressure-card h2,
+body.experience-eight .mode-rules-card h2,
+body.experience-eight .race-rules-card h2 {
+  color: #fff9f1;
+}
+body.experience-eight .together-card p,
+body.experience-eight .mode-note,
+body.experience-eight .setup-note,
+body.experience-eight .mode-player-detail,
+body.experience-eight .mode-pressure-card p,
+body.experience-eight .mode-rules-card p,
+body.experience-eight .race-rules-card p {
+  color: rgba(232,239,243,.7);
+}
+
+.duel-home-reference {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
+  margin: 10px 10px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 10% 25%, rgba(238,116,89,.13), transparent 38%),
+    rgba(6,19,29,.88);
+  color: #fff7ee;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 30px rgba(0,6,11,.2);
+}
+.duel-home-reference.is-concealed { visibility: hidden; }
+.duel-home-copy span {
+  display: block;
+  color: #efb3a3;
+  font-size: .62rem;
+  font-weight: 820;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.duel-home-copy strong {
+  display: block;
+  margin-top: 3px;
+  color: #fff9f1;
+  font-size: 1rem;
+}
+.duel-route-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px 12px;
+  color: rgba(235,241,244,.7);
+  font-size: .66rem;
+  font-weight: 680;
+}
+.duel-route-legend i {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  margin-right: 5px;
+  border-radius: 50%;
+  vertical-align: 0;
+}
+.duel-route-legend .you i { background: #e5ad50; }
+.duel-route-legend .opponent i { background: #7892a7; }
+.duel-route-legend .home i { background: #f3ded0; box-shadow: 0 0 0 2px #ee7459; }
+
+body.experience-eight.mode-duel .pressure-radar,
+body.experience-eight.mode-duel .pressure-key { display: none !important; }
+body.experience-eight.mode-duel .mode-pressure-card { padding-top: 18px; }
+body.experience-eight.mode-duel .pressure-metric { margin-top: 14px; }
+
+@media (max-width: 680px) {
+  body.experience-eight .app-shell { padding-top: 6px; }
+  body.experience-eight .topbar { padding-top: 8px !important; }
+  body.experience-eight .globe-stage::before,
+  body.experience-eight .mode-globe-stage::before,
+  body.experience-eight .race-globe-stage::before { width: 88%; }
+  .duel-home-reference { grid-template-columns: 1fr; }
+  .duel-route-legend { justify-content: flex-start; }
+}
