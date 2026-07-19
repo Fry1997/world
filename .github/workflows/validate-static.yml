@@ -29,6 +29,13 @@ jobs:
         with:
           name: static-validation-report
           path: validation-report.txt
+      - name: Package validated preview
+        if: steps.static.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: regional-mastery-preview
+          path: .
+          include-hidden-files: false
       - name: Report validation result
         if: always()
         run: |
