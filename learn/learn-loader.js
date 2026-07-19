@@ -30,6 +30,8 @@
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) {
         throw new Error("Nearer country data did not initialise.");
       }
+      await loadScript(`learn/regional-projection.js?v=${VERSION}`);
+      if (!window.__NEARER_REGIONAL_PROJECTION_STARTED) throw new Error("Regional map framing did not initialise.");
       await loadScript(`learn/learn.js?v=${VERSION}`);
       if (!window.__NEARER_MASTERY_STARTED) throw new Error("Regional Mastery did not initialise.");
     } finally {
