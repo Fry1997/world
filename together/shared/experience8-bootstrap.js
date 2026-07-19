@@ -20,6 +20,7 @@
   };
   let attempts = 0;
   const start = async () => {
+    if (window.__NEARER_EXPERIENCE10_STARTED) return;
     attempts += 1;
     if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3 || !document.querySelector("canvas.globe-canvas")) {
       if (attempts < 120) setTimeout(start, 50);
