@@ -99,11 +99,6 @@
         throw new Error("The name-only guessing rules did not initialise.");
       }
 
-      await loadScript(`guessed-country-info.js?v=${VERSION}`);
-      if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
-        throw new Error("Guessed-country identification did not initialise.");
-      }
-
       await loadScript(`together/shared/experience4.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE4_STARTED) throw new Error("The compact visual experience layer did not initialise.");
       await loadScript(`together/shared/experience5.js?v=${VERSION}`);
@@ -115,6 +110,12 @@
 
       await loadScript(`together/shared/premium-globe.js?v=${VERSION}`);
       if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
+
+      await loadScript(`guessed-country-info.js?v=${VERSION}`);
+      if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
+        throw new Error("Guessed-country identification did not initialise.");
+      }
+
       await loadScript(`together/shared/experience8.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE8_STARTED) throw new Error("The contrast refinement layer did not initialise.");
     } finally {
