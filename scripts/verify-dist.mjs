@@ -11,7 +11,7 @@ const requiredFiles = [
   "together/race/index.html",
   "together/cooperative/index.html",
   "together/duel/index.html",
-  "runtime-loader.js",
+  "chunks/runtime-01.js",
   "mastery/mastery-loader.js",
   "together/race/race-loader.js",
   "together/cooperative/cooperative-loader.js",
@@ -40,12 +40,17 @@ for (const page of pages) {
   }
 }
 
+const mainHtml = await readFile(resolve(dist, "index.html"), "utf8");
+if (/chunks\/(?:app-|runtime-\d)/.test(mainHtml) || mainHtml.includes("runtime-loader.js")) {
+  throw new Error("The Today and Random page still contains the legacy solo script waterfall.");
+}
+
 const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 3) {
-  throw new Error("The shared platform, cloud and entry modules were not split into cached assets.");
+if (javascriptAssets.length < 6) {
+  throw new Error("The shared and solo modules were not split into cached assets.");
 }
 if (!stylesheetAssets.length) {
   throw new Error("The shared Vite stylesheet asset was not generated.");
@@ -64,6 +69,12 @@ if (!bundledJavascript.includes("__NEARER_PLATFORM_STARTED")) {
 if (!bundledJavascript.includes("__NEARER_CLOUD_STARTED")) {
   throw new Error("The cloud account layer is missing from the generated JavaScript assets.");
 }
+if (!bundledJavascript.includes("Nearer source modules are missing.")) {
+  throw new Error("The bundled solo bootstrap is missing from the generated JavaScript assets.");
+}
+if (!bundledJavascript.includes("__NEARER_PREMIUM_GLOBE_V2_STARTED")) {
+  throw new Error("The solo enhancement sequence is missing from the generated JavaScript assets.");
+}
 if (!bundledStyles.includes("nearer-account-dialog")) {
   throw new Error("The cloud account styling is missing from the generated CSS assets.");
 }
@@ -73,13 +84,18 @@ if (!togetherBootstrap.includes("__NEARER_PLATFORM_MODULE_PENDING")) {
   throw new Error("Together can still race the bundled platform module with its legacy loader.");
 }
 
-for (const legacyFile of ["platform.js", "cloud.js", "cloud.css"]) {
+for (const legacyFile of ["platform.js", "cloud.js", "cloud.css", "runtime-loader.js", "chunks/app-01.js", "chunks/runtime-tail-01.js"]) {
   try {
     await access(resolve(dist, legacyFile));
     throw new Error(`${legacyFile} was copied into dist instead of being bundled.`);
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
+}
+
+const copiedChunks = await readdir(resolve(dist, "chunks"));
+if (copiedChunks.some(name => name.startsWith("app-") || name.startsWith("runtime-tail-"))) {
+  throw new Error("One or more solo source fragments remain as public deployment files.");
 }
 
 console.log(`Verified ${requiredFiles.length} Nearer outputs and ${javascriptAssets.length + stylesheetAssets.length} hashed assets.`);

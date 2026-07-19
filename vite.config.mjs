@@ -31,10 +31,17 @@ const ignoredRootFiles = new Set([
   "vercel.json",
   "platform.js",
   "cloud.js",
-  "cloud.css"
+  "cloud.css",
+  "runtime-loader.js"
 ]);
 
+const soloOnlyLegacyAssets = [
+  /^chunks\/app-[^/]+\.js$/,
+  /^chunks\/runtime-tail-[^/]+\.js$/
+];
+
 const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
+const directSoloScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/(?:app-[^"']+|runtime-\d+)\.js|runtime-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 
 async function copyLegacyAssets(sourceDirectory = root) {
   for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
@@ -42,6 +49,7 @@ async function copyLegacyAssets(sourceDirectory = root) {
 
     const sourcePath = resolve(sourceDirectory, entry.name);
     const relativePath = relative(root, sourcePath);
+    const normalisedPath = relativePath.split(sep).join("/");
     const firstSegment = relativePath.split(sep)[0];
 
     if (entry.isDirectory()) {
@@ -52,6 +60,7 @@ async function copyLegacyAssets(sourceDirectory = root) {
 
     if (relativePath.endsWith(".html")) continue;
     if (!relativePath.includes(sep) && ignoredRootFiles.has(entry.name)) continue;
+    if (soloOnlyLegacyAssets.some(pattern => pattern.test(normalisedPath))) continue;
 
     const destinationPath = resolve(outDir, relativePath);
     await mkdir(dirname(destinationPath), { recursive: true });
@@ -78,24 +87,36 @@ function nearerCompatibilityPlugin() {
     enforce: "pre",
     transformIndexHtml: {
       order: "pre",
-      handler(html) {
-        return {
-          html: html
-            .replaceAll('<base href="/world/">', '<base href="/">')
-            .replace(directPlatformScript, ""),
-          tags: [
-            {
-              tag: "script",
-              children: "window.__NEARER_PLATFORM_MODULE_PENDING=true;",
-              injectTo: "head-pre"
-            },
-            {
-              tag: "script",
-              attrs: { type: "module", src: "/src/platform-entry.js" },
-              injectTo: "head"
-            }
-          ]
-        };
+      handler(html, context) {
+        const isMainPage = Boolean(context?.filename && resolve(context.filename) === pages.main);
+        const tags = [
+          {
+            tag: "script",
+            children: "window.__NEARER_PLATFORM_MODULE_PENDING=true;",
+            injectTo: "head-pre"
+          },
+          {
+            tag: "script",
+            attrs: { type: "module", src: "/src/platform-entry.js" },
+            injectTo: "head"
+          }
+        ];
+
+        if (isMainPage) {
+          tags.push({
+            tag: "script",
+            attrs: { type: "module", src: "/src/solo-entry.js" },
+            injectTo: "head"
+          });
+        }
+
+        let transformedHtml = html
+          .replaceAll('<base href="/world/">', '<base href="/">')
+          .replace(directPlatformScript, "");
+
+        if (isMainPage) transformedHtml = transformedHtml.replace(directSoloScript, "");
+
+        return { html: transformedHtml, tags };
       }
     },
     async closeBundle() {
