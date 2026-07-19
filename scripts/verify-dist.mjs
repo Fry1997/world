@@ -3,6 +3,10 @@ import { resolve } from "node:path";
 
 const root = process.cwd();
 const dist = resolve(root, "dist");
+const runtimeTailFiles = Array.from(
+  { length: 9 },
+  (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js`
+);
 
 const requiredFiles = [
   "index.html",
@@ -12,6 +16,7 @@ const requiredFiles = [
   "together/cooperative/index.html",
   "together/duel/index.html",
   "chunks/runtime-01.js",
+  ...runtimeTailFiles,
   "mastery/mastery-loader.js",
   "together/race/race-loader.js",
   "together/cooperative/cooperative-loader.js",
@@ -69,7 +74,7 @@ if (!bundledJavascript.includes("__NEARER_PLATFORM_STARTED")) {
 if (!bundledJavascript.includes("__NEARER_CLOUD_STARTED")) {
   throw new Error("The cloud account layer is missing from the generated JavaScript assets.");
 }
-if (!bundledJavascript.includes("Nearer source modules are missing.")) {
+if (!bundledJavascript.includes("Nearer application source modules are missing.")) {
   throw new Error("The bundled solo bootstrap is missing from the generated JavaScript assets.");
 }
 if (!bundledJavascript.includes("__NEARER_PREMIUM_GLOBE_V2_STARTED")) {
@@ -84,7 +89,7 @@ if (!togetherBootstrap.includes("__NEARER_PLATFORM_MODULE_PENDING")) {
   throw new Error("Together can still race the bundled platform module with its legacy loader.");
 }
 
-for (const legacyFile of ["platform.js", "cloud.js", "cloud.css", "runtime-loader.js", "chunks/app-01.js", "chunks/runtime-tail-01.js"]) {
+for (const legacyFile of ["platform.js", "cloud.js", "cloud.css", "runtime-loader.js", "chunks/app-01.js"]) {
   try {
     await access(resolve(dist, legacyFile));
     throw new Error(`${legacyFile} was copied into dist instead of being bundled.`);
@@ -94,8 +99,8 @@ for (const legacyFile of ["platform.js", "cloud.js", "cloud.css", "runtime-loade
 }
 
 const copiedChunks = await readdir(resolve(dist, "chunks"));
-if (copiedChunks.some(name => name.startsWith("app-") || name.startsWith("runtime-tail-"))) {
-  throw new Error("One or more solo source fragments remain as public deployment files.");
+if (copiedChunks.some(name => name.startsWith("app-"))) {
+  throw new Error("One or more solo application source fragments remain as public deployment files.");
 }
 
 console.log(`Verified ${requiredFiles.length} Nearer outputs and ${javascriptAssets.length + stylesheetAssets.length} hashed assets.`);
