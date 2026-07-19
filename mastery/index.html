@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06111b">
+  <base href="/world/">
+  <meta name="description" content="Learn and master every country by region with Nearer Regional Mastery.">
+  <title>Nearer — Regional Mastery</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="globe.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience7.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience10.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="platform.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="mastery/mastery.css?v=20260719-mastery1">
+</head>
+<body class="experience-seven mastery-experience">
+  <div class="nearer-safe-area-shield" aria-hidden="true"></div>
+  <div class="app-shell mastery-shell">
+    <header class="topbar platform-topbar">
+      <a class="brand" href="./" aria-label="Nearer home">
+        <span class="brand-mark" aria-hidden="true">N</span>
+        <span><strong>NEARER</strong><small>Know the world</small></span>
+      </a>
+      <nav class="mode-switch platform-tabs" aria-label="Nearer sections">
+        <a class="mode-button" href="./">Today</a>
+        <a class="mode-button" href="./?mode=random">Random</a>
+        <a class="mode-button is-active" href="mastery/" aria-current="page">Mastery</a>
+        <a class="mode-button" href="together/">Together</a>
+      </nav>
+      <div class="topbar-actions">
+        <button id="themeButton" class="icon-button" type="button" aria-label="Toggle dark mode"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.4 15.6A8.5 8.5 0 0 1 8.4 3.6 8.5 8.5 0 1 0 20.4 15.6Z"/></svg></button>
+      </div>
+    </header>
+
+    <main class="mastery-main">
+      <section id="masteryDashboard" class="mastery-dashboard">
+        <div class="mastery-hero">
+          <div class="mastery-hero-copy">
+            <p class="eyebrow">LEARN · RETAIN · MASTER</p>
+            <h1>Build a world you actually know.</h1>
+            <p>Choose a region, place every named country on the globe and turn mistakes into a personal review plan.</p>
+            <div class="mastery-hero-actions">
+              <button id="continueMasteryButton" class="primary-button is-hidden" type="button">Continue session</button>
+              <button id="reviewWeakButton" class="secondary-button" type="button">Review weak countries</button>
+            </div>
+          </div>
+          <aside class="mastery-passport" aria-label="Overall mastery progress">
+            <div class="passport-mark" aria-hidden="true"><span>◆</span></div>
+            <p>WORLD PASSPORT</p>
+            <strong id="overallMastery">0%</strong>
+            <span id="overallCopy">Start a region to build your map memory.</span>
+            <div class="passport-progress"><i id="overallProgressBar"></i></div>
+          </aside>
+        </div>
+
+        <section class="mastery-overview" aria-label="Mastery summary">
+          <article><span>Countries placed</span><strong id="countriesPlacedStat">0</strong><small id="countriesPlacedCopy">of 0 studied</small></article>
+          <article><span>First-attempt accuracy</span><strong id="accuracyStat">—</strong><small>across completed rounds</small></article>
+          <article><span>Learning sessions</span><strong id="sessionsStat">0</strong><small>saved on this browser</small></article>
+          <article><span>Review queue</span><strong id="reviewStat">0</strong><small>countries needing reinforcement</small></article>
+        </section>
+
+        <div class="mastery-section-heading">
+          <div><p class="eyebrow">REGIONAL PATHS</p><h2>Choose your next map.</h2></div>
+          <div class="mastery-mode-toggle" role="group" aria-label="Learning style">
+            <button class="is-active" type="button" data-learning-mode="practice">Practice</button>
+            <button type="button" data-learning-mode="test">Test</button>
+          </div>
+        </div>
+        <p id="learningModeCopy" class="learning-mode-copy">Practice shows the name of a country you tap incorrectly and keeps missed countries in the queue.</p>
+
+        <section id="regionGrid" class="region-grid" aria-label="Regions"></section>
+
+        <section class="mastery-intelligence">
+          <div class="mastery-intelligence-heading"><div><p class="eyebrow">SMART REVIEW</p><h2>Your map memory, made visible.</h2></div><span id="reviewBadge">No review due</span></div>
+          <div class="mastery-intelligence-grid">
+            <article class="weakest-card"><span>Countries to revisit</span><div id="weakestCountries" class="weak-country-list"><p>Complete a learning round and Nearer will find the places that need another look.</p></div></article>
+            <article class="mastery-method-card"><span>How mastery grows</span><ol><li><b>Place it first time</b><small>Builds the strongest memory score.</small></li><li><b>Recover after a miss</b><small>Still strengthens recognition and location.</small></li><li><b>Return later</b><small>Repeated success turns a country into mastered knowledge.</small></li></ol></article>
+          </div>
+        </section>
+      </section>
+
+      <section id="masterySession" class="mastery-session is-hidden" aria-live="polite">
+        <div class="session-heading">
+          <div><p id="sessionEyebrow" class="eyebrow">EUROPE · PRACTICE</p><h1 id="targetCountryName">Find France.</h1><p id="sessionInstruction">Tap the named country on the globe.</p></div>
+          <button id="exitSessionButton" class="secondary-button" type="button">Exit session</button>
+        </div>
+
+        <section class="session-progress-card">
+          <div><span id="sessionProgressLabel">1 of 44</span><strong id="sessionProgressPercent">0%</strong></div>
+          <div class="session-progress-track"><i id="sessionProgressBar"></i></div>
+          <div class="session-metrics"><span>First time <b id="firstCorrectCount">0</b></span><span>Recovered <b id="recoveredCount">0</b></span><span>Skipped <b id="skippedCount">0</b></span></div>
+        </section>
+
+        <div class="mastery-play-layout">
+          <section class="mastery-play-column">
+            <div class="mastery-map-panel">
+              <div class="mastery-map-toolbar"><div><span class="mastery-signal-dot" aria-hidden="true"></span><span id="mapPrompt">Tap a country to answer</span></div><div class="mastery-map-actions"><button id="resetMasteryGlobe" type="button" aria-label="Reset globe view" title="Reset globe view"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 4v7h-7"/></svg></button></div></div>
+              <div id="masteryGlobeStage" class="mastery-globe-stage" role="application" tabindex="0" aria-label="Interactive globe for placing the named country. Drag to rotate, pinch to zoom and tap a country to answer.">
+                <canvas id="masteryGlobeCanvas" aria-hidden="true"></canvas>
+                <div class="mastery-zoom" aria-label="Zoom controls"><button id="masteryZoomIn" type="button" aria-label="Zoom in">+</button><button id="masteryZoomOut" type="button" aria-label="Zoom out">−</button></div>
+                <div class="mastery-globe-hint">Drag to rotate · pinch to zoom · tap to answer</div>
+              </div>
+            </div>
+
+            <div id="masteryFeedback" class="mastery-feedback is-neutral" aria-live="polite"><span class="mastery-feedback-icon" aria-hidden="true">◎</span><div><strong>Place the named country.</strong><p>Your first answer determines first-attempt accuracy.</p></div></div>
+
+            <div class="session-actions"><button id="skipCountryButton" class="secondary-button" type="button">Skip for now</button><button id="revealCountryButton" class="secondary-button" type="button">Reveal location</button></div>
+          </section>
+
+          <aside class="mastery-session-aside">
+            <section class="current-country-card"><p class="eyebrow">CURRENT COUNTRY</p><span id="currentRegionLabel">Europe</span><strong id="currentCountryLarge">France</strong><p id="countryAttemptCopy">A first-time placement is still available.</p></section>
+            <section class="session-queue-card"><div><span>Still to place</span><strong id="remainingCount">44</strong></div><div><span>Current run</span><strong id="currentRun">0</strong></div><div><span>Accuracy</span><strong id="liveAccuracy">—</strong></div></section>
+            <section class="session-tip-card"><p class="eyebrow">LOCATION NOTE</p><h2 id="locationHintTitle">No hint used.</h2><p id="locationHintCopy">After two misses, Practice mode offers a directional clue without revealing the answer.</p></section>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="masteryResultDialog" class="dialog-card mastery-result-dialog">
+    <div class="win-symbol" aria-hidden="true">◆</div>
+    <p class="eyebrow">REGION COMPLETE</p>
+    <h2 id="resultRegionTitle">Europe mapped.</h2>
+    <p id="resultSummary" class="dialog-copy"></p>
+    <div class="mastery-result-score"><div><span>Knowledge score</span><strong id="resultKnowledgeScore">0%</strong></div><div><span>First time</span><strong id="resultFirstCorrect">0</strong></div><div><span>Recovered</span><strong id="resultRecovered">0</strong></div></div>
+    <div id="resultReviewList" class="result-review-list"></div>
+    <div class="dialog-button-row"><button id="repeatRegionButton" class="primary-button" type="button">Practise again</button><button id="closeMasteryResultButton" class="secondary-button" type="button">Back to regions</button></div>
+  </dialog>
+
+  <div id="masteryLoading" class="mastery-loading">Preparing Regional Mastery…</div>
+  <script src="chunks/runtime-01.js?v=20260719-mastery1"></script><script src="chunks/runtime-02.js?v=20260719-mastery1"></script><script src="chunks/runtime-03.js?v=20260719-mastery1"></script><script src="chunks/runtime-04.js?v=20260719-mastery1"></script><script src="chunks/runtime-05.js?v=20260719-mastery1"></script><script src="chunks/runtime-06.js?v=20260719-mastery1"></script>
+  <script src="mastery/mastery-loader.js?v=20260719-mastery1"></script>
+</body>
+</html>
