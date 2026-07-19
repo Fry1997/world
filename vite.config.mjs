@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readdir } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { defineConfig } from "vite";
 
@@ -20,6 +20,7 @@ const ignoredDirectories = new Set([
   "dist",
   "node_modules",
   "scripts",
+  "src",
   "supabase"
 ]);
 
@@ -27,8 +28,13 @@ const ignoredRootFiles = new Set([
   "package.json",
   "package-lock.json",
   "vite.config.mjs",
-  "vercel.json"
+  "vercel.json",
+  "platform.js",
+  "cloud.js",
+  "cloud.css"
 ]);
+
+const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 
 async function copyLegacyAssets(sourceDirectory = root) {
   for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
@@ -53,6 +59,19 @@ async function copyLegacyAssets(sourceDirectory = root) {
   }
 }
 
+async function patchGeneratedCompatibilityAssets() {
+  const bootstrapPath = resolve(outDir, "together/shared/experience8-bootstrap.js");
+  const bootstrap = await readFile(bootstrapPath, "utf8");
+  const legacyPlatformLoad = "if (!window.__NEARER_PLATFORM_STARTED) load(`platform.js?v=${VERSION}`).catch(console.error);";
+  const moduleAwarePlatformLoad = "if (!window.__NEARER_PLATFORM_STARTED && !window.__NEARER_PLATFORM_MODULE_PENDING) load(`platform.js?v=${VERSION}`).catch(console.error);";
+
+  if (!bootstrap.includes(legacyPlatformLoad)) {
+    throw new Error("Could not locate the Together platform compatibility loader.");
+  }
+
+  await writeFile(bootstrapPath, bootstrap.replace(legacyPlatformLoad, moduleAwarePlatformLoad));
+}
+
 function nearerCompatibilityPlugin() {
   return {
     name: "nearer-compatibility-build",
@@ -60,11 +79,28 @@ function nearerCompatibilityPlugin() {
     transformIndexHtml: {
       order: "pre",
       handler(html) {
-        return html.replaceAll('<base href="/world/">', '<base href="/">');
+        return {
+          html: html
+            .replaceAll('<base href="/world/">', '<base href="/">')
+            .replace(directPlatformScript, ""),
+          tags: [
+            {
+              tag: "script",
+              children: "window.__NEARER_PLATFORM_MODULE_PENDING=true;",
+              injectTo: "head-pre"
+            },
+            {
+              tag: "script",
+              attrs: { type: "module", src: "/src/platform-entry.js" },
+              injectTo: "head"
+            }
+          ]
+        };
       }
     },
     async closeBundle() {
       await copyLegacyAssets();
+      await patchGeneratedCompatibilityAssets();
     }
   };
 }
