@@ -7,13 +7,12 @@
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
   );
   const enhancementFiles = [
-    `globe-canvas.js?v=${VERSION}`,
+    `together/shared/premium-globe-v2.js?v=${VERSION}`,
     `guess-rules.js?v=${VERSION}`,
     `together/shared/experience4.js?v=${VERSION}`,
     `together/shared/experience5.js?v=${VERSION}`,
     `together/shared/experience6.js?v=${VERSION}`,
     `together/shared/experience7.js?v=${VERSION}`,
-    `together/shared/premium-globe.js?v=${VERSION}`,
     `guessed-country-info.js?v=${VERSION}`,
     `together/shared/experience8.js?v=${VERSION}`,
     `together/shared/experience9.js?v=${VERSION}`,
@@ -30,7 +29,7 @@
         <div style="min-height:360px;display:grid;place-items:center;padding:2rem;text-align:center;border:1px solid rgba(196,74,49,.3);border-radius:24px;background:rgba(196,74,49,.08);font-family:system-ui,sans-serif">
           <div>
             <strong style="display:block;font-size:1.1rem;margin-bottom:.5rem">The globe could not start.</strong>
-            <span style="color:#6b7280">Please reload the page. The retired flat map will not be shown as a substitute.</span>
+            <span style="color:#6b7280">Please reload the page.</span>
           </div>
         </div>`;
       return;
@@ -59,22 +58,8 @@
     document.head.appendChild(script);
   });
 
-  const loadPremiumGlobeWithoutPolling = async source => {
-    const nativeSetInterval = window.setInterval;
-    window.setInterval = (callback, delay, ...args) => {
-      if (Number(delay) === 350) return 0;
-      return nativeSetInterval(callback, delay, ...args);
-    };
-    try {
-      await loadScript(source);
-    } finally {
-      window.setInterval = nativeSetInterval;
-    }
-  };
-
   const start = async () => {
     [...tailFiles, ...enhancementFiles].forEach(preloadScript);
-
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
@@ -109,11 +94,9 @@
         }
       };
 
-      /* The premium renderer already manages its own high-DPI canvas. The old
-         preflight multiplied that resolution a second time on mobile. */
-      await loadScript(`globe-canvas.js?v=${VERSION}`);
-      if (!window.__NEARER_CANVAS_GLOBE_STARTED || !document.getElementById("globeCanvas")) {
-        throw new Error("The Canvas globe script loaded but did not initialise.");
+      await loadScript(`together/shared/premium-globe-v2.js?v=${VERSION}`);
+      if (!window.__NEARER_PREMIUM_GLOBE_V2_STARTED || !document.getElementById("globeCanvas")) {
+        throw new Error("The adaptive globe renderer did not initialise.");
       }
 
       await loadScript(`guess-rules.js?v=${VERSION}`);
@@ -129,9 +112,6 @@
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
-
-      await loadPremiumGlobeWithoutPolling(`together/shared/premium-globe.js?v=${VERSION}`);
-      if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
 
       await loadScript(`guessed-country-info.js?v=${VERSION}`);
       if (!window.__NEARER_GUESSED_COUNTRY_INFO_STARTED) {
