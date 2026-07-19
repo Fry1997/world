@@ -361,7 +361,7 @@
     const resolved = new Set(activeSession.resolved);
     elements.map.querySelectorAll("[data-code]").forEach(node => {
       const code = node.dataset.code;
-      node.classList.toggle("is-placed", resolved.includes(code));
+      node.classList.toggle("is-placed", resolved.has(code));
       node.classList.toggle("is-wrong", code === activeSession.lastWrongCode);
       node.classList.toggle("is-revealed", code === activeSession.currentResultClass && activeSession.locked);
       node.classList.toggle("is-current-correct", code === activeSession.currentResultClass && activeSession.locked && activeSession.currentResultType === "correct");
@@ -527,7 +527,7 @@
     if (!activeSession) return;
     elements.firstTryLive.textContent = activeSession.stats.firstTry;
     elements.retryLive.textContent = activeSession.stats.retry;
-    elements.skippedLive.textContent = activeSession.stats.skipped + activeSession.skippedCodes.size;
+    elements.skippedLive.textContent = activeSession.skippedCodes.size;
     elements.revealedLive.textContent = activeSession.stats.revealed;
     elements.sessionScoreLabel.textContent = `${activeSession.stats.firstTry} first try`;
   }

@@ -275,6 +275,7 @@ body.mastery-app::before {
 .legend-target { background: #f5d07d; }
 .mastery-map-wrap { position: relative; min-height: 590px; overflow: hidden; background: radial-gradient(circle at 52% 40%, rgba(78,132,166,.18), transparent 45%); }
 #masteryMap { display: block; width: 100%; height: 590px; touch-action: none; }
+#masteryMap > rect { pointer-events: none; }
 .mastery-country { fill: #e9e2d7; stroke: rgba(28,42,52,.62); stroke-width: .8; vector-effect: non-scaling-stroke; cursor: pointer; transition: fill .18s ease, opacity .18s ease, stroke-width .18s ease; }
 .mastery-country:hover { fill: #fff7ec; }
 .mastery-country.is-outside { fill: #435665; opacity: .28; cursor: default; }
