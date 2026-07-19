@@ -74,7 +74,7 @@ if (!bundledJavascript.includes("__NEARER_PLATFORM_STARTED")) {
 if (!bundledJavascript.includes("__NEARER_CLOUD_STARTED")) {
   throw new Error("The cloud account layer is missing from the generated JavaScript assets.");
 }
-if (!bundledJavascript.includes("Nearer application source modules are missing.")) {
+if (!bundledJavascript.includes("Nearer source modules are missing.")) {
   throw new Error("The bundled solo bootstrap is missing from the generated JavaScript assets.");
 }
 if (!bundledJavascript.includes("__NEARER_PREMIUM_GLOBE_V2_STARTED")) {
