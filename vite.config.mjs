@@ -36,8 +36,7 @@ const ignoredRootFiles = new Set([
 ]);
 
 const soloOnlyLegacyAssets = [
-  /^chunks\/app-[^/]+\.js$/,
-  /^chunks\/runtime-tail-[^/]+\.js$/
+  /^chunks\/app-[^/]+\.js$/
 ];
 
 const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
