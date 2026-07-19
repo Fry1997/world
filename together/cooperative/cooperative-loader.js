@@ -6,12 +6,12 @@
   const appFiles = [
     `together/shared/together-core.js?v=${VERSION}`,
     `together/cooperative/cooperative.js?v=${VERSION}`,
+    `together/shared/premium-globe-v2.js?v=${VERSION}`,
     `together/shared/polish-ui.js?v=${VERSION}`,
     `together/shared/experience4.js?v=${VERSION}`,
     `together/shared/experience5.js?v=${VERSION}`,
     `together/shared/experience6.js?v=${VERSION}`,
     `together/shared/experience7.js?v=${VERSION}`,
-    `together/shared/premium-globe.js?v=${VERSION}`,
     `together/shared/experience8.js?v=${VERSION}`,
     `together/shared/experience9.js?v=${VERSION}`,
     `together/shared/experience10.js?v=${VERSION}`
@@ -38,12 +38,6 @@
     link.href = source;
     document.head.appendChild(link);
   };
-  const loadPremiumGlobeWithoutPolling = async source => {
-    const nativeSetInterval = window.setInterval;
-    window.setInterval = (callback, delay, ...args) => Number(delay) === 350 ? 0 : nativeSetInterval(callback, delay, ...args);
-    try { await loadScript(source); }
-    finally { window.setInterval = nativeSetInterval; }
-  };
   const fail = error => {
     console.error(error);
     const loading = document.getElementById("modeLoading");
@@ -65,6 +59,8 @@
       if (!window.NEARER_TOGETHER_CORE) throw new Error("Together core did not initialise.");
       await loadScript(`together/cooperative/cooperative.js?v=${VERSION}`);
       if (!window.__NEARER_COOPERATIVE_STARTED) throw new Error("Cooperative Relay did not initialise.");
+      await loadScript(`together/shared/premium-globe-v2.js?v=${VERSION}`);
+      if (!window.__NEARER_PREMIUM_GLOBE_V2_STARTED) throw new Error("The adaptive globe renderer did not initialise.");
       await loadScript(`together/shared/polish-ui.js?v=${VERSION}`);
       await loadScript(`together/shared/experience4.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE4_STARTED) throw new Error("The compact visual experience layer did not initialise.");
@@ -74,8 +70,6 @@
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
-      await loadPremiumGlobeWithoutPolling(`together/shared/premium-globe.js?v=${VERSION}`);
-      if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
       await loadScript(`together/shared/experience8.js?v=${VERSION}`);
       await loadScript(`together/shared/experience9.js?v=${VERSION}`);
       await loadScript(`together/shared/experience10.js?v=${VERSION}`);
