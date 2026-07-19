@@ -41,8 +41,9 @@ for (const file of htmlFiles) {
     if (/^(?:https?:|data:|mailto:|tel:|#)/i.test(reference)) continue;
     const clean = reference.split(/[?#]/)[0];
     if (!clean || clean === "." || clean === "./") continue;
-    const resolved = rootBased
-      ? path.resolve(root, clean.replace(/^\//, "").replace(/^world\//, ""))
+    const githubPagesRoot = clean === "/world" || clean.startsWith("/world/");
+    const resolved = rootBased || githubPagesRoot
+      ? path.resolve(root, clean.replace(/^\/world\/?/, "").replace(/^\//, ""))
       : path.resolve(path.dirname(file), clean);
     if (!await localReferenceExists(resolved)) errors.push(`${label}: missing ${reference}`);
   }
