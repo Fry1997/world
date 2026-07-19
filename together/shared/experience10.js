@@ -24,6 +24,14 @@
     const hint = document.querySelector(".globe-hint");
     if (hint) hint.textContent = "Distance colours: your route · graphite: opponent route · coral: your country";
 
+    const setupCopy = document.querySelector(".mode-setup-copy");
+    if (setupCopy) setupCopy.textContent = "Each player receives a different secret country. Your guesses use the distance colour scale, while your opponent's completed route appears in neutral graphite.";
+
+    const feedbackCopy = document.querySelector("#feedbackPanel p");
+    if (feedbackCopy && /gold|steel/i.test(feedbackCopy.textContent)) {
+      feedbackCopy.textContent = "Your guesses use the distance scale; your opponent's completed route appears in graphite.";
+    }
+
     const renameLegend = (selector, label) => {
       const node = document.querySelector(selector);
       if (!node) return;
