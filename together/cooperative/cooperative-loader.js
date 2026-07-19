@@ -31,6 +31,7 @@
     loadStyle(`together/shared/experience5.css?v=${VERSION}`);
     loadStyle(`together/shared/experience6.css?v=${VERSION}`);
     loadStyle(`together/shared/experience7.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience7-multiplayer.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
