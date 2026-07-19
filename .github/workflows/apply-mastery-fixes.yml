@@ -1,0 +1,49 @@
+name: Apply mastery interaction fixes
+
+on:
+  push:
+    branches:
+      - agent/regional-mastery-platform
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/regional-mastery-platform
+      - name: Apply exact interaction fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          script = Path('learn/learn.js')
+          source = script.read_text()
+          before = source
+          source = source.replace('resolved.includes(code)', 'resolved.has(code)')
+          source = source.replace(
+              'elements.skippedLive.textContent = activeSession.stats.skipped + activeSession.skippedCodes.size;',
+              'elements.skippedLive.textContent = activeSession.skippedCodes.size;'
+          )
+          if source == before:
+              print('JavaScript fixes already applied.')
+          script.write_text(source)
+
+          style = Path('learn/learn.css')
+          css = style.read_text()
+          rule = '#masteryMap > rect { pointer-events: none; }\n'
+          if rule not in css:
+              css = css.replace('.mastery-country { fill:', rule + '.mastery-country { fill:')
+          style.write_text(css)
+          PY
+      - name: Commit fixes
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "Nearer validation"
+          git config user.email "actions@users.noreply.github.com"
+          git add learn/learn.js learn/learn.css
+          git commit -m "Fix mastery map interaction state"
+          git push origin HEAD:agent/regional-mastery-platform
