@@ -8,60 +8,69 @@
   <meta name="description" content="Play Nearer together on one device.">
   <title>Nearer Together</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=20260719-experience10">
+  <link rel="stylesheet" href="styles.css?v=20260719-mastery1">
   <style>
-    .together-shell{padding-bottom:56px}.together-topbar{grid-template-columns:1fr auto}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;color:#fffaf2;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em;text-shadow:0 4px 24px rgba(0,0,0,.2)}.together-intro{max-width:720px;margin:22px 0 34px;color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.65}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{position:relative;min-height:300px;padding:24px;overflow:hidden;border-radius:28px;display:flex;flex-direction:column;text-decoration:none;transition:transform .16s ease,border-color .16s ease}.together-card::before{content:"";position:absolute;width:230px;height:230px;left:-65px;top:-85px;border-radius:50%;background:radial-gradient(circle,var(--card-glow,rgba(255,118,89,.28)),transparent 68%);pointer-events:none}.together-card:nth-child(2){--card-glow:rgba(89,206,164,.3)}.together-card:nth-child(3){--card-glow:rgba(151,124,225,.28)}.mode-icon{position:relative;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;font-size:1.25rem}.mode-status{position:relative;width:max-content;margin:20px 0 12px;padding:5px 10px;border-radius:999px;font-size:.66rem;font-weight:850;letter-spacing:.1em}.together-card h2{position:relative;margin:0;font-size:1.45rem}.together-card p{position:relative;margin:12px 0 0;line-height:1.55}.mode-meta{position:relative;margin-top:14px;font-size:.75rem;font-weight:720}.mode-cta{position:relative;margin-top:auto;padding-top:24px;font-weight:780}.together-note{margin-top:24px;padding:18px 20px;border-radius:18px;line-height:1.55}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:230px}}@media(max-width:680px){.together-shell{padding-left:14px;padding-right:14px;padding-bottom:34px}.together-topbar{min-height:74px}.together-main h1{font-size:clamp(2.45rem,13vw,4rem)}}
+    .together-shell{padding-bottom:56px}.together-back{text-decoration:none}.together-main{max-width:1100px;margin:0 auto;padding:54px 0 20px}.together-main h1{max-width:850px;margin:0;color:#fffaf2;font-size:clamp(2.6rem,8vw,6.4rem);line-height:.94;letter-spacing:-.06em;text-shadow:0 4px 24px rgba(0,0,0,.2)}.together-intro{max-width:720px;margin:22px 0 25px;color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.65}.together-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 34px}.together-pill-row span{padding:7px 11px;border:1px solid rgba(255,255,255,.12);border-radius:999px;background:rgba(6,18,28,.52);color:rgba(255,255,255,.66);font-size:.7rem;font-weight:720}.mode-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.together-card{position:relative;min-height:320px;padding:24px;overflow:hidden;border-radius:28px;display:flex;flex-direction:column;text-decoration:none;transition:transform .16s ease,border-color .16s ease}.together-card::before{content:"";position:absolute;width:230px;height:230px;left:-65px;top:-85px;border-radius:50%;background:radial-gradient(circle,var(--card-glow,rgba(255,118,89,.28)),transparent 68%);pointer-events:none}.together-card:nth-child(2){--card-glow:rgba(89,206,164,.3)}.together-card:nth-child(3){--card-glow:rgba(151,124,225,.28)}.mode-icon{position:relative;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;font-size:1.25rem}.mode-status{position:relative;width:max-content;margin:20px 0 12px;padding:5px 10px;border-radius:999px;font-size:.66rem;font-weight:850;letter-spacing:.1em}.together-card h2{position:relative;margin:0;font-size:1.45rem}.together-card p{position:relative;margin:12px 0 0;line-height:1.55}.mode-meta{position:relative;margin-top:14px;font-size:.75rem;font-weight:720}.mode-cta{position:relative;margin-top:auto;padding-top:24px;font-weight:780}.together-note{margin-top:24px;padding:18px 20px;border-radius:18px;line-height:1.55}@media(max-width:800px){.mode-grid{grid-template-columns:1fr}.together-main{padding-top:38px}.together-card{min-height:245px}}@media(max-width:680px){.together-shell{padding-left:14px;padding-right:14px;padding-bottom:34px}.together-main h1{font-size:clamp(2.45rem,13vw,4rem)}}
   </style>
-  <link rel="stylesheet" href="together/shared/prestige.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience2.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience3.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience4.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience5.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience6.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience7.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience8.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience9.css?v=20260719-experience10">
-  <link rel="stylesheet" href="together/shared/experience10.css?v=20260719-experience10">
+  <link rel="stylesheet" href="together/shared/prestige.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience2.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience3.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience4.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience5.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience6.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience7.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience8.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience9.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/experience10.css?v=20260719-mastery1">
+  <link rel="stylesheet" href="together/shared/product-shell.css?v=20260719-mastery1">
 </head>
-<body class="experience-six experience-seven">
+<body class="experience-six experience-seven product-static-page">
   <div class="app-shell together-shell">
-    <header class="topbar together-topbar">
-      <a class="brand together-back" href="./" aria-label="Back to Nearer"><span class="brand-mark" aria-hidden="true">N</span><span><strong>NEARER</strong><small>Play together</small></span></a>
-      <a class="secondary-button" href="./" style="text-decoration:none">Solo game</a>
+    <header class="topbar product-topbar">
+      <a class="brand together-back" href="./" aria-label="Nearer home"><span class="brand-mark" aria-hidden="true">N</span><span><strong>NEARER</strong><small>Play together</small></span></a>
+      <nav class="product-tabs" aria-label="Nearer sections">
+        <a class="product-tab" href="./?mode=daily">Today</a>
+        <a class="product-tab" href="./?mode=random">Random</a>
+        <a class="product-tab is-active" href="together/" aria-current="page">Together</a>
+        <a class="product-tab" href="learn/">Mastery <span class="product-tab-badge" data-mastery-count hidden>0</span></a>
+      </nav>
+      <div class="topbar-actions"><button id="themeButton" class="icon-button" type="button" aria-label="Toggle dark mode"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.4 15.6A8.5 8.5 0 0 1 8.4 3.6 8.5 8.5 0 1 0 20.4 15.6Z"/></svg></button></div>
     </header>
 
     <main class="together-main">
       <p class="eyebrow">ONE DEVICE · MULTIPLAYER</p>
-      <h1>Choose how you want to play together.</h1>
+      <h1>One map. Three ways to play together.</h1>
       <p class="together-intro">Pass one phone between players. Every mode uses the same border-distance clues, but changes what is shared, what stays private and how you win.</p>
+      <div class="together-pill-row" aria-label="Together mode qualities"><span>Local pass-and-play</span><span>Separate saved games</span><span>Fair final-round rules</span><span>No account required</span></div>
 
       <section class="mode-grid" aria-label="Together game modes">
         <a class="together-card" href="together/race/">
-          <span class="mode-icon" aria-hidden="true">◎</span><span class="mode-status">PLAY NOW</span><h2>Same Target Race</h2>
+          <span class="mode-icon" aria-hidden="true">◎</span><span class="mode-status">COMPETITIVE</span><h2>Same Target Race</h2>
           <p>Everyone privately searches for the same country. Complete the round, then the player who reached it in the fewest guesses wins.</p>
           <span class="mode-meta">2–6 players · private routes</span><span class="mode-cta">Choose players and start →</span>
         </a>
 
         <a class="together-card" href="together/cooperative/">
-          <span class="mode-icon" aria-hidden="true">↔</span><span class="mode-status">PLAY NOW</span><h2>Cooperative Relay</h2>
+          <span class="mode-icon" aria-hidden="true">↔</span><span class="mode-status">COOPERATIVE</span><h2>Cooperative Relay</h2>
           <p>Share one globe and one trail of clues. Take turns choosing the team's next country and solve the target together.</p>
           <span class="mode-meta">2–6 players · shared route</span><span class="mode-cta">Build a team and start →</span>
         </a>
 
         <a class="together-card" href="together/duel/">
-          <span class="mode-icon" aria-hidden="true">◆</span><span class="mode-status">PLAY NOW</span><h2>Hidden Country Duel</h2>
+          <span class="mode-icon" aria-hidden="true">◆</span><span class="mode-status">HEAD TO HEAD</span><h2>Hidden Country Duel</h2>
           <p>Each player protects a secret country while searching for the other's. See both routes converge while your defended country remains yours to protect.</p>
           <span class="mode-meta">2 players · private targets</span><span class="mode-cta">Set up a duel →</span>
         </a>
       </section>
 
-      <div class="together-note"><strong>All three modes save separately on this browser.</strong> Starting or resuming a multiplayer game does not alter Daily, Random or another Together mode.</div>
+      <div class="together-note"><strong>Every mode saves independently on this browser.</strong> Starting or resuming a multiplayer game does not alter Today, Random, Mastery or another Together mode.</div>
     </main>
   </div>
-  <script src="together/shared/experience7.js?v=20260719-experience10"></script>
-  <script src="together/shared/experience8.js?v=20260719-experience10"></script>
-  <script src="together/shared/experience9.js?v=20260719-experience10"></script>
-  <script src="together/shared/experience10.js?v=20260719-experience10"></script>
+  <script src="together/shared/experience7.js?v=20260719-mastery1"></script>
+  <script src="together/shared/experience8.js?v=20260719-mastery1"></script>
+  <script src="together/shared/experience9.js?v=20260719-mastery1"></script>
+  <script src="together/shared/experience10.js?v=20260719-mastery1"></script>
+  <script src="together/shared/product-shell.js?v=20260719-mastery1"></script>
 </body>
 </html>
