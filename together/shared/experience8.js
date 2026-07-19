@@ -12,6 +12,7 @@
     const style = document.createElement("style");
     style.dataset.nearerExperience8Contrast = "true";
     style.textContent = `
+      body.experience-eight #globeFocus { display:none !important; }
       body.experience-eight .mode-setup-card input,
       body.experience-eight .mode-setup-card select,
       body.experience-eight .setup-card input,
