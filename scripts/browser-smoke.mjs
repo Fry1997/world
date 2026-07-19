@@ -77,9 +77,22 @@ try {
     return Boolean(suggestions && !suggestions.classList.contains("is-hidden") && suggestions.children.length);
   });
 
+  const suggestion = page.locator('#suggestions [role="option"], #suggestions > *').first();
+  await suggestion.click();
+  if (Number(await page.locator("#guessCount").textContent()) === 0) {
+    await page.locator("#guessButton").click();
+  }
+  await page.waitForFunction(() => Number(document.getElementById("guessCount")?.textContent || 0) > 0);
+  const savedGuessCount = Number(await page.locator("#guessCount").textContent());
+
+  await page.locator("#nearerAccountButton").click();
+  await page.waitForSelector("#nearerAccountDialog[open]");
+  await page.locator("[data-account-close]").click();
+
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => document.documentElement.classList.contains("nearer-runtime-ready"), null, { timeout: 25_000 });
   assert(await page.locator("#globeCanvas").count(), "The globe did not recover after a reload.");
+  await page.waitForFunction(expected => Number(document.getElementById("guessCount")?.textContent || 0) >= expected, savedGuessCount);
 
   await page.goto(`${baseUrl}/mastery/`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#masteryDashboard");
@@ -90,7 +103,7 @@ try {
   assert(await page.locator(".together-card").count() === 3, "Together did not expose all three game modes.");
 
   assert(pageErrors.length === 0, `Browser errors were raised:\n${pageErrors.join("\n")}`);
-  console.log("Mobile browser smoke test passed for Today, Random, Mastery and Together.");
+  console.log("Mobile browser smoke test passed for gameplay, saved progress, accounts, Mastery and Together.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
