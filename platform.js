@@ -23,7 +23,7 @@
     document.documentElement.dataset.theme = savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
   }
 
-  if (!isRoot) {
+  if (!isRoot && document.querySelector(".platform-tabs")) {
     const themeButton = document.getElementById("themeButton");
     themeButton?.addEventListener("click", () => {
       const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
