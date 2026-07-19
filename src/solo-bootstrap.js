@@ -1,6 +1,4 @@
-import * as d3 from "d3";
-import { feature as topoFeature } from "topojson-client";
-import world from "world-atlas/countries-110m.json";
+import { initialiseGameRuntime } from "./game-runtime.js";
 
 window.__NEARER_SVG_PATCH_STARTED = true;
 
@@ -22,66 +20,30 @@ function showFailure(error) {
 
 async function start() {
   const appSource = window.NEARER_APP_SOURCE || "";
-  const rawSource = window.NEARER_RUNTIME_SOURCE || "";
-  if (!rawSource || !appSource) throw new Error("Nearer source modules are missing.");
+  if (!appSource) throw new Error("Nearer application source modules are missing.");
 
-  const externalImports = /^import \* as d3 from "[^"]+";\nimport \{ feature as topoFeature \} from "[^"]+";\nimport world from "[^"]+";\n\n/;
-  if (!externalImports.test(rawSource)) {
-    throw new Error("Nearer runtime dependencies have an unexpected format.");
+  await initialiseGameRuntime();
+  const safeAppSource = appSource.replace("initializeMap();", "");
+  (0, eval)(safeAppSource);
+
+  const importedD3 = window.NEARER_D3;
+  const originalOrthographic = importedD3?.geoOrthographic;
+  if (typeof originalOrthographic !== "function") {
+    throw new Error("The globe projection factory is unavailable.");
   }
 
-  const marker = "const COUNTRY_METADATA =";
-  const runtimeBody = rawSource.replace(externalImports, "");
-  if (!runtimeBody.includes(marker)) throw new Error("Nearer runtime has an unexpected format.");
-
-  window.__NEARER_D3_MODULE = d3;
-  window.__NEARER_TOPO_FEATURE_MODULE = topoFeature;
-  window.__NEARER_WORLD_TOPOLOGY_MODULE = world;
-
-  const dependencyPrelude = [
-    "const d3 = window.__NEARER_D3_MODULE;",
-    "const topoFeature = window.__NEARER_TOPO_FEATURE_MODULE;",
-    "const world = window.__NEARER_WORLD_TOPOLOGY_MODULE;",
-    ""
-  ].join("\n");
-
-  const source = dependencyPrelude + runtimeBody.replace(
-    marker,
-    "window.NEARER_D3 = d3;\nwindow.NEARER_TOPO_FEATURE = topoFeature;\nwindow.NEARER_WORLD_TOPOLOGY = world;\nconst COUNTRY_METADATA ="
-  );
-
-  const url = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
-  try {
-    await import(url);
-    const safeAppSource = appSource.replace("initializeMap();", "");
-    (0, eval)(safeAppSource);
-
-    const importedD3 = window.NEARER_D3;
-    const originalOrthographic = importedD3?.geoOrthographic;
-    if (typeof originalOrthographic !== "function") {
-      throw new Error("The globe projection factory is unavailable.");
+  window.NEARER_D3 = {
+    ...importedD3,
+    geoOrthographic: (...args) => {
+      const projection = originalOrthographic(...args);
+      window.__NEARER_GLOBE_PROJECTION = projection;
+      return projection;
     }
+  };
 
-    window.NEARER_D3 = {
-      ...importedD3,
-      geoOrthographic: (...args) => {
-        const projection = originalOrthographic(...args);
-        window.__NEARER_GLOBE_PROJECTION = projection;
-        return projection;
-      }
-    };
-
-    await import("./solo-enhancements.js");
-    document.documentElement.classList.add("nearer-runtime-ready");
-
-    delete window.NEARER_APP_SOURCE;
-    delete window.NEARER_RUNTIME_SOURCE;
-    delete window.__NEARER_D3_MODULE;
-    delete window.__NEARER_TOPO_FEATURE_MODULE;
-    delete window.__NEARER_WORLD_TOPOLOGY_MODULE;
-  } finally {
-    URL.revokeObjectURL(url);
-  }
+  await import("./solo-enhancements.js");
+  document.documentElement.classList.add("nearer-runtime-ready");
+  delete window.NEARER_APP_SOURCE;
 }
 
 start().catch(showFailure);
