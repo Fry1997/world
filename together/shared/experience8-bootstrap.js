@@ -11,6 +11,13 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
+  const loadStyle = source => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = source;
+    link.dataset.nearerExperience8Final = "true";
+    document.head.appendChild(link);
+  };
   let attempts = 0;
   const start = async () => {
     attempts += 1;
@@ -18,6 +25,7 @@
       if (attempts < 120) setTimeout(start, 50);
       return;
     }
+    loadStyle(`together/shared/experience8.css?v=${VERSION}`);
     await load(`together/shared/premium-globe.js?v=${VERSION}`);
     await load(`together/shared/experience8.js?v=${VERSION}`);
   };
