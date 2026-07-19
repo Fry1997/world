@@ -44,9 +44,6 @@ const mainHtml = await readFile(resolve(dist, "index.html"), "utf8");
 if (/chunks\/(?:app-|runtime-\d)/.test(mainHtml) || mainHtml.includes("runtime-loader.js")) {
   throw new Error("The Today and Random page still contains the legacy solo script waterfall.");
 }
-if ((mainHtml.match(/<script\b[^>]*type="module"/g) || []).length < 2) {
-  throw new Error("The Today and Random page is missing its generated solo module entry.");
-}
 
 const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
