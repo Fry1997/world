@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260719-experience10";
+  const VERSION = "20260719-mastery1";
   const appSource = window.NEARER_APP_SOURCE || "";
   const tailFiles = Array.from({ length: 9 }, (_, index) =>
     `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`
@@ -54,6 +54,7 @@
     loadStyle(`together/shared/experience8.css?v=${VERSION}`);
     loadStyle(`together/shared/experience9.css?v=${VERSION}`);
     loadStyle(`together/shared/experience10.css?v=${VERSION}`);
+    loadStyle(`together/shared/product-shell.css?v=${VERSION}`);
     for (const file of tailFiles) await loadScript(file);
 
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
