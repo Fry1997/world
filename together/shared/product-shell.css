@@ -1,0 +1,181 @@
+:root {
+  --shell-ink: #fffaf3;
+  --shell-muted: rgba(238, 244, 247, .64);
+  --shell-line: rgba(255,255,255,.14);
+  --shell-glass: rgba(5, 17, 27, .76);
+  --shell-active-ink: #111b24;
+  --shell-coral: #ff7659;
+}
+
+.product-topbar {
+  position: relative;
+  z-index: 40;
+}
+
+.product-tabs {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border: 1px solid var(--shell-line);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.014)),
+    var(--shell-glass);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 16px 36px rgba(1,7,12,.18);
+  backdrop-filter: blur(22px) saturate(1.16);
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
+}
+
+.product-tabs::-webkit-scrollbar { display: none; }
+
+.product-tabs .mode-button,
+.product-tab {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  color: rgba(255,255,255,.7);
+  text-decoration: none;
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.product-tabs .mode-button:hover,
+.product-tab:hover {
+  color: #fffaf3;
+  background: rgba(255,255,255,.055);
+}
+
+.product-tabs .mode-button.is-active,
+.product-tab.is-active,
+.product-tab[aria-current="page"] {
+  border-color: rgba(255,255,255,.86);
+  background: linear-gradient(145deg, #fffaf4, #e7ddd3);
+  color: var(--shell-active-ink);
+  box-shadow: 0 7px 20px rgba(0,0,0,.25), inset 0 1px 0 #fff;
+}
+
+.product-tab-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(255,118,89,.16);
+  color: #ffc1b1;
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+.product-tabs .is-active .product-tab-badge,
+.product-tab[aria-current="page"] .product-tab-badge {
+  background: rgba(255,118,89,.14);
+  color: #c95239;
+}
+
+.product-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--shell-line);
+  border-radius: 13px;
+  background: rgba(6,18,28,.66);
+  color: rgba(255,255,255,.72);
+  font-size: .72rem;
+  font-weight: 730;
+  white-space: nowrap;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.product-context-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--shell-coral);
+  box-shadow: 0 0 0 5px rgba(255,118,89,.12);
+}
+
+.mastery-pulse {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  background:
+    radial-gradient(circle at 0 0, rgba(255,118,89,.14), transparent 38%),
+    linear-gradient(145deg, rgba(19,39,54,.86), rgba(5,16,25,.9));
+  color: #fff9f1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 44px rgba(1,7,12,.2);
+}
+
+.mastery-pulse-mark {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.075);
+  color: #ffd2c5;
+  font-weight: 850;
+}
+
+.mastery-pulse strong,
+.mastery-pulse span { display: block; }
+.mastery-pulse strong { font-size: .9rem; }
+.mastery-pulse span { margin-top: 3px; color: rgba(235,242,246,.64); font-size: .74rem; }
+.mastery-pulse a { color: #fffaf3; font-size: .76rem; font-weight: 760; text-decoration: none; }
+
+@media (max-width: 900px) {
+  .product-topbar {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    row-gap: 13px !important;
+  }
+
+  .product-tabs {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .product-tabs .mode-button,
+  .product-tab {
+    min-height: 40px;
+    padding-inline: 14px;
+    font-size: .78rem;
+  }
+
+  .product-context { display: none; }
+
+  .mastery-pulse {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .mastery-pulse a {
+    grid-column: 2;
+    margin-top: 2px;
+  }
+}
