@@ -12,7 +12,7 @@
   const isMastery = path.includes(`${rootPath}mastery/`);
   const isTogether = path.includes(`${rootPath}together/`);
   const isTogetherMatch = isTogether && path.replace(/\/+$/, "/") !== `${rootPath}together/`;
-  const query = new URLSearchParams(location.search);
+  const initialQuery = new URLSearchParams(location.search);
   const THEME_KEY = "nearer-together-theme";
   const savedTheme = localStorage.getItem(THEME_KEY) || localStorage.getItem("nearer-race-theme");
 
@@ -44,7 +44,8 @@
     if (isTogether) return "together";
     if (isRoot) {
       const randomActive = document.querySelector('.platform-tabs .mode-button[data-mode="random"]')?.classList.contains("is-active");
-      return randomActive || query.get("mode") === "random" ? "random" : "daily";
+      const currentQuery = new URLSearchParams(location.search);
+      return randomActive || currentQuery.get("mode") === "random" ? "random" : "daily";
     }
     return "daily";
   }
@@ -60,6 +61,7 @@
   }
 
   function markActive(dock) {
+    if (!dock) return;
     const activeSection = currentSection();
     dock.querySelectorAll("[data-platform-section]").forEach(item => {
       const active = item.dataset.platformSection === activeSection;
@@ -144,16 +146,15 @@
           <span>6 regions</span><span>Practice + Test</span><span>Smart review</span>
         </div>
       </div>
-      <a class="platform-launch-action" href="${sectionUrls.mastery.href}"><span>Explore Mastery</span><b aria-hidden="true">→</b></a>`;
+      <a class="platform-launch-action" href="${sectionUrls.mastery.href}" data-platform-section="mastery"><span>Explore Mastery</span><b aria-hidden="true">→</b></a>`;
     launchpad.querySelector("a")?.addEventListener("click", navigateFluidly);
-    launchpad.querySelector("a")?.setAttribute("data-platform-section", "mastery");
     main.prepend(launchpad);
   }
 
   addMobileDock();
   if (isRoot) addLaunchpad();
 
-  if (isRoot && query.get("mode") === "random") {
+  if (isRoot && initialQuery.get("mode") === "random") {
     let attempts = 0;
     const timer = setInterval(() => {
       attempts += 1;
