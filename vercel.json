@@ -1,13 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
   "redirects": [
     { "source": "/world", "destination": "/", "permanent": true },
-    { "source": "/world/", "destination": "/", "permanent": true },
-    { "source": "/mastery/:path*", "destination": "/world/mastery/:path*", "permanent": false },
-    { "source": "/together/:path*", "destination": "/world/together/:path*", "permanent": false }
-  ],
-  "rewrites": [
-    { "source": "/world/:path*", "destination": "/:path*" }
+    { "source": "/world/:path*", "destination": "/:path*", "permanent": true }
   ],
   "headers": [
     {
