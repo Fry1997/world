@@ -1,7 +1,23 @@
 (() => {
   "use strict";
-  const VERSION = "20260719-experience10";
+  const VERSION = "20260719-platform4";
   const tailFiles = Array.from({ length: 9 }, (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`);
+  const styleFiles = ["polish.css", "prestige.css", "experience.css", "experience2.css", "experience3.css", "experience4.css", "experience5.css", "experience6.css", "experience7.css", "experience7-multiplayer.css", "experience8.css", "experience9.css", "experience10.css"].map(file => `together/shared/${file}?v=${VERSION}`);
+  const appFiles = [
+    `together/shared/together-core.js?v=${VERSION}`,
+    `together/duel/duel.js?v=${VERSION}`,
+    `together/shared/polish-ui.js?v=${VERSION}`,
+    `together/duel/duel-pressure.js?v=${VERSION}`,
+    `together/shared/experience4.js?v=${VERSION}`,
+    `together/shared/experience5.js?v=${VERSION}`,
+    `together/shared/experience6.js?v=${VERSION}`,
+    `together/shared/experience7.js?v=${VERSION}`,
+    `together/shared/premium-globe.js?v=${VERSION}`,
+    `together/shared/experience8.js?v=${VERSION}`,
+    `together/shared/experience9.js?v=${VERSION}`,
+    `together/shared/experience10.js?v=${VERSION}`
+  ];
+
   const loadScript = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = source;
@@ -16,25 +32,27 @@
     link.href = source;
     document.head.appendChild(link);
   };
+  const preloadScript = source => {
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "script";
+    link.href = source;
+    document.head.appendChild(link);
+  };
+  const loadPremiumGlobeWithoutPolling = async source => {
+    const nativeSetInterval = window.setInterval;
+    window.setInterval = (callback, delay, ...args) => Number(delay) === 350 ? 0 : nativeSetInterval(callback, delay, ...args);
+    try { await loadScript(source); }
+    finally { window.setInterval = nativeSetInterval; }
+  };
   const fail = error => {
     console.error(error);
     const loading = document.getElementById("modeLoading");
     if (loading) loading.textContent = "Hidden Country Duel could not start. Please reload the page.";
   };
   const start = async () => {
-    loadStyle(`together/shared/polish.css?v=${VERSION}`);
-    loadStyle(`together/shared/prestige.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience2.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience3.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience4.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience5.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience6.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience7.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience7-multiplayer.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience8.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience9.css?v=${VERSION}`);
-    loadStyle(`together/shared/experience10.css?v=${VERSION}`);
+    styleFiles.forEach(loadStyle);
+    [...tailFiles, ...appFiles].forEach(preloadScript);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
     const marker = "const COUNTRY_METADATA =";
@@ -44,8 +62,6 @@
     try {
       await import(url);
       if (!window.NEARER_GAME_DATA || !window.NEARER_COUNTRIES_GEOJSON || !window.NEARER_D3) throw new Error("Nearer game data did not initialise.");
-      await loadScript(`together/shared/hd-canvas-preflight.js?v=${VERSION}`);
-      if (!window.__NEARER_HD_CANVAS_PREFLIGHT) throw new Error("The HD globe canvas layer did not initialise.");
       await loadScript(`together/shared/together-core.js?v=${VERSION}`);
       if (!window.NEARER_TOGETHER_CORE) throw new Error("Together core did not initialise.");
       await loadScript(`together/duel/duel.js?v=${VERSION}`);
@@ -60,12 +76,13 @@
       if (!window.__NEARER_EXPERIENCE6_STARTED) throw new Error("The elevated visual layer did not initialise.");
       await loadScript(`together/shared/experience7.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE7_STARTED) throw new Error("The final responsive visual layer did not initialise.");
-      await loadScript(`together/shared/premium-globe.js?v=${VERSION}`);
+      await loadPremiumGlobeWithoutPolling(`together/shared/premium-globe.js?v=${VERSION}`);
       if (!window.__NEARER_PREMIUM_GLOBE_STARTED) throw new Error("The dimensional globe renderer did not initialise.");
       await loadScript(`together/shared/experience8.js?v=${VERSION}`);
       await loadScript(`together/shared/experience9.js?v=${VERSION}`);
       await loadScript(`together/shared/experience10.js?v=${VERSION}`);
       if (!window.__NEARER_EXPERIENCE10_STARTED) throw new Error("The final stabilisation layer did not initialise.");
+      document.documentElement.classList.add("nearer-runtime-ready");
     } finally {
       URL.revokeObjectURL(url);
     }
