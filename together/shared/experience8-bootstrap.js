@@ -2,7 +2,7 @@
   "use strict";
   if (window.__NEARER_EXPERIENCE8_BOOTSTRAP) return;
   window.__NEARER_EXPERIENCE8_BOOTSTRAP = true;
-  const VERSION = "20260719-experience8";
+  const VERSION = "20260719-experience9";
   const load = source => new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = source;
@@ -26,8 +26,10 @@
       return;
     }
     loadStyle(`together/shared/experience8.css?v=${VERSION}`);
+    loadStyle(`together/shared/experience9.css?v=${VERSION}`);
     await load(`together/shared/premium-globe.js?v=${VERSION}`);
     await load(`together/shared/experience8.js?v=${VERSION}`);
+    await load(`together/shared/experience9.js?v=${VERSION}`);
   };
   start().catch(console.error);
 })();
