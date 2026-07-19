@@ -69,7 +69,7 @@ try {
   assert(initialState.globe, "The adaptive globe did not start.");
   assert(!initialState.failed, "The solo failure surface was shown.");
 
-  await page.locator('.platform-tabs [data-mode="random"]').click();
+  await page.locator('.platform-mobile-dock [data-platform-section="random"]').click();
   await page.waitForFunction(() => document.querySelector('.platform-tabs [data-mode="random"]')?.classList.contains("is-active"));
   await page.locator("#countryInput").fill("France");
   await page.waitForFunction(() => {
