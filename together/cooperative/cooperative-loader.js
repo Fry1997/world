@@ -2,7 +2,6 @@
   "use strict";
   const VERSION = "20260719-platform4";
   const tailFiles = Array.from({ length: 9 }, (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js?v=${VERSION}`);
-  const styleFiles = ["polish.css", "prestige.css", "experience.css", "experience2.css", "experience3.css", "experience4.css", "experience5.css", "experience6.css", "experience7.css", "experience7-multiplayer.css", "experience8.css", "experience9.css", "experience10.css"].map(file => `together/shared/${file}?v=${VERSION}`);
   const appFiles = [
     `together/shared/together-core.js?v=${VERSION}`,
     `together/cooperative/cooperative.js?v=${VERSION}`,
@@ -25,12 +24,6 @@
     script.onerror = () => reject(new Error(`Could not load ${source}`));
     document.head.appendChild(script);
   });
-  const loadStyle = source => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = source;
-    document.head.appendChild(link);
-  };
   const preloadScript = source => {
     const link = document.createElement("link");
     link.rel = "preload";
@@ -44,7 +37,6 @@
     if (loading) loading.textContent = "Cooperative Relay could not start. Please reload the page.";
   };
   const start = async () => {
-    styleFiles.forEach(loadStyle);
     [...tailFiles, ...appFiles].forEach(preloadScript);
     for (const file of tailFiles) await loadScript(file);
     const rawSource = window.NEARER_RUNTIME_SOURCE || "";
