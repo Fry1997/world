@@ -110,7 +110,7 @@ function submitGuess(event) {
   globe.setGuesses(run.currentGuesses);
   globe.focusCode(country.code);
 
-  if (distance === 0) {
+  if (country.code === target.code) {
     const solvedIn = Math.max(0, performance.now() - run.countryStartedAt);
     run.solved.push({ code: target.code, name: target.name, guesses: run.currentGuesses.length, durationMs: Math.round(solvedIn) });
     run.found += 1;
