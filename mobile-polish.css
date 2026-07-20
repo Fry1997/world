@@ -1,0 +1,179 @@
+/* Mobile shell polish: consistent controls, safe-area treatment and compact mastery cards. */
+@media (max-width: 720px) {
+  html:has(body.platform-shell-enabled),
+  html:has(body.experience-seven),
+  html:has(body.mastery-experience) {
+    background: #0a2233 !important;
+    background-color: #0a2233 !important;
+    color-scheme: dark;
+  }
+
+  body.experience-seven.is-iphone {
+    --e7-safe-top: env(safe-area-inset-top, 0px);
+  }
+
+  body.experience-seven .nearer-safe-area-shield,
+  body.mastery-experience .nearer-safe-area-shield {
+    height: env(safe-area-inset-top, 0px);
+    background: #07131f;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  body.experience-seven .topbar {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    padding-bottom: 10px;
+  }
+
+  body.experience-seven .topbar-actions {
+    align-items: center;
+    gap: 8px;
+  }
+
+  body.experience-seven .brand-mark,
+  body.experience-seven .icon-button,
+  body.experience-seven .nearer-account-button {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    flex: 0 0 46px;
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  body.experience-seven .text-button {
+    width: auto !important;
+    min-width: 54px !important;
+    flex-basis: auto;
+    padding-inline: 12px !important;
+  }
+
+  body.experience-seven .game-heading .secondary-button {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+
+  body.experience-seven .globe-action,
+  body.experience-seven .globe-zoom button,
+  body.mastery-experience .mastery-map-actions button,
+  body.mastery-experience .mastery-zoom button {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+  }
+
+  body.experience-seven .globe-action,
+  body.mastery-experience .mastery-map-actions button {
+    border-radius: 14px !important;
+  }
+
+  body.experience-seven .globe-zoom,
+  body.mastery-experience .mastery-zoom {
+    border-radius: 15px !important;
+  }
+
+  body.experience-seven .platform-launch-action,
+  body.experience-seven #countryInput,
+  body.experience-seven #guessButton,
+  body.mastery-experience .mastery-hero-actions button,
+  body.mastery-experience .region-card button,
+  body.mastery-experience .session-actions button {
+    min-height: 54px !important;
+    height: 54px !important;
+    border-radius: 16px !important;
+  }
+
+  body.experience-seven .platform-mobile-dock {
+    min-height: 70px;
+    padding: 6px;
+    border-radius: 23px;
+  }
+
+  body.experience-seven .platform-mobile-dock a,
+  body.experience-seven .platform-mobile-dock button {
+    min-height: 56px;
+    border-radius: 17px;
+  }
+
+  body.mastery-experience .mastery-mode-toggle {
+    min-height: 54px;
+    padding: 4px;
+  }
+
+  body.mastery-experience .mastery-mode-toggle button {
+    min-height: 46px;
+    padding-inline: 16px;
+  }
+
+  body.mastery-experience .region-grid {
+    gap: 12px;
+  }
+
+  body.mastery-experience .region-card {
+    min-height: 0;
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  body.mastery-experience .region-card-top {
+    align-items: flex-start;
+  }
+
+  body.mastery-experience .region-symbol {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+  }
+
+  body.mastery-experience .region-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 30px;
+    padding: 0 11px;
+    border-radius: 999px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  body.mastery-experience .region-card h3 {
+    margin-top: 20px;
+  }
+
+  body.mastery-experience .region-card p {
+    font-size: .86rem;
+    line-height: 1.46;
+  }
+
+  body.mastery-experience .region-card-progress {
+    margin: 17px 0 11px;
+  }
+
+  body.mastery-experience .region-card button {
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 430px) {
+  body.experience-seven .topbar-actions {
+    gap: 7px;
+  }
+
+  body.experience-seven .brand {
+    gap: 10px;
+  }
+
+  body.experience-seven .brand strong {
+    letter-spacing: .23em;
+  }
+}
