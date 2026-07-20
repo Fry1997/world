@@ -1,4 +1,5 @@
 import "../cloud.css";
+import "../mobile-polish.css";
 
 window.__NEARER_PLATFORM_MODULE_PENDING = true;
 
