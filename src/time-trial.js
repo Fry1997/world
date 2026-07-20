@@ -99,6 +99,10 @@ function submitGuess(event) {
   }
 
   const target = run.sequence[run.index];
+  if (!target) {
+    finishRun();
+    return;
+  }
   const previous = run.currentGuesses.at(-1)?.distance ?? null;
   const distance = window.NEARER_GAME_DATA.distance(country.code, target.code);
   const guess = { code: country.code, name: country.name, distance, order: run.currentGuesses.length + 1 };
@@ -118,6 +122,10 @@ function submitGuess(event) {
     run.currentGuesses = [];
     run.countryStartedAt = performance.now();
     run.closestDistance = Infinity;
+    if (run.index >= run.sequence.length) {
+      finishRun();
+      return;
+    }
     renderGuessState(dialog, [], `${target.name} found · country ${run.found + 1} is now hiding.`);
     globe.setGuesses([]);
     input.focus();
@@ -176,7 +184,7 @@ function startRun(ranked) {
 function finishRun() {
   if (!run || run.status !== "running") return;
   clearInterval(timer);
-  tick();
+  run.remaining = Math.max(0, run.endsAt - performance.now());
   run.status = "finished";
   globe?.destroy();
   const result = {
