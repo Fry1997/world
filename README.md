@@ -15,27 +15,33 @@ A country is selected in secret. Every guess reports the shortest approximate bo
 - Interactive proximity map
 - Kilometres and miles
 - Light and dark themes
-- Local game statistics, daily progress and streaks
-- Shareable result trail
+- Local-first statistics, daily progress and streaks
+- Optional Supabase accounts with cross-device progress
+- Email-link, password and password-recovery sign-in
+- Regional Mastery, achievements and Daily Time Trial
+- Shareable result trail and friend challenges
 - Responsive mobile-first interface
 
 ## Run locally
 
-The browser loads pinned map libraries and Natural Earth geometry from jsDelivr, so serve the folder over HTTP:
+Install the application dependencies and start Vite:
 
 ```bash
-python -m http.server 8080
+npm install
+npm run dev
 ```
 
-Then open `http://localhost:8080`.
+Then open the local URL shown by Vite.
 
 ## Project structure
 
-- `index.html` — application markup
-- `styles.css` — responsive visual design
-- `chunks/runtime-*.js` — country metadata, map loading and distance engine
-- `chunks/app-*.js` — game state, search, ranking, feedback and persistence
-- `runtime-loader.js` — assembles and starts the browser modules
+- `index.html` — main game page
+- `mastery/` — Regional Mastery experience
+- `together/` — multiplayer modes
+- `src/` — Vite entry points, progress, competition and account extensions
+- `cloud.js` — Supabase authentication and cloud progress sync
+- `chunks/` — compatibility source for the geography and game runtimes
+- `supabase/` — versioned database migrations and functions
 
 ## Geography model
 
@@ -45,4 +51,4 @@ Countries absent from the low-resolution atlas are represented by mapped point a
 
 ## Deployment
 
-Production deploys from the `main` branch to Vercel.
+Production deploys from the `main` branch to Vercel. Pull requests receive isolated preview deployments and run the mobile and desktop browser regression suite before merge.
