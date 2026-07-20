@@ -1,6 +1,6 @@
 import '../styles.css';
 import '../platform.css';
-import '../together/together.css';
+import './together-hub-layout.css';
 import '../together/shared/prestige.css';
 import '../together/shared/experience.css';
 import '../together/shared/experience2.css';
