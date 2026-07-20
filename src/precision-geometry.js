@@ -1,4 +1,4 @@
-import detailedWorldUrl from "world-atlas/countries-50m.json?url";
+import precisionWorldUrl from "world-atlas/countries-10m.json?url";
 
 const normalise = value => String(value || "")
   .normalize("NFD")
@@ -8,25 +8,26 @@ const normalise = value => String(value || "")
   .trim()
   .replace(/\s+/g, " ");
 
-let detailPromise = null;
+const criticalMicrostates = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
+let precisionPromise = null;
 
 function namesFor(country) {
   return [country.name, ...(country.aliases || [])].map(normalise).filter(Boolean);
 }
 
-export async function prepareDetailedGeometry() {
-  if (window.__NEARER_DETAILED_GEOMETRY) return window.__NEARER_DETAILED_GEOMETRY;
+export async function preparePrecisionGeometry() {
+  if (window.__NEARER_PRECISION_GEOMETRY) return window.__NEARER_PRECISION_GEOMETRY;
 
-  detailPromise ||= (async () => {
+  precisionPromise ||= (async () => {
     const gameData = window.NEARER_GAME_DATA;
     const existing = window.NEARER_COUNTRIES_GEOJSON;
     const topoFeature = window.NEARER_TOPO_FEATURE;
     if (!gameData || !existing || typeof topoFeature !== "function") {
-      throw new Error("Detailed country geometry requires the Nearer geography runtime.");
+      throw new Error("Precision country geometry requires the Nearer geography runtime.");
     }
 
-    const response = await fetch(detailedWorldUrl, { cache: "force-cache" });
-    if (!response.ok) throw new Error(`Could not load detailed country geometry (${response.status}).`);
+    const response = await fetch(precisionWorldUrl, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`Could not load precision country geometry (${response.status}).`);
     const topology = await response.json();
     const sourceFeatures = topoFeature(topology, topology.objects.countries).features;
     const sourceByNumeric = new Map();
@@ -69,20 +70,27 @@ export async function prepareDetailedGeometry() {
           name: country.name,
           continent: country.continent,
           approximate,
-          detailScale: source ? "50m" : previous?.properties?.detailScale || "fallback"
+          detailScale: source ? "10m" : previous?.properties?.detailScale || "fallback"
         },
         geometry
       };
     });
 
-    window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
-    window.__NEARER_DETAILED_GEOMETRY = {
-      source: "Natural Earth 1:50m via world-atlas",
+    const featureByCode = new Map(features.map(feature => [feature.properties.code, feature]));
+    const unresolvedMicrostates = criticalMicrostates.filter(code => featureByCode.get(code)?.geometry.type === "Point");
+    const detail = {
+      source: "Natural Earth 1:10m via world-atlas",
       detailedCount,
-      pointFallbackCount
+      pointFallbackCount,
+      unresolvedMicrostates
     };
-    return window.__NEARER_DETAILED_GEOMETRY;
+
+    window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
+    window.__NEARER_PRECISION_GEOMETRY = detail;
+    window.__NEARER_DETAILED_GEOMETRY = detail;
+    window.__NEARER_MASTERY_DETAILED_GEOMETRY = detail;
+    return detail;
   })();
 
-  return detailPromise;
+  return precisionPromise;
 }

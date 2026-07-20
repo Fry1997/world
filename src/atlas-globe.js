@@ -1,5 +1,5 @@
 const MIN_ZOOM = 0.78;
-const MAX_ZOOM = 18;
+const MAX_ZOOM = 900;
 
 function clampZoom(value) {
   return Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value));
@@ -21,6 +21,7 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
   const graticule = d3.geoGraticule10();
   const pointers = new Map();
   const initialRotation = [-12, -13, 0];
+  const polygonBounds = new Map(model.polygons.map(feature => [feature.properties.code, d3.geoBounds(feature)]));
   let rotation = [...initialRotation];
   let zoom = 1;
   let selectedCode = null;
@@ -32,7 +33,8 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
   let ratio = 1;
 
   function updateZoomLabel() {
-    if (zoomLabel) zoomLabel.textContent = `${zoom.toFixed(1)}×`;
+    if (zoomLabel) zoomLabel.textContent = `${zoom < 10 ? zoom.toFixed(1) : Math.round(zoom)}×`;
+    stage.dataset.zoom = zoom.toFixed(zoom < 10 ? 1 : 0);
   }
 
   function resize() {
@@ -77,6 +79,29 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
     context.restore();
   }
 
+  function longitudeNear(value, minimum, maximum, padding) {
+    const longitude = ((value + 540) % 360) - 180;
+    if (minimum <= maximum) return longitude >= minimum - padding && longitude <= maximum + padding;
+    return longitude >= minimum - padding || longitude <= maximum + padding;
+  }
+
+  function featureNearView(feature) {
+    if (zoom < 24) return true;
+    const centre = [-rotation[0], -rotation[1]];
+    const latitudePadding = Math.max(.08, 220 / zoom);
+    const longitudePadding = latitudePadding / Math.max(.2, Math.cos(centre[1] * Math.PI / 180));
+    if (feature.geometry.type === 'Point') {
+      const coordinate = feature.geometry.coordinates;
+      return Math.abs(coordinate[1] - centre[1]) <= latitudePadding
+        && longitudeNear(centre[0], coordinate[0], coordinate[0], longitudePadding);
+    }
+    const bounds = polygonBounds.get(feature.properties.code);
+    return Boolean(bounds
+      && centre[1] >= bounds[0][1] - latitudePadding
+      && centre[1] <= bounds[1][1] + latitudePadding
+      && longitudeNear(centre[0], bounds[0][0], bounds[1][0], longitudePadding));
+  }
+
   function featurePoint(feature) {
     const coordinate = feature.geometry.type === 'Point' ? feature.geometry.coordinates : d3.geoCentroid(feature);
     if (!visible(coordinate)) return null;
@@ -86,11 +111,12 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
   function drawLabels() {
     if (zoom < 3.4) return;
     const occupied = new Set();
-    const threshold = zoom < 5 ? 42 : zoom < 9 ? 24 : 12;
+    const threshold = zoom < 5 ? 42 : zoom < 9 ? 24 : zoom < 24 ? 12 : 2;
     const candidates = model.features
+      .filter(featureNearView)
       .map(feature => {
         const point = featurePoint(feature);
-        if (!point) return null;
+        if (!point || point[0] < -100 || point[0] > width + 100 || point[1] < -100 || point[1] > height + 100) return null;
         let size = 0;
         if (feature.geometry.type !== 'Point') {
           const bounds = path.bounds(feature);
@@ -131,45 +157,58 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
       .translate([width / 2, height / 2])
       .scale(radius)
       .rotate(rotation)
-      .precision(Math.max(.045, .4 / Math.sqrt(zoom)));
+      .precision(Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));
 
     const x = width / 2;
     const y = height / 2;
-    context.save();
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
-    context.fillStyle = '#020d16';
-    context.shadowColor = 'rgba(0,5,10,.72)';
-    context.shadowBlur = 28;
-    context.shadowOffsetY = 15;
-    context.fill();
-    context.restore();
+    if (zoom < 24) {
+      context.save();
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.fillStyle = '#020d16';
+      context.shadowColor = 'rgba(0,5,10,.72)';
+      context.shadowBlur = 28;
+      context.shadowOffsetY = 15;
+      context.fill();
+      context.restore();
 
-    context.save();
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
-    context.clip();
-    const ocean = context.createRadialGradient(x + radius * .3, y - radius * .34, radius * .02, x, y, radius * 1.14);
-    ocean.addColorStop(0, '#315f7d');
-    ocean.addColorStop(.48, '#12374f');
-    ocean.addColorStop(1, '#020b12');
-    context.fillStyle = ocean;
-    context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-    context.restore();
+      context.save();
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.clip();
+      const ocean = context.createRadialGradient(x + radius * .3, y - radius * .34, radius * .02, x, y, radius * 1.14);
+      ocean.addColorStop(0, '#315f7d');
+      ocean.addColorStop(.48, '#12374f');
+      ocean.addColorStop(1, '#020b12');
+      context.fillStyle = ocean;
+      context.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+      context.restore();
+    } else {
+      context.fillStyle = '#12374f';
+      context.fillRect(0, 0, width, height);
+    }
 
-    context.save();
-    context.beginPath();
-    path(graticule);
-    context.strokeStyle = 'rgba(212,235,247,.085)';
-    context.lineWidth = .6;
-    context.stroke();
-    context.restore();
+    if (zoom < 80) {
+      context.save();
+      context.beginPath();
+      path(graticule);
+      context.strokeStyle = 'rgba(212,235,247,.085)';
+      context.lineWidth = .6;
+      context.stroke();
+      context.restore();
+    }
 
     const land = context.createLinearGradient(width * .18, height * .12, width * .82, height * .9);
     land.addColorStop(0, '#f2ebdf');
     land.addColorStop(.55, '#ded6ca');
     land.addColorStop(1, '#b8b1a8');
-    drawPath(model.worldCollection, land, 'rgba(28,43,54,.62)', zoom > 7 ? .45 : .72);
+    if (zoom < 24) {
+      drawPath(model.worldCollection, land, 'rgba(28,43,54,.62)', zoom > 7 ? .45 : .72);
+    } else {
+      for (const feature of model.polygons) {
+        if (featureNearView(feature)) drawPath(feature, land, 'rgba(28,43,54,.62)', Math.max(.22, .7 / Math.sqrt(zoom / 24)));
+      }
+    }
 
     if (selectedCode) {
       const selected = model.featureByCode.get(selectedCode);
@@ -187,13 +226,13 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
           context.restore();
         }
       } else if (selected) {
-        drawPath(selected, '#e87a60', '#fff6e9', Math.max(1.5, 2.6 / Math.sqrt(zoom)), .95);
+        drawPath(selected, '#e87a60', '#fff6e9', Math.max(1.2, 2.6 / Math.sqrt(zoom)), .95);
       }
     }
 
     if (zoom >= 4.5) {
       for (const feature of model.points) {
-        if (feature.properties.code === selectedCode) continue;
+        if (feature.properties.code === selectedCode || !featureNearView(feature)) continue;
         const point = featurePoint(feature);
         if (!point) continue;
         context.save();
@@ -206,13 +245,15 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
     }
 
     drawLabels();
-    context.save();
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
-    context.strokeStyle = 'rgba(222,240,250,.35)';
-    context.lineWidth = 1.5;
-    context.stroke();
-    context.restore();
+    if (zoom < 24) {
+      context.save();
+      context.beginPath();
+      context.arc(x, y, radius, 0, Math.PI * 2);
+      context.strokeStyle = 'rgba(222,240,250,.35)';
+      context.lineWidth = 1.5;
+      context.stroke();
+      context.restore();
+    }
   }
 
   function queue() {
@@ -237,10 +278,14 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
 
   function focusZoom(country) {
     const area = Number(country?.area) || 0;
-    if (area < 1_000) return 14;
-    if (area < 10_000) return 10;
-    if (area < 100_000) return 6;
-    if (area < 500_000) return 4;
+    if (area <= 1) return 720;
+    if (area <= 10) return 520;
+    if (area <= 100) return 260;
+    if (area <= 500) return 120;
+    if (area <= 3_000) return 48;
+    if (area <= 10_000) return 24;
+    if (area <= 100_000) return 8;
+    if (area <= 500_000) return 4;
     return 2.35;
   }
 
@@ -280,6 +325,17 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
   function pointerDistance() {
     const values = [...pointers.values()];
     return values.length > 1 ? Math.hypot(values[1].x - values[0].x, values[1].y - values[0].y) : 0;
+  }
+
+  function zoomFactor(value) {
+    return value < 12 ? 1.8 : value < 120 ? 2.2 : 2.5;
+  }
+
+  function changeZoom(direction) {
+    const factor = zoomFactor(zoom);
+    zoom = clampZoom(direction > 0 ? zoom * factor : zoom / factor);
+    updateZoomLabel();
+    queue();
   }
 
   stage.addEventListener('pointerdown', event => {
@@ -344,19 +400,24 @@ export function createAtlasGlobe({ d3, model, onSelect }) {
     if (event.key === 'ArrowRight') rotation[0] += 7 / Math.sqrt(zoom);
     if (event.key === 'ArrowUp') rotation[1] = Math.min(84, rotation[1] + 6 / Math.sqrt(zoom));
     if (event.key === 'ArrowDown') rotation[1] = Math.max(-84, rotation[1] - 6 / Math.sqrt(zoom));
-    if (event.key === '+' || event.key === '=') zoom = clampZoom(zoom * 1.32);
-    if (event.key === '-') zoom = clampZoom(zoom / 1.32);
-    updateZoomLabel();
-    queue();
+    if (event.key === '+' || event.key === '=') changeZoom(1);
+    if (event.key === '-') changeZoom(-1);
+    if (!['+', '=', '-'].includes(event.key)) queue();
   });
 
-  zoomIn?.addEventListener('click', () => { zoom = clampZoom(zoom * 1.42); updateZoomLabel(); queue(); });
-  zoomOut?.addEventListener('click', () => { zoom = clampZoom(zoom / 1.42); updateZoomLabel(); queue(); });
+  zoomIn?.addEventListener('click', () => changeZoom(1));
+  zoomOut?.addEventListener('click', () => changeZoom(-1));
   resetButton?.addEventListener('click', () => animateTo([...initialRotation], 1));
   focusButton?.addEventListener('click', () => selectedCode && focusCountry(selectedCode));
   new ResizeObserver(queue).observe(stage);
 
   updateZoomLabel();
   queue();
-  return { setSelected, focusCountry, reset: () => animateTo([...initialRotation], 1), queue };
+  return {
+    setSelected,
+    focusCountry,
+    reset: () => animateTo([...initialRotation], 1),
+    queue,
+    getZoom: () => zoom
+  };
 }

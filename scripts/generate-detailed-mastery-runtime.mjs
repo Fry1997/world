@@ -17,13 +17,13 @@ function replaceOnce(search, replacement, label) {
 
 replaceOnce(
   'function clampZoom(value) { return Math.max(.78, Math.min(4.5, value)); }',
-  'function clampZoom(value) { return Math.max(.78, Math.min(18, value)); }',
+  'function clampZoom(value) { return Math.max(.78, Math.min(900, value)); }',
   "zoom limit"
 );
 
 replaceOnce(
   'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? .8 : .45);',
-  'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? .72 : Math.max(.08, .42 / Math.sqrt(Math.max(1, zoom))));',
+  'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? Math.max(.08, .6 / Math.sqrt(Math.max(1, zoom))) : Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));',
   "projection precision"
 );
 
@@ -34,20 +34,35 @@ replaceOnce(
 );
 
 replaceOnce(
+  'function drawPoint(feature, fill, stroke, radiusValue = 5) { const coordinate = feature.geometry.coordinates; if (!visible(coordinate)) return; const point = projection(coordinate); if (!point) return; context.save(); context.beginPath(); context.arc(point[0], point[1], radiusValue, 0, Math.PI * 2); context.fillStyle = fill; context.fill(); context.strokeStyle = stroke; context.lineWidth = 1.7; context.stroke(); context.restore(); }',
+  `function drawPoint(feature, fill, stroke, radiusValue = 5) { const coordinate = feature.geometry.coordinates; if (!visible(coordinate)) return; const point = projection(coordinate); if (!point) return; context.save(); context.beginPath(); context.arc(point[0], point[1], radiusValue, 0, Math.PI * 2); context.fillStyle = fill; context.fill(); context.strokeStyle = stroke; context.lineWidth = 1.7; context.stroke(); context.restore(); }
+  const polygonBounds = new Map(polygonFeatures.map(feature => [feature.properties.code, d3.geoBounds(feature)]));
+  function longitudeNear(value, minimum, maximum, padding) { const longitude = ((value + 540) % 360) - 180; if (minimum <= maximum) return longitude >= minimum - padding && longitude <= maximum + padding; return longitude >= minimum - padding || longitude <= maximum + padding; }
+  function featureNearView(feature) { if (zoom < 24) return true; const centre = [-rotation[0], -rotation[1]]; const latitudePadding = Math.max(.08, 220 / zoom); const longitudePadding = latitudePadding / Math.max(.2, Math.cos(centre[1] * Math.PI / 180)); const bounds = polygonBounds.get(feature.properties.code); return Boolean(bounds && centre[1] >= bounds[0][1] - latitudePadding && centre[1] <= bounds[1][1] + latitudePadding && longitudeNear(centre[0], bounds[0][0], bounds[1][0], longitudePadding)); }`,
+  "deep zoom feature culling"
+);
+
+replaceOnce(
+  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7);',
+  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); if (zoom < 24) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of polygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.22,.7/Math.sqrt(zoom/24)));',
+  "deep zoom land rendering"
+);
+
+replaceOnce(
   'function focusCountry(code) { const feature = featureByCode.get(code); if (!feature) return; const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature); rotation = [-coordinate[0], -coordinate[1], 0]; zoom = Math.max(1.4, Math.min(2.2, zoom)); queueRender(); }',
-  'function focusCountry(code) { const feature = featureByCode.get(code); if (!feature) return; const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature); rotation = [-coordinate[0], -coordinate[1], 0]; if (feature.geometry.type === "Point") zoom = Math.max(zoom, 12); else { const bounds = d3.geoBounds(feature); const longitudeSpan = Math.abs(bounds[1][0] - bounds[0][0]); const latitudeSpan = Math.abs(bounds[1][1] - bounds[0][1]); const span = Math.max(.35, longitudeSpan, latitudeSpan); zoom = Math.max(zoom, Math.min(12, Math.max(1.8, 10 / span))); } queueRender(); }',
+  'function focusCountry(code) { const feature = featureByCode.get(code); if (!feature) return; const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature); const area = Number(countryByCode.get(code)?.area) || 0; const targetZoom = feature.geometry.type === "Point" || area <= 1 ? 720 : area <= 10 ? 520 : area <= 100 ? 260 : area <= 500 ? 120 : area <= 3000 ? 48 : area <= 10000 ? 24 : area <= 100000 ? 8 : 2.2; rotation = [-coordinate[0], -coordinate[1], 0]; zoom = Math.max(zoom, targetZoom); queueRender(); }',
   "reveal focus"
 );
 
 replaceOnce(
   'elements.zoomIn.addEventListener("click",()=>{zoom=clampZoom(zoom*1.25);queueRender();}); elements.zoomOut.addEventListener("click",()=>{zoom=clampZoom(zoom/1.25);queueRender();}); elements.reset.addEventListener("click",()=>setRegion(activeRegion));',
-  'elements.zoomIn.addEventListener("click",()=>{zoom=clampZoom(zoom*1.4);queueRender();}); elements.zoomOut.addEventListener("click",()=>{zoom=clampZoom(zoom/1.4);queueRender();}); elements.reset.addEventListener("click",()=>setRegion(activeRegion));',
+  'function zoomFactor(value) { return value < 12 ? 1.8 : value < 120 ? 2.2 : 2.5; } function changeZoom(direction) { const factor = zoomFactor(zoom); zoom = clampZoom(direction > 0 ? zoom * factor : zoom / factor); elements.stage.dataset.zoom = zoom.toFixed(zoom < 10 ? 1 : 0); queueRender(); } elements.zoomIn.addEventListener("click",()=>changeZoom(1)); elements.zoomOut.addEventListener("click",()=>changeZoom(-1)); elements.reset.addEventListener("click",()=>setRegion(activeRegion));',
   "zoom controls"
 );
 
 replaceOnce(
   'const globe = { queueRender, setRegion, focusCountry };',
-  'const globe = { queueRender, setRegion, focusCountry }; window.NEARER_MASTERY_GLOBE = { zoomIn: () => elements.zoomIn.click(), zoomOut: () => elements.zoomOut.click(), reset: () => elements.reset.click() };',
+  'const globe = { queueRender, setRegion, focusCountry }; window.NEARER_MASTERY_GLOBE = { zoomIn: () => changeZoom(1), zoomOut: () => changeZoom(-1), reset: () => elements.reset.click(), focusCountry, getZoom: () => zoom, projectCountry: code => { const feature = featureByCode.get(code); if (!feature) return null; const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature); return projection(coordinate); } };',
   "globe controls API"
 );
 
