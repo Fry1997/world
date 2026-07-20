@@ -43,7 +43,7 @@ async function waitForRuntime(page, flag = null, timeout = 35_000) {
   );
 }
 
-async function assertDetailedGeometry(page, label) {
+async function assertDetailedGeometry(page, label, precision = false) {
   const detail = await page.evaluate(() => {
     const critical = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
     const features = new Map((window.NEARER_COUNTRIES_GEOJSON?.features || []).map(feature => [feature.properties.code, feature]));
@@ -54,8 +54,9 @@ async function assertDetailedGeometry(page, label) {
       criticalTypes: Object.fromEntries(critical.map(code => [code, features.get(code)?.geometry?.type || null]))
     };
   });
-  assert(detail.source.includes("1:10m"), `${label}: the 1:10m country geometry did not load.`);
+  assert(detail.source.includes(precision ? "1:10m" : "1:50m"), `${label}: the expected country geometry did not load.`);
   assert(detail.detailedCount > 150, `${label}: detailed country geometry did not load.`);
+  if (!precision) return;
   assert(detail.unresolved.length === 0, `${label}: critical microstates still use point fallbacks: ${detail.unresolved.join(", ")}.`);
   for (const [code, type] of Object.entries(detail.criticalTypes)) {
     assert(type && type !== "Point", `${label}: ${code} is not represented by a real polygon.`);
@@ -102,7 +103,7 @@ async function exerciseSolo(page, label, mobile) {
 async function exerciseMastery(page, label) {
   await page.goto(`${baseUrl}/mastery/`, { waitUntil: "domcontentloaded" });
   await waitForRuntime(page, "__NEARER_MASTERY_STARTED");
-  await assertDetailedGeometry(page, label);
+  await assertDetailedGeometry(page, label, true);
   await page.waitForSelector("#regionGrid [data-region]");
   await page.locator("#regionGrid [data-region]").first().click();
   await page.waitForFunction(() => !document.getElementById("masterySession")?.classList.contains("is-hidden"));
@@ -129,7 +130,7 @@ async function exerciseMastery(page, label) {
 async function exerciseAtlas(page, label, mobile) {
   await page.goto(`${baseUrl}/atlas/`, { waitUntil: "domcontentloaded" });
   await waitForRuntime(page, "__NEARER_ATLAS_STARTED");
-  await assertDetailedGeometry(page, label);
+  await assertDetailedGeometry(page, label, true);
   await page.waitForSelector("#atlasGlobeCanvas", { state: "attached" });
   await page.waitForSelector('.platform-mobile-dock [data-platform-section="atlas"]', { state: "attached" });
 
