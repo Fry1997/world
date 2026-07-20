@@ -13,6 +13,7 @@ if (!document.querySelector("link[data-nearer-cloud-style]")) {
 try {
   await import("../cloud.js");
   await import("../platform.js");
+  await import("./progress-panel.js");
 } finally {
   window.__NEARER_PLATFORM_MODULE_PENDING = false;
 }
