@@ -90,7 +90,11 @@ const bundledOnlyLegacyAssets = [
   /^together\/race\/race-loader\.js$/,
   /^together\/cooperative\/cooperative(?:-loader)?\.js$/,
   /^together\/duel\/(?:duel|duel-loader|duel-pressure)\.js$/,
-  /^together\/shared\/(?:together-core|premium-globe-v2|polish-ui|experience(?:4|5|6|7|8|9|10)|experience8-bootstrap)\.js$/
+  /^together\/shared\/(?:together-core|premium-globe-v2|polish-ui|experience(?:4|5|6|7|8|9|10)|experience8-bootstrap)\.js$/,
+  /^(?:styles|globe|platform|performance)\.css$/,
+  /^mastery\/mastery\.css$/,
+  /^together\/(?:race\/race|cooperative\/cooperative|duel\/duel)\.css$/,
+  /^together\/shared\/(?:mode|polish|prestige|experience(?:2|3|4|5|6|7|7-multiplayer|8|9|10)?)\.css$/
 ];
 
 const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
@@ -98,6 +102,7 @@ const directSoloScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/(?:app-[^"
 const directMasteryScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/runtime-\d+\.js|mastery\/mastery-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directTogetherHubScript = /<script\b[^>]*\bsrc=["']together\/shared\/experience(?:7|8|9|10)\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directTogetherModeScript = /<script\b[^>]*\bsrc=["'](?:chunks\/runtime-\d+\.js|together\/(?:race\/race-loader|cooperative\/cooperative-loader|duel\/duel-loader|shared\/experience8-bootstrap)\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
+const directStylesheetLink = /<link\b(?=[^>]*\brel=["']stylesheet["'])(?=[^>]*\bhref=["'][^"']+\.css(?:\?[^"']*)?["'])[^>]*>\s*/gi;
 
 async function reconstructSource(files, globalKey) {
   const cacheKey = `${globalKey}:${files.join(",")}`;
@@ -236,7 +241,8 @@ function nearerCompatibilityPlugin() {
 
         let transformedHtml = html
           .replaceAll('<base href="/world/">', '<base href="/">')
-          .replace(directPlatformScript, "");
+          .replace(directPlatformScript, "")
+          .replace(directStylesheetLink, "");
 
         if (isMainPage) transformedHtml = transformedHtml.replace(directSoloScript, "");
         if (isMasteryPage) transformedHtml = transformedHtml.replace(directMasteryScript, "");
