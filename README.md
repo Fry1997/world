@@ -45,4 +45,4 @@ Countries absent from the low-resolution atlas are represented by mapped point a
 
 ## Deployment
 
-The project is a static site and can be hosted on GitHub Pages, Netlify, Vercel or any ordinary static web server.
+Production deploys from the `main` branch to Vercel.
