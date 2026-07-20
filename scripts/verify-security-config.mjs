@@ -1,6 +1,7 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { contentSecurityPolicy, securityHeaders } from "../security-headers.mjs";
+import { contentSecurityPolicy, inlineScriptHashes, securityHeaders } from "../security-headers.mjs";
 
 const root = process.cwd();
 const config = JSON.parse(await readFile(resolve(root, "vercel.json"), "utf8"));
@@ -40,6 +41,7 @@ for (const directive of requiredDirectives) {
 }
 
 const policyFailures = [];
+if (directives.get("script-src")?.includes("'unsafe-inline'")) policyFailures.push("arbitrary inline scripts are permitted");
 if (contentSecurityPolicy.includes("'unsafe-eval'")) policyFailures.push("script evaluation is permitted");
 if (contentSecurityPolicy.includes("*")) policyFailures.push("a wildcard source is permitted");
 if (contentSecurityPolicy.includes("cdn.jsdelivr.net")) policyFailures.push("the former runtime CDN remains permitted");
@@ -63,4 +65,39 @@ if (missingOrExtra.length) {
   throw new Error(`The Vercel security header set has drifted: ${[...new Set(missingOrExtra)].join(", ")}`);
 }
 
-console.log(`Verified ${expectedKeys.length} security headers and ${requiredDirectives.length} CSP directives.`);
+const authorisedHashes = new Set(inlineScriptHashes);
+const generatedPages = [
+  "index.html",
+  "mastery/index.html",
+  "together/index.html",
+  "together/race/index.html",
+  "together/cooperative/index.html",
+  "together/duel/index.html"
+];
+const usedHashes = new Set();
+
+for (const page of generatedPages) {
+  const html = await readFile(resolve(root, "dist", page), "utf8");
+  const inlineScripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
+    .map(match => match[1])
+    .filter(source => source.length);
+
+  for (const source of inlineScripts) {
+    const digest = createHash("sha256").update(source, "utf8").digest("base64");
+    const hash = `'sha256-${digest}'`;
+    usedHashes.add(hash);
+    if (!authorisedHashes.has(hash)) {
+      throw new Error(`${page} contains an inline script that is not authorised by the production CSP: ${hash}`);
+    }
+  }
+}
+
+for (const hash of authorisedHashes) {
+  if (!usedHashes.has(hash)) throw new Error(`The production CSP contains an unused inline script hash: ${hash}`);
+  if (!directives.get("script-src")?.includes(hash)) throw new Error(`script-src is missing the authorised inline hash: ${hash}`);
+}
+
+console.log(
+  `Verified ${expectedKeys.length} security headers, ${requiredDirectives.length} CSP directives and ` +
+  `${usedHashes.size} exact inline script hashes.`
+);
