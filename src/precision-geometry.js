@@ -1,88 +1,56 @@
-import precisionWorldUrl from "world-atlas/countries-10m.json?url";
-
-const normalise = value => String(value || "")
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "")
-  .toLowerCase()
-  .replace(/[^a-z0-9]+/g, " ")
-  .trim()
-  .replace(/\s+/g, " ");
+import precisionCollection from "./generated/precision-countries.json";
 
 const criticalMicrostates = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
 let precisionPromise = null;
 
-function namesFor(country) {
-  return [country.name, ...(country.aliases || [])].map(normalise).filter(Boolean);
-}
-
 export async function preparePrecisionGeometry() {
   if (window.__NEARER_PRECISION_GEOMETRY) return window.__NEARER_PRECISION_GEOMETRY;
 
-  precisionPromise ||= (async () => {
-    const gameData = window.NEARER_GAME_DATA;
+  precisionPromise ||= Promise.resolve().then(() => {
     const existing = window.NEARER_COUNTRIES_GEOJSON;
-    const topoFeature = window.NEARER_TOPO_FEATURE;
-    if (!gameData || !existing || typeof topoFeature !== "function") {
+    if (!existing?.features?.length) {
       throw new Error("Precision country geometry requires the Nearer geography runtime.");
     }
 
-    const response = await fetch(precisionWorldUrl, { cache: "force-cache" });
-    if (!response.ok) throw new Error(`Could not load precision country geometry (${response.status}).`);
-    const topology = await response.json();
-    const sourceFeatures = topoFeature(topology, topology.objects.countries).features;
-    const sourceByNumeric = new Map();
-    const sourceByName = new Map();
-
-    for (const feature of sourceFeatures) {
-      if (feature.id !== undefined && feature.id !== null && feature.id !== "") {
-        sourceByNumeric.set(String(feature.id).padStart(3, "0"), feature);
-      }
-      const sourceName = normalise(feature.properties?.name);
-      if (sourceName) sourceByName.set(sourceName, feature);
-    }
-
-    const existingByCode = new Map(existing.features.map(feature => [feature.properties.code, feature]));
+    const precisionByCode = new Map(
+      (precisionCollection.features || []).map(feature => [feature.properties.code, feature])
+    );
+    let precisionCount = 0;
     let detailedCount = 0;
     let pointFallbackCount = 0;
 
-    const features = gameData.countries.map(country => {
-      let source = country.numeric
-        ? sourceByNumeric.get(String(country.numeric).padStart(3, "0"))
-        : null;
+    const features = existing.features.map(previous => {
+      const precision = precisionByCode.get(previous.properties.code);
+      const feature = precision
+        ? {
+            type: "Feature",
+            properties: {
+              ...previous.properties,
+              ...precision.properties,
+              approximate: false,
+              detailScale: "10m"
+            },
+            geometry: precision.geometry
+          }
+        : previous;
 
-      if (!source) {
-        for (const name of namesFor(country)) {
-          source = sourceByName.get(name);
-          if (source) break;
-        }
-      }
-
-      const previous = existingByCode.get(country.code);
-      const geometry = source?.geometry || previous?.geometry || { type: "Point", coordinates: country.fallback };
-      const approximate = geometry.type === "Point";
-      if (approximate) pointFallbackCount += 1;
+      if (precision) precisionCount += 1;
+      if (feature.geometry.type === "Point") pointFallbackCount += 1;
       else detailedCount += 1;
-
-      return {
-        type: "Feature",
-        properties: {
-          code: country.code,
-          name: country.name,
-          continent: country.continent,
-          approximate,
-          detailScale: source ? "10m" : previous?.properties?.detailScale || "fallback"
-        },
-        geometry
-      };
+      return feature;
     });
 
     const featureByCode = new Map(features.map(feature => [feature.properties.code, feature]));
-    const unresolvedMicrostates = criticalMicrostates.filter(code => featureByCode.get(code)?.geometry.type === "Point");
+    const unresolvedMicrostates = criticalMicrostates.filter(
+      code => featureByCode.get(code)?.geometry.type === "Point"
+    );
     const detail = {
-      source: "Natural Earth 1:10m via world-atlas",
+      source: "Natural Earth 1:50m base with a compact 1:10m precision layer",
       detailedCount,
+      precisionCount,
       pointFallbackCount,
-      unresolvedMicrostates
+      unresolvedMicrostates,
+      runtimeBytes: JSON.stringify(precisionCollection).length
     };
 
     window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
@@ -90,7 +58,7 @@ export async function preparePrecisionGeometry() {
     window.__NEARER_DETAILED_GEOMETRY = detail;
     window.__NEARER_MASTERY_DETAILED_GEOMETRY = detail;
     return detail;
-  })();
+  });
 
   return precisionPromise;
 }
