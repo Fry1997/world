@@ -35,12 +35,14 @@ const ignoredRootFiles = new Set([
   "runtime-loader.js"
 ]);
 
-const soloOnlyLegacyAssets = [
-  /^chunks\/app-[^/]+\.js$/
+const bundledOnlyLegacyAssets = [
+  /^chunks\/app-[^/]+\.js$/,
+  /^mastery\/mastery(?:-loader)?\.js$/
 ];
 
 const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directSoloScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/(?:app-[^"']+|runtime-\d+)\.js|runtime-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
+const directMasteryScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/runtime-\d+\.js|mastery\/mastery-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 
 async function copyLegacyAssets(sourceDirectory = root) {
   for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
@@ -59,7 +61,7 @@ async function copyLegacyAssets(sourceDirectory = root) {
 
     if (relativePath.endsWith(".html")) continue;
     if (!relativePath.includes(sep) && ignoredRootFiles.has(entry.name)) continue;
-    if (soloOnlyLegacyAssets.some(pattern => pattern.test(normalisedPath))) continue;
+    if (bundledOnlyLegacyAssets.some(pattern => pattern.test(normalisedPath))) continue;
 
     const destinationPath = resolve(outDir, relativePath);
     await mkdir(dirname(destinationPath), { recursive: true });
@@ -87,7 +89,9 @@ function nearerCompatibilityPlugin() {
     transformIndexHtml: {
       order: "pre",
       handler(html, context) {
-        const isMainPage = Boolean(context?.filename && resolve(context.filename) === pages.main);
+        const filename = context?.filename ? resolve(context.filename) : "";
+        const isMainPage = filename === pages.main;
+        const isMasteryPage = filename === pages.mastery;
         const tags = [
           {
             tag: "script",
@@ -109,11 +113,20 @@ function nearerCompatibilityPlugin() {
           });
         }
 
+        if (isMasteryPage) {
+          tags.push({
+            tag: "script",
+            attrs: { type: "module", src: "/src/mastery-entry.js" },
+            injectTo: "head"
+          });
+        }
+
         let transformedHtml = html
           .replaceAll('<base href="/world/">', '<base href="/">')
           .replace(directPlatformScript, "");
 
         if (isMainPage) transformedHtml = transformedHtml.replace(directSoloScript, "");
+        if (isMasteryPage) transformedHtml = transformedHtml.replace(directMasteryScript, "");
 
         return { html: transformedHtml, tags };
       }

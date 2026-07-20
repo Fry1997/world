@@ -95,8 +95,19 @@ try {
   await page.waitForFunction(expected => Number(document.getElementById("guessCount")?.textContent || 0) >= expected, savedGuessCount);
 
   await page.goto(`${baseUrl}/mastery/`, { waitUntil: "domcontentloaded" });
-  await page.waitForSelector("#masteryDashboard");
+  await page.waitForFunction(
+    () => document.documentElement.classList.contains("nearer-runtime-ready") && Boolean(window.__NEARER_MASTERY_STARTED),
+    null,
+    { timeout: 30_000 }
+  );
+  await page.waitForSelector("#regionGrid [data-region]");
   await page.waitForSelector(".platform-mobile-dock");
+  await page.locator("#regionGrid [data-region]").first().click();
+  await page.waitForFunction(() => !document.getElementById("masterySession")?.classList.contains("is-hidden"));
+  await page.waitForSelector("#masteryGlobeCanvas", { state: "attached" });
+  assert(Boolean(await page.evaluate(() => localStorage.getItem("nearer-mastery-session-v1"))), "Regional Mastery did not save its active session.");
+  await page.locator("#exitSessionButton").click();
+  await page.waitForFunction(() => !document.getElementById("masteryDashboard")?.classList.contains("is-hidden"));
 
   await page.goto(`${baseUrl}/together/`, { waitUntil: "domcontentloaded" });
   await page.waitForSelector(".platform-mobile-dock");
@@ -119,7 +130,7 @@ try {
   }
 
   assert(pageErrors.length === 0, `Browser errors were raised:\n${pageErrors.join("\n")}`);
-  console.log("Mobile browser smoke test passed for solo play, saved progress, accounts, Mastery and all Together modes.");
+  console.log("Mobile browser smoke test passed for solo play, saved progress, accounts, Regional Mastery and all Together modes.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
