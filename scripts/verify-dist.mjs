@@ -56,9 +56,15 @@ if (stylesheetAssets.length < 7) {
   throw new Error("The route styles were not split into generated cached assets.");
 }
 
-const bundledJavascript = (await Promise.all(
-  javascriptAssets.map(name => readFile(resolve(dist, "assets", name), "utf8"))
-)).join("\n");
+const javascriptSources = await Promise.all(javascriptAssets.map(async name => ({
+  name,
+  source: await readFile(resolve(dist, "assets", name), "utf8")
+})));
+const bundledJavascript = javascriptSources.map(asset => asset.source).join("\n");
+const firstPartyJavascript = javascriptSources
+  .filter(asset => !asset.name.startsWith("supabase-client-"))
+  .map(asset => asset.source)
+  .join("\n");
 const bundledStyles = (await Promise.all(
   stylesheetAssets.map(name => readFile(resolve(dist, "assets", name), "utf8"))
 )).join("\n");
@@ -93,12 +99,19 @@ for (const forbiddenMarker of [
   "NEARER_RACE_SOURCE",
   "URL.createObjectURL",
   "new Blob([source]",
-  "(0, eval)(",
+  "(0, eval)("
+]) {
+  if (firstPartyJavascript.includes(forbiddenMarker)) {
+    throw new Error(`The generated first-party JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
+  }
+}
+
+for (const forbiddenMarker of [
   "cdn.jsdelivr.net/npm/@supabase/supabase-js",
   "SUPABASE_MODULE"
 ]) {
   if (bundledJavascript.includes(forbiddenMarker)) {
-    throw new Error(`The generated JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
+    throw new Error(`The generated JavaScript still contains the remote Supabase mechanism: ${forbiddenMarker}`);
   }
 }
 
