@@ -8,6 +8,8 @@ function showFailure(error) {
 
 async function start() {
   await initialiseGameRuntime();
+  const { installMasteryPrecision } = await import('./mastery-precision.js');
+  installMasteryPrecision();
   await import('../mastery/mastery.js');
 
   if (!window.__NEARER_MASTERY_STARTED) {
