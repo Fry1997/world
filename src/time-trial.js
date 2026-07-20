@@ -1,6 +1,10 @@
 import "./time-trial.css";
+import "./time-trial-table.css";
 import { countrySearch, dailySequence, localDateKey, rankedAvailable, readTimeTrialState, saveResult } from "./time-trial-data.js";
 import { createTimeTrialGlobe } from "./time-trial-globe.js";
+import { clearCompetitionResult, markCompetitionVerified, queueCompetitionResult, queuedCompetitionResults } from "./time-trial-recovery.js";
+import { loadCompetitionTable, startCompetition, submitCompetition } from "./time-trial-service.js";
+import { showCompetitionTable, showVerificationStatus } from "./time-trial-table.js";
 import { launchMarkup, lobbyMarkup, renderGuessState, resultMarkup, runningMarkup, updateRunning } from "./time-trial-view.js";
 
 const DURATION_MS = 180000;
@@ -50,7 +54,30 @@ function bindClose() {
 }
 
 function bindStarts() {
-  dialog.querySelectorAll("[data-time-trial-start]").forEach(button => button.addEventListener("click", () => startRun(button.dataset.timeTrialStart === "ranked")));
+  dialog.querySelectorAll("[data-time-trial-start]").forEach(button => button.addEventListener("click", () => startRun(button.dataset.timeTrialStart === "ranked", button)));
+}
+
+function configureAccountAccess() {
+  const button = dialog.querySelector('[data-time-trial-start="ranked"]');
+  if (!button || window.NEARER_CLOUD?.session) return;
+  button.removeAttribute("data-time-trial-start");
+  button.textContent = "Sign in for ranked attempt";
+  button.addEventListener("click", () => {
+    dialog.close();
+    window.NEARER_CLOUD?.open?.();
+  });
+}
+
+async function refreshTable(message = "") {
+  if (!window.NEARER_CLOUD?.session) {
+    showCompetitionTable(dialog, [], "Sign in to view today's verified results.");
+    return;
+  }
+  try {
+    showCompetitionTable(dialog, await loadCompetitionTable(localDateKey()));
+  } catch (error) {
+    showCompetitionTable(dialog, [], message || error.message || "Today's results are temporarily unavailable.");
+  }
 }
 
 function openLobby() {
@@ -58,8 +85,10 @@ function openLobby() {
   const state = readTimeTrialState();
   dialog.innerHTML = lobbyMarkup({ rankedAvailable: rankedAvailable(), today: currentDay(), stats: state.stats || {} });
   bindClose();
+  configureAccountAccess();
   bindStarts();
   dialog.showModal();
+  refreshTable();
 }
 
 function showSuggestions(input) {
@@ -153,14 +182,36 @@ function bindRunning() {
   input?.focus();
 }
 
-function startRun(ranked) {
+async function startRun(ranked, sourceButton = null) {
   clearInterval(timer);
   globe?.destroy();
   const dateKey = localDateKey();
   if (ranked && !rankedAvailable(dateKey)) ranked = false;
+  let competition = null;
+  let remaining = DURATION_MS;
+
+  if (ranked) {
+    sourceButton && (sourceButton.disabled = true);
+    sourceButton && (sourceButton.textContent = "Preparing ranked run…");
+    try {
+      competition = await startCompetition(dateKey);
+      remaining = Math.max(0, Math.min(DURATION_MS, Date.parse(competition.endsAt) - Date.now()));
+      if (remaining <= 0) throw new Error("Today's ranked attempt has expired.");
+    } catch (error) {
+      sourceButton && (sourceButton.disabled = false);
+      sourceButton && (sourceButton.textContent = "Begin ranked attempt");
+      const message = dialog.querySelector(".nearer-time-trial-used") || document.createElement("p");
+      message.className = "nearer-time-trial-used";
+      message.textContent = error.message || "The ranked run could not start.";
+      dialog.querySelector(".nearer-time-trial-lobby aside")?.append(message);
+      return;
+    }
+  }
+
   run = {
     status: "running",
     ranked,
+    serverRunId: competition?.runId || null,
     dateKey,
     sequence: dailySequence(countries, dateKey),
     index: 0,
@@ -169,23 +220,23 @@ function startRun(ranked) {
     currentGuesses: [],
     solved: [],
     closestDistance: Infinity,
-    remaining: DURATION_MS,
-    startedAt: performance.now(),
+    remaining,
+    startedAt: performance.now() - (DURATION_MS - remaining),
     countryStartedAt: performance.now(),
-    endsAt: performance.now() + DURATION_MS
+    endsAt: performance.now() + remaining
   };
-  dialog.innerHTML = runningMarkup({ ranked, remaining: DURATION_MS, found: 0, guesses: 0 });
+  dialog.innerHTML = runningMarkup({ ranked, remaining, found: 0, guesses: 0 });
   globe = createTimeTrialGlobe(dialog.querySelector("[data-time-trial-globe]"), window.NEARER_GAME_DATA, window.NEARER_COUNTRIES_GEOJSON, window.NEARER_D3);
   bindRunning();
   timer = setInterval(tick, 100);
   tick();
 }
 
-function finishRun() {
+async function finishRun() {
   if (!run || run.status !== "running") return;
   clearInterval(timer);
   run.remaining = Math.max(0, run.endsAt - performance.now());
-  run.status = "finished";
+  run.status = "finishing";
   globe?.destroy();
   const result = {
     clientRunId: crypto.randomUUID?.() || `time-trial-${Date.now()}`,
@@ -200,12 +251,47 @@ function finishRun() {
     solved: run.solved,
     completedAt: new Date().toISOString()
   };
+  let serverResult = null;
+  let submissionError = null;
   const state = saveResult(result);
+
+  if (run.ranked && run.serverRunId) {
+    queueCompetitionResult(run.serverRunId, result);
+    try {
+      serverResult = await submitCompetition(run.serverRunId, result);
+      clearCompetitionResult(run.serverRunId);
+      markCompetitionVerified(result.dateKey, serverResult);
+      result.verified = true;
+      result.durationMs = serverResult.durationMs;
+      result.timeRemainingMs = serverResult.timeRemainingMs;
+    } catch (error) {
+      submissionError = error;
+    }
+  }
+
+  run.status = "finished";
   dialog.innerHTML = resultMarkup(result, state);
   bindClose();
+  configureAccountAccess();
   bindStarts();
   updateLaunch();
+  if (run.ranked) showVerificationStatus(dialog, Boolean(serverResult), submissionError?.message || "");
+  if (serverResult?.leaderboard) showCompetitionTable(dialog, serverResult.leaderboard);
+  else refreshTable(submissionError?.message || "");
   window.dispatchEvent(new CustomEvent("nearer:time-trial-result", { detail: result }));
+}
+
+async function retryQueuedResults() {
+  if (!window.NEARER_CLOUD?.session) return;
+  for (const item of queuedCompetitionResults()) {
+    try {
+      const serverResult = await submitCompetition(item.runId, item.result);
+      clearCompetitionResult(item.runId);
+      markCompetitionVerified(item.result.dateKey, serverResult);
+    } catch (error) {
+      if (/already submitted/i.test(error.message || "")) clearCompetitionResult(item.runId);
+    }
+  }
 }
 
 async function waitForRuntime() {
@@ -223,6 +309,7 @@ async function initialise() {
   search = countrySearch(countries);
   createDialog();
   addLaunch();
+  retryQueuedResults();
   window.NEARER_TIME_TRIAL = { open: openLobby, startPractice: () => { openLobby(); startRun(false); } };
 }
 

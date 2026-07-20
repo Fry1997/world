@@ -1,7 +1,7 @@
 const STORAGE_KEY = "nearer-time-trial-v1";
 
 export function localDateKey(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return date.toISOString().slice(0, 10);
 }
 
 export function normalise(value) {
@@ -75,8 +75,8 @@ export function rankedAvailable(dateKey = localDateKey()) {
 }
 
 function previousDateKey(dateKey) {
-  const date = new Date(`${dateKey}T12:00:00`);
-  date.setDate(date.getDate() - 1);
+  const date = new Date(`${dateKey}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
   return localDateKey(date);
 }
 
