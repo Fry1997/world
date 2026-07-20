@@ -1,0 +1,15 @@
+.nearer-time-trial-share-panel{display:grid;gap:12px;margin-top:15px;padding:18px;border:1px solid rgba(239,158,132,.28);border-radius:19px;background:rgba(239,147,120,.08)}
+.nearer-time-trial-share-panel h3{margin:4px 0;color:#fff8ef}
+.nearer-time-trial-share-panel p{color:rgba(255,255,255,.55)}
+.nearer-time-trial-share-panel label{display:grid;gap:6px}
+.nearer-time-trial-share-panel input{min-height:43px;padding:0 12px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(2,11,18,.55);color:#fff}
+.nearer-time-trial-invitation{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center;margin:18px 28px 0;padding:19px;border:1px solid rgba(239,158,132,.3);border-radius:21px;background:linear-gradient(145deg,rgba(24,52,66,.96),rgba(8,20,30,.98))}
+.nearer-time-trial-invitation-copy h2{margin:5px 0;color:#fff9f0;font-size:clamp(1.15rem,3vw,1.8rem)}
+.nearer-time-trial-invitation-copy p:last-child{color:rgba(255,255,255,.55);font-size:.7rem;line-height:1.5}
+.nearer-time-trial-invitation-score{display:grid;place-items:center;width:84px;height:84px;border:1px solid rgba(255,255,255,.18);border-radius:24px;background:rgba(255,255,255,.055)}
+.nearer-time-trial-invitation-score strong{color:#ffb099;font-size:2rem}
+.nearer-time-trial-invitation-score span{color:rgba(255,255,255,.45);font-size:.56rem;text-transform:uppercase}
+.nearer-time-trial-invitation-action{display:grid;gap:7px;min-width:165px}
+.nearer-time-trial-invitation-status{padding:11px;border:1px solid rgba(98,196,159,.22);border-radius:13px;background:rgba(98,196,159,.08);color:#9ce2c7;font-size:.68rem;text-align:center}
+@media(max-width:760px){.nearer-time-trial-invitation{grid-template-columns:1fr auto;margin-inline:14px}.nearer-time-trial-invitation-action{grid-column:1/-1}.nearer-time-trial-share-panel{grid-template-columns:1fr}}
+@media(max-width:480px){.nearer-time-trial-invitation{grid-template-columns:1fr}.nearer-time-trial-result-actions{display:grid}.nearer-time-trial-result-actions button{width:100%}}
