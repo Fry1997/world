@@ -70,7 +70,7 @@ export async function prepareDetailedMasteryGeometry() {
           name: country.name,
           continent: country.continent,
           approximate,
-          detailScale: source ? "1:50m" : previous?.properties?.detailScale || "fallback"
+          detailScale: source ? "detailed" : previous?.properties?.detailScale || "fallback"
         },
         geometry
       };
@@ -78,7 +78,7 @@ export async function prepareDetailedMasteryGeometry() {
 
     window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
     window.__NEARER_MASTERY_DETAILED_GEOMETRY = {
-      scale: "1:50m",
+      source: "world-atlas countries-50m",
       detailedCount,
       pointFallbackCount
     };
