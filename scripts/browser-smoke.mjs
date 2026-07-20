@@ -56,12 +56,14 @@ async function assertCoreRuntime(page, label) {
     platform: Boolean(window.__NEARER_PLATFORM_STARTED),
     cloud: Boolean(window.__NEARER_CLOUD_STARTED),
     globe: Boolean(window.__NEARER_PREMIUM_GLOBE_V2_STARTED),
+    detailed: Number(window.__NEARER_DETAILED_GEOMETRY?.detailedCount || 0),
     failed: document.body.textContent.includes("The globe could not start")
   }));
 
   assert(state.platform, `${label}: the shared platform shell did not start.`);
   assert(state.cloud, `${label}: the account and cloud layer did not start.`);
   assert(state.globe, `${label}: the adaptive globe did not start.`);
+  assert(state.detailed > 150, `${label}: the detailed country geometry did not load.`);
   assert(!state.failed, `${label}: the solo failure surface was shown.`);
 }
 
@@ -110,6 +112,28 @@ async function exerciseMastery(page, label) {
   await page.waitForFunction(() => !document.getElementById("masteryDashboard")?.classList.contains("is-hidden"));
 }
 
+async function exerciseAtlas(page, label) {
+  await page.goto(`${baseUrl}/atlas/`, { waitUntil: "domcontentloaded" });
+  await waitForRuntime(page, "__NEARER_ATLAS_STARTED", 35_000);
+  await page.waitForSelector("#atlasGlobeCanvas", { state: "attached" });
+  await page.waitForSelector('.platform-mobile-dock [data-platform-section="atlas"]');
+  await page.locator("#atlasSearch").fill("Luxembourg");
+  await page.waitForSelector('#atlasSuggestions [data-atlas-country="LUX"]');
+  await page.locator('#atlasSuggestions [data-atlas-country="LUX"]').click();
+  await page.waitForFunction(() => document.getElementById("atlasCountryCode")?.textContent === "LUX");
+  const state = await page.evaluate(() => ({
+    detailed: Number(window.__NEARER_DETAILED_GEOMETRY?.detailedCount || 0),
+    code: document.getElementById("atlasCountryCode")?.textContent,
+    profileVisible: !document.getElementById("atlasProfileContent")?.classList.contains("is-hidden"),
+    atlasActive: document.querySelector('.platform-mobile-dock [data-platform-section="atlas"]')?.classList.contains("is-active")
+  }));
+  assert(state.detailed > 150, `${label}: Atlas did not use detailed geometry.`);
+  assert(state.code === "LUX" && state.profileVisible, `${label}: Atlas did not open Luxembourg.`);
+  assert(state.atlasActive, `${label}: Atlas was not active in the mobile dock.`);
+  await page.locator("#atlasFavouriteButton").click();
+  assert(await page.locator("#atlasFavouriteButton").getAttribute("aria-pressed") === "true", `${label}: Atlas did not save a favourite.`);
+}
+
 async function exerciseTogetherRoutes(page, label) {
   await page.goto(`${baseUrl}/together/`, { waitUntil: "domcontentloaded" });
   await waitForRuntime(page);
@@ -146,6 +170,7 @@ async function runMobileSuite(browser) {
   try {
     await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
     await assertCoreRuntime(page, "Mobile");
+    assert(await page.locator(".platform-mobile-dock [data-platform-section]").count() === 5, "Mobile: the dock does not contain all five Nearer sections.");
 
     const savedGuessCount = await selectAndSubmitGuess(
       page,
@@ -161,6 +186,7 @@ async function runMobileSuite(browser) {
     );
 
     await exerciseMastery(page, "Mobile");
+    await exerciseAtlas(page, "Mobile");
     await exerciseTogetherRoutes(page, "Mobile");
     assert(pageErrors.length === 0, `Mobile browser errors were raised:\n${pageErrors.join("\n")}`);
   } finally {
@@ -184,6 +210,7 @@ async function runDesktopSuite(browser) {
     await assertCoreRuntime(page, "Desktop");
     assert(await page.locator(".platform-tabs").isVisible(), "Desktop: the primary navigation is not visible.");
     assert(await page.locator('.platform-tabs [data-mode="random"]').isVisible(), "Desktop: Random is not available in the primary navigation.");
+    assert(await page.locator('.platform-tabs [data-platform-section="atlas"]').isVisible(), "Desktop: Atlas is not available in the primary navigation.");
 
     const playBox = await page.locator(".play-column").boundingBox();
     const resultsBox = await page.locator(".results-column").boundingBox();
@@ -206,6 +233,11 @@ async function runDesktopSuite(browser) {
     await page.waitForSelector("#masteryGlobeCanvas", { state: "attached" });
     await page.locator("#exitSessionButton").click();
     await page.waitForFunction(() => !document.getElementById("masteryDashboard")?.classList.contains("is-hidden"));
+
+    await exerciseAtlas(page, "Desktop");
+    const atlasLayout = await page.locator(".atlas-layout").boundingBox();
+    const atlasProfile = await page.locator(".atlas-profile").boundingBox();
+    assert(atlasLayout && atlasProfile && atlasProfile.x > atlasLayout.x + atlasLayout.width / 2, "Desktop: Atlas did not keep its globe and profile columns.");
 
     await page.goto(`${baseUrl}/together/`, { waitUntil: "domcontentloaded" });
     await waitForRuntime(page);
@@ -249,7 +281,7 @@ try {
   browser = await chromium.launch({ headless: true });
   await runMobileSuite(browser);
   await runDesktopSuite(browser);
-  console.log("Mobile and desktop browser smoke tests passed for every Nearer route.");
+  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including Atlas.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
