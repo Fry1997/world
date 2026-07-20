@@ -1,1 +1,2 @@
-import "./duel-bootstrap.js";
+import './duel-styles.js';
+import './duel-bootstrap.js';
