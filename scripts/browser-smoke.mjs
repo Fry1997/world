@@ -86,6 +86,10 @@ async function selectAndSubmitGuess(page, navigationSelector) {
 async function exerciseAccountDialog(page) {
   await page.locator("#nearerAccountButton").click();
   await page.waitForSelector("#nearerAccountDialog[open]");
+  await page.waitForFunction(() => {
+    const message = document.querySelector("#nearerAccountDialog [data-auth-message]");
+    return Boolean(message && !message.textContent.includes("Loading your account"));
+  }, null, { timeout: 15_000 });
   await page.locator("[data-account-close]").click();
   await page.waitForFunction(() => !document.getElementById("nearerAccountDialog")?.hasAttribute("open"));
 }

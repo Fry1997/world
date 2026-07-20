@@ -46,16 +46,25 @@ const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 10) {
-  throw new Error("The route modules were not split into the expected cached assets.");
+if (javascriptAssets.length < 11) {
+  throw new Error("The route and account modules were not split into the expected cached assets.");
+}
+if (!javascriptAssets.some(name => name.startsWith("supabase-client-"))) {
+  throw new Error("The locally bundled Supabase client chunk was not generated.");
 }
 if (stylesheetAssets.length < 7) {
   throw new Error("The route styles were not split into generated cached assets.");
 }
 
-const bundledJavascript = (await Promise.all(
-  javascriptAssets.map(name => readFile(resolve(dist, "assets", name), "utf8"))
-)).join("\n");
+const javascriptSources = await Promise.all(javascriptAssets.map(async name => ({
+  name,
+  source: await readFile(resolve(dist, "assets", name), "utf8")
+})));
+const bundledJavascript = javascriptSources.map(asset => asset.source).join("\n");
+const firstPartyJavascript = javascriptSources
+  .filter(asset => !asset.name.startsWith("supabase-client-"))
+  .map(asset => asset.source)
+  .join("\n");
 const bundledStyles = (await Promise.all(
   stylesheetAssets.map(name => readFile(resolve(dist, "assets", name), "utf8"))
 )).join("\n");
@@ -74,7 +83,8 @@ const requiredBundleMarkers = [
   ["__NEARER_COOPERATIVE_STARTED", "Cooperative Relay implementation"],
   ["Hidden Country Duel did not initialise.", "Hidden Country Duel entry"],
   ["__NEARER_DUEL_STARTED", "Hidden Country Duel implementation"],
-  ["NEARER_TOGETHER_CORE", "Together shared core"]
+  ["NEARER_TOGETHER_CORE", "Together shared core"],
+  ["gxtrcjuhlgkpanqndtwy.supabase.co", "Supabase account configuration"]
 ];
 
 for (const [marker, description] of requiredBundleMarkers) {
@@ -91,8 +101,17 @@ for (const forbiddenMarker of [
   "new Blob([source]",
   "(0, eval)("
 ]) {
+  if (firstPartyJavascript.includes(forbiddenMarker)) {
+    throw new Error(`The generated first-party JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
+  }
+}
+
+for (const forbiddenMarker of [
+  "cdn.jsdelivr.net/npm/@supabase/supabase-js",
+  "SUPABASE_MODULE"
+]) {
   if (bundledJavascript.includes(forbiddenMarker)) {
-    throw new Error(`The generated JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
+    throw new Error(`The generated JavaScript still contains the remote Supabase mechanism: ${forbiddenMarker}`);
   }
 }
 

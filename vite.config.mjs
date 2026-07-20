@@ -5,6 +5,7 @@ import { defineConfig } from "vite";
 
 const root = process.cwd();
 const outDir = resolve(root, "dist");
+const cloudModulePath = resolve(root, "cloud.js");
 
 const pages = {
   main: resolve(root, "index.html"),
@@ -103,6 +104,8 @@ const directMasteryScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/runtime
 const directTogetherHubScript = /<script\b[^>]*\bsrc=["']together\/shared\/experience(?:7|8|9|10)\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directTogetherModeScript = /<script\b[^>]*\bsrc=["'](?:chunks\/runtime-\d+\.js|together\/(?:race\/race-loader|cooperative\/cooperative-loader|duel\/duel-loader|shared\/experience8-bootstrap)\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directStylesheetLink = /<link\b(?=[^>]*\brel=["']stylesheet["'])(?=[^>]*\bhref=["'][^"']+\.css(?:\?[^"']*)?["'])[^>]*>\s*/gi;
+const remoteSupabaseDeclaration = 'const SUPABASE_MODULE = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";';
+const remoteSupabaseImport = "import(SUPABASE_MODULE)";
 
 async function reconstructSource(files, globalKey) {
   const cacheKey = `${globalKey}:${files.join(",")}`;
@@ -199,6 +202,18 @@ function nearerCompatibilityPlugin() {
       if (id === virtualModules["virtual:nearer-app"]) return nativeAppSource();
       if (id === virtualModules["virtual:nearer-race"]) return nativeRaceSource();
       return null;
+    },
+    transform(code, id) {
+      if (id.split("?")[0] !== cloudModulePath) return null;
+      if (!code.includes(remoteSupabaseDeclaration) || !code.includes(remoteSupabaseImport)) {
+        throw new Error("The Nearer cloud module has an unexpected Supabase import format.");
+      }
+      return {
+        code: code
+          .replace(remoteSupabaseDeclaration, "")
+          .replace(remoteSupabaseImport, 'import("./src/supabase-client.js")'),
+        map: null
+      };
     },
     transformIndexHtml: {
       order: "pre",
