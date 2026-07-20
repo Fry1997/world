@@ -5,29 +5,47 @@ import { gzipSync } from "node:zlib";
 const assetsDirectory = resolve(process.cwd(), "dist/assets");
 const kibibyte = 1024;
 
-const budgets = {
-  javascript: {
-    extension: ".js",
+const budgets = [
+  {
+    label: "first-party JavaScript",
+    filter: name => name.endsWith(".js") && !name.startsWith("supabase-client-"),
     largestRaw: 500 * kibibyte,
     totalRaw: 750 * kibibyte,
     largestGzip: 170 * kibibyte,
     totalGzip: 260 * kibibyte
   },
-  stylesheet: {
-    extension: ".css",
+  {
+    label: "lazy account client",
+    filter: name => name.startsWith("supabase-client-") && name.endsWith(".js"),
+    largestRaw: 230 * kibibyte,
+    totalRaw: 230 * kibibyte,
+    largestGzip: 65 * kibibyte,
+    totalGzip: 65 * kibibyte
+  },
+  {
+    label: "all JavaScript",
+    filter: name => name.endsWith(".js"),
+    largestRaw: 500 * kibibyte,
+    totalRaw: 900 * kibibyte,
+    largestGzip: 170 * kibibyte,
+    totalGzip: 330 * kibibyte
+  },
+  {
+    label: "stylesheet",
+    filter: name => name.endsWith(".css"),
     largestRaw: 80 * kibibyte,
     totalRaw: 260 * kibibyte,
     largestGzip: 18 * kibibyte,
     totalGzip: 60 * kibibyte
   }
-};
+];
 
 function formatBytes(bytes) {
   return `${(bytes / kibibyte).toFixed(1)} KiB`;
 }
 
-async function measureAssets(extension) {
-  const names = (await readdir(assetsDirectory)).filter(name => name.endsWith(extension));
+async function measureAssets(filter) {
+  const names = (await readdir(assetsDirectory)).filter(filter);
   const measured = await Promise.all(names.map(async name => {
     const content = await readFile(resolve(assetsDirectory, name));
     return {
@@ -76,7 +94,7 @@ function enforceBudget(label, assets, limits) {
   );
 }
 
-for (const [label, limits] of Object.entries(budgets)) {
-  const assets = await measureAssets(limits.extension);
-  enforceBudget(label, assets, limits);
+for (const budget of budgets) {
+  const assets = await measureAssets(budget.filter);
+  enforceBudget(budget.label, assets, budget);
 }
