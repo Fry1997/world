@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -19,6 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Check JavaScript syntax
         shell: bash
@@ -32,7 +38,7 @@ jobs:
         run: python3 scripts/validate-html.py
 
       - name: Install application dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Build the Vercel output
         run: npm run build
@@ -40,7 +46,7 @@ jobs:
       - name: Install Chromium for smoke testing
         run: npx playwright install --with-deps chromium > /dev/null
 
-      - name: Smoke test the mobile application
+      - name: Smoke test mobile and desktop application
         shell: bash
         run: |
           set -o pipefail
