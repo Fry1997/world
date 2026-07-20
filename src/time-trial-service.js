@@ -1,15 +1,7 @@
-import cloudSource from "../cloud.js?raw";
-
-const projectUrl = cloudSource.match(/const SUPABASE_URL = "([^"]+)"/)?.[1];
-const publishableKey = cloudSource.match(/const SUPABASE_KEY = "([^"]+)"/)?.[1];
-let clientPromise;
-
 async function client() {
-  if (!projectUrl || !publishableKey) throw new Error("Nearer account configuration is unavailable.");
-  clientPromise ||= import("./supabase-client.js").then(({ createClient }) => createClient(projectUrl, publishableKey, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-  }));
-  return clientPromise;
+  const getClient = window.NEARER_CLOUD?.client;
+  if (!getClient) throw new Error("Nearer account services are still loading.");
+  return getClient();
 }
 
 async function invoke(body) {
