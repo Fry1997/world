@@ -7,7 +7,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "prepare:mastery": "node scripts/generate-detailed-mastery-runtime.mjs",
+    "prepare:mastery": "node scripts/generate-small-country-precision.mjs && node scripts/generate-detailed-mastery-runtime.mjs",
     "dev": "npm run prepare:mastery && vite --config vite.atlas.config.mjs",
     "build": "npm run prepare:mastery && vite build --config vite.atlas.config.mjs && node scripts/generate-country-catalog.mjs && node scripts/verify-security-config.mjs && node scripts/verify-dist.mjs && node scripts/verify-country-catalog.mjs && node scripts/verify-asset-budgets.mjs",
     "preview": "vite preview",
