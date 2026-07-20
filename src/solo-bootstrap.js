@@ -1,10 +1,10 @@
-import { initialiseGameRuntime } from "./game-runtime.js";
+import { initialiseGameRuntime } from './game-runtime.js';
 
 window.__NEARER_SVG_PATCH_STARTED = true;
 
 function showFailure(error) {
   console.error(error);
-  const panel = document.querySelector(".map-panel");
+  const panel = document.querySelector('.map-panel');
   if (panel) {
     panel.innerHTML = `
       <div style="min-height:360px;display:grid;place-items:center;padding:2rem;text-align:center;border:1px solid rgba(196,74,49,.3);border-radius:24px;background:rgba(196,74,49,.08);font-family:system-ui,sans-serif">
@@ -19,17 +19,13 @@ function showFailure(error) {
 }
 
 async function start() {
-  const appSource = window.NEARER_APP_SOURCE || "";
-  if (!appSource) throw new Error("Nearer application source modules are missing.");
-
   await initialiseGameRuntime();
-  const safeAppSource = appSource.replace("initializeMap();", "");
-  (0, eval)(safeAppSource);
+  await import('virtual:nearer-app');
 
   const importedD3 = window.NEARER_D3;
   const originalOrthographic = importedD3?.geoOrthographic;
-  if (typeof originalOrthographic !== "function") {
-    throw new Error("The globe projection factory is unavailable.");
+  if (typeof originalOrthographic !== 'function') {
+    throw new Error('The globe projection factory is unavailable.');
   }
 
   window.NEARER_D3 = {
@@ -41,9 +37,8 @@ async function start() {
     }
   };
 
-  await import("./solo-enhancements.js");
-  document.documentElement.classList.add("nearer-runtime-ready");
-  delete window.NEARER_APP_SOURCE;
+  await import('./solo-enhancements.js');
+  document.documentElement.classList.add('nearer-runtime-ready');
 }
 
 start().catch(showFailure);
