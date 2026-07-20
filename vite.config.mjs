@@ -106,6 +106,8 @@ const directTogetherModeScript = /<script\b[^>]*\bsrc=["'](?:chunks\/runtime-\d+
 const directStylesheetLink = /<link\b(?=[^>]*\brel=["']stylesheet["'])(?=[^>]*\bhref=["'][^"']+\.css(?:\?[^"']*)?["'])[^>]*>\s*/gi;
 const remoteSupabaseDeclaration = 'const SUPABASE_MODULE = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";';
 const remoteSupabaseImport = "import(SUPABASE_MODULE)";
+const cloudApiDeclaration = "window.NEARER_CLOUD = { open: openAccount, sync: () => syncAll({ initial: false }), get session() { return session; } };";
+const cloudApiReplacement = "window.NEARER_CLOUD = { open: openAccount, sync: () => syncAll({ initial: false }), client: getClient, get session() { return session; } };";
 
 async function reconstructSource(files, globalKey) {
   const cacheKey = `${globalKey}:${files.join(",")}`;
@@ -205,13 +207,14 @@ function nearerCompatibilityPlugin() {
     },
     transform(code, id) {
       if (id !== cloudModulePath) return null;
-      if (!code.includes(remoteSupabaseDeclaration) || !code.includes(remoteSupabaseImport)) {
+      if (!code.includes(remoteSupabaseDeclaration) || !code.includes(remoteSupabaseImport) || !code.includes(cloudApiDeclaration)) {
         throw new Error("The Nearer cloud module has an unexpected Supabase import format.");
       }
       return {
         code: code
           .replace(remoteSupabaseDeclaration, "")
-          .replace(remoteSupabaseImport, 'import("./src/supabase-client.js")'),
+          .replace(remoteSupabaseImport, 'import("./src/supabase-client.js")')
+          .replace(cloudApiDeclaration, cloudApiReplacement),
         map: null
       };
     },
