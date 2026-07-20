@@ -410,7 +410,7 @@
     context.strokeStyle = p.rim;
     context.lineWidth = 1.45;
     context.stroke();
-    if (!fastFrame()) {
+    if (!fastFrame() && radius > .6) {
       context.beginPath();
       context.arc(x, y, radius - .6, -1.28, .26);
       context.strokeStyle = "rgba(225,244,255,.44)";
@@ -430,358 +430,186 @@
     requestAnimationFrame(draw);
   }
 
-  function clampZoom(value) {
-    return Math.max(.72, Math.min(4.8, value));
+  function syncState(force = false) {
+    const next = readView();
+    const nextSignature = signature(next);
+    if (force || nextSignature !== stateSignature) {
+      currentView = next;
+      stateSignature = nextSignature;
+      queue();
+      return true;
+    }
+    return false;
   }
 
-  function pointerDistance(values) {
-    const [a, b] = values;
-    return Math.hypot(a.x - b.x, a.y - b.y);
+  function setInteracting(value) {
+    if (interacting === value) return;
+    interacting = value;
+    resize();
+    queue();
   }
 
-  function centroidFor(code) {
-    const feature = featureByCode.get(code);
-    if (!feature) return null;
-    if (feature.geometry.type === "Point") return feature.geometry.coordinates;
-    const centroid = d3.geoCentroid(feature);
-    return Number.isFinite(centroid[0]) && Number.isFinite(centroid[1]) ? centroid : null;
+  function angleDifference(from, to) {
+    return ((to - from + 540) % 360) - 180;
   }
 
-  function shortestLongitude(from, to) {
-    let delta = to - from;
-    while (delta > 180) delta -= 360;
-    while (delta < -180) delta += 360;
-    return from + delta;
-  }
-
-  function stopAnimation() {
-    if (!viewAnimation) return;
+  function animateTo(targetRotation, targetZoom = zoom, duration = 760) {
     cancelAnimationFrame(viewAnimation);
-    viewAnimation = 0;
-  }
-
-  function animateView(targetRotation, targetZoom, duration = 460) {
-    stopAnimation();
-    const adjustedTarget = [
-      shortestLongitude(rotation[0], targetRotation[0]),
-      Math.max(-82, Math.min(82, targetRotation[1])),
-      0
-    ];
-    const finalZoom = clampZoom(targetZoom);
-    if (reducedMotion.matches || duration <= 0) {
-      rotation = adjustedTarget;
-      zoom = finalZoom;
+    if (reducedMotion.matches) {
+      rotation = [...targetRotation];
+      zoom = targetZoom;
       queue();
       return;
     }
-
     const startRotation = [...rotation];
     const startZoom = zoom;
-    const started = performance.now();
-    const ease = value => 1 - Math.pow(1 - value, 3);
-    const tick = now => {
-      const progress = Math.min(1, (now - started) / duration);
-      const value = ease(progress);
-      rotation = [
-        startRotation[0] + (adjustedTarget[0] - startRotation[0]) * value,
-        startRotation[1] + (adjustedTarget[1] - startRotation[1]) * value,
-        0
-      ];
-      zoom = startZoom + (finalZoom - startZoom) * value;
+    const start = performance.now();
+    const frame = now => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      rotation = startRotation.map((value, index) => value + angleDifference(value, targetRotation[index]) * eased);
+      zoom = startZoom + (targetZoom - startZoom) * eased;
       queue();
-      if (progress < 1) viewAnimation = requestAnimationFrame(tick);
-      else {
-        viewAnimation = 0;
-        gradientCache = null;
-        queue();
-      }
+      if (progress < 1) viewAnimation = requestAnimationFrame(frame);
+      else viewAnimation = 0;
     };
-    viewAnimation = requestAnimationFrame(tick);
+    viewAnimation = requestAnimationFrame(frame);
   }
 
-  function focusCountry(code, targetZoom, duration = 460) {
-    const centroid = centroidFor(code);
-    if (!centroid) return;
-    const feature = featureByCode.get(code);
-    const zoomLevel = targetZoom || (feature?.geometry.type === "Point" ? 2.35 : 1.62);
-    animateView([-centroid[0], -centroid[1], 0], zoomLevel, duration);
+  function focusFeature(feature, targetZoom = 1.35) {
+    if (!feature) return;
+    const centroid = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature);
+    if (!centroid || centroid.some(value => !Number.isFinite(value))) return;
+    latestFocusedCode = feature.properties.code;
+    animateTo([-centroid[0], -centroid[1], 0], targetZoom);
   }
 
-  function hideGuessInfo() {
-    document.getElementById("globeGuessInfo")?.classList.add("is-hidden");
-    document.getElementById("guessedCountryChip")?.classList.add("is-hidden");
+  function updateFocusControl() {
+    const button = document.getElementById("globeFocus");
+    if (!button) return;
+    const best = bestGuess(currentView?.guesses || []);
+    button.disabled = !best;
+    button.title = best ? `Focus ${countryByCode.get(best.code)?.name || "closest guess"}` : "Focus closest guess";
   }
 
-  function showGuessInfo(guess) {
-    if (!guess) {
-      hideGuessInfo();
-      return;
-    }
-    const country = countryByCode.get(guess.code);
-    if (!country) {
-      hideGuessInfo();
-      return;
-    }
-    const target = document.getElementById("globeGuessInfo") || document.getElementById("guessedCountryChip");
-    const name = target?.querySelector("strong");
-    if (name) name.textContent = country.name;
-    target?.classList.remove("is-hidden");
+  function clientPoint(event) {
+    return { x: event.clientX, y: event.clientY };
   }
 
-  function guessedAt(clientX, clientY) {
-    const rect = stage.getBoundingClientRect();
-    const point = [clientX - rect.left, clientY - rect.top];
-    const translate = projection.translate();
-    const radius = projection.scale();
-    if (Math.hypot(point[0] - translate[0], point[1] - translate[1]) > radius) return null;
-    const guesses = [...(currentView?.guesses || [])].reverse();
-    for (const guess of guesses) {
-      const feature = featureByCode.get(guess.code);
-      if (!feature || feature.geometry.type !== "Point") continue;
-      const coordinate = feature.geometry.coordinates;
-      if (!visible(coordinate)) continue;
-      const projected = projection(coordinate);
-      if (projected && Math.hypot(projected[0] - point[0], projected[1] - point[1]) <= 16) return guess;
-    }
-    const coordinate = projection.invert(point);
-    if (!coordinate) return null;
-    return guesses.find(guess => {
-      const feature = featureByCode.get(guess.code);
-      return feature && feature.geometry.type !== "Point" && d3.geoContains(feature, coordinate);
-    }) || null;
-  }
-
-  function consumePointer(event) {
-    if (event.target.closest("button")) return false;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    return true;
+  function pointerDistance() {
+    const values = [...pointers.values()];
+    if (values.length < 2) return 0;
+    return Math.hypot(values[1].x - values[0].x, values[1].y - values[0].y);
   }
 
   stage.addEventListener("pointerdown", event => {
-    if (!consumePointer(event)) return;
-    stopAnimation();
-    interacting = true;
-    stage.classList.add("is-globe-dragging");
     stage.setPointerCapture?.(event.pointerId);
-    pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    if (pointers.size === 1) {
-      gesture = { type: "rotate", x: event.clientX, y: event.clientY, rotation: [...rotation], moved: false };
-    } else if (pointers.size === 2) {
-      gesture = { type: "pinch", distance: pointerDistance([...pointers.values()]), zoom, moved: true };
-    }
-    queue();
-  }, { capture: true, passive: false });
+    pointers.set(event.pointerId, clientPoint(event));
+    setInteracting(true);
+    gesture = {
+      x: event.clientX,
+      y: event.clientY,
+      rotation: [...rotation],
+      zoom,
+      distance: pointerDistance(),
+      moved: false
+    };
+  });
 
   stage.addEventListener("pointermove", event => {
-    if (!pointers.has(event.pointerId) || !gesture || !consumePointer(event)) return;
-    const samples = event.getCoalescedEvents?.() || [event];
-    const latest = samples.at(-1) || event;
-    pointers.set(event.pointerId, { x: latest.clientX, y: latest.clientY });
-    if (pointers.size >= 2) {
-      const distance = pointerDistance([...pointers.values()].slice(0, 2));
-      if (gesture.type !== "pinch") gesture = { type: "pinch", distance, zoom, moved: true };
-      if (gesture.distance > 0) zoom = clampZoom(gesture.zoom * distance / gesture.distance);
+    if (!pointers.has(event.pointerId) || !gesture) return;
+    pointers.set(event.pointerId, clientPoint(event));
+    if (pointers.size > 1) {
+      const distance = pointerDistance();
+      if (gesture.distance > 0) zoom = Math.max(.8, Math.min(2.25, gesture.zoom * distance / gesture.distance));
       gesture.moved = true;
-      gradientCache = null;
       queue();
       return;
     }
-    if (gesture.type === "rotate") {
-      const dx = latest.clientX - gesture.x;
-      const dy = latest.clientY - gesture.y;
-      if (Math.hypot(dx, dy) > 5) gesture.moved = true;
-      const rect = stage.getBoundingClientRect();
-      const sensitivity = 180 / Math.max(300, Math.min(rect.width, rect.height) * zoom);
-      rotation = [
-        gesture.rotation[0] + dx * sensitivity,
-        Math.max(-82, Math.min(82, gesture.rotation[1] - dy * sensitivity)),
-        0
-      ];
-      queue();
-    }
-  }, { capture: true, passive: false });
+    const dx = event.clientX - gesture.x;
+    const dy = event.clientY - gesture.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) gesture.moved = true;
+    rotation = [gesture.rotation[0] + dx * .22, Math.max(-78, Math.min(78, gesture.rotation[1] - dy * .18)), 0];
+    queue();
+  });
 
-  const finishPointer = event => {
-    if (!pointers.has(event.pointerId) || !consumePointer(event)) return;
-    const tap = pointers.size === 1 && gesture?.type === "rotate" && !gesture.moved
-      ? { x: event.clientX, y: event.clientY }
-      : null;
+  function releasePointer(event) {
     pointers.delete(event.pointerId);
     if (!pointers.size) {
-      interacting = false;
-      stage.classList.remove("is-globe-dragging");
       gesture = null;
-      gradientCache = null;
-      if (tap) showGuessInfo(guessedAt(tap.x, tap.y));
+      setInteracting(false);
     }
-    queue();
-  };
+  }
 
-  stage.addEventListener("pointerup", finishPointer, { capture: true, passive: false });
-  stage.addEventListener("pointercancel", event => {
-    if (!pointers.has(event.pointerId) || !consumePointer(event)) return;
-    pointers.delete(event.pointerId);
-    if (!pointers.size) {
-      interacting = false;
-      stage.classList.remove("is-globe-dragging");
-      gesture = null;
-      gradientCache = null;
-    }
-    queue();
-  }, { capture: true, passive: false });
-
+  stage.addEventListener("pointerup", releasePointer);
+  stage.addEventListener("pointercancel", releasePointer);
+  stage.addEventListener("lostpointercapture", releasePointer);
   stage.addEventListener("wheel", event => {
     event.preventDefault();
-    event.stopImmediatePropagation();
-    stopAnimation();
-    zoom = clampZoom(zoom * Math.exp(-event.deltaY * .0012));
-    gradientCache = null;
+    zoom = Math.max(.8, Math.min(2.25, zoom * Math.exp(-event.deltaY * .0012)));
+    setInteracting(true);
+    clearTimeout(stage._wheelTimer);
+    stage._wheelTimer = setTimeout(() => setInteracting(false), 140);
     queue();
-  }, { capture: true, passive: false });
-
-  stage.addEventListener("dblclick", event => {
-    event.preventDefault();
-    stopAnimation();
-    zoom = clampZoom(zoom * 1.35);
-    gradientCache = null;
-    queue();
-  });
+  }, { passive: false });
 
   stage.addEventListener("keydown", event => {
-    const amount = 8 / zoom;
-    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) event.preventDefault();
-    if (event.key === "ArrowLeft") rotation[0] -= amount;
-    if (event.key === "ArrowRight") rotation[0] += amount;
-    if (event.key === "ArrowUp") rotation[1] = Math.min(82, rotation[1] + amount);
-    if (event.key === "ArrowDown") rotation[1] = Math.max(-82, rotation[1] - amount);
-    if (event.key === "+" || event.key === "=") zoom = clampZoom(zoom * 1.2);
-    if (event.key === "-") zoom = clampZoom(zoom / 1.2);
-    if (event.key === "Escape" && expanded) toggleExpanded();
-    gradientCache = null;
-    queue();
-  });
-
-  function centreHome() {
-    const feature = featureByCode.get(currentView?.homeCode);
-    if (!feature) {
-      animateView(initialRotation, 1, 420);
-      return;
-    }
-    const coordinate = feature.geometry.type === "Point" ? feature.geometry.coordinates : d3.geoCentroid(feature);
-    animateView([-coordinate[0], -coordinate[1], 0], Math.max(1.18, Math.min(zoom, 1.5)), 420);
-  }
-
-  function reset() {
-    if (kind === "duel") centreHome();
-    else animateView(initialRotation, 1, 420);
-  }
-
-  function toggleExpanded() {
-    expanded = !expanded;
-    panel.classList.toggle("is-globe-expanded", expanded);
-    document.body.classList.toggle("globe-expanded", expanded);
-    const button = document.getElementById("globeExpand");
-    button?.classList.toggle("is-active", expanded);
-    button?.setAttribute("aria-label", expanded ? "Close expanded globe" : "Expand globe");
-    gradientCache = null;
-    setTimeout(queue, 40);
-  }
-
-  const captureButton = (button, action) => button?.addEventListener("click", event => {
+    if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "=", "-"].includes(event.key)) return;
     event.preventDefault();
-    event.stopImmediatePropagation();
-    action();
-  }, true);
+    if (event.key === "ArrowLeft") rotation[0] -= 8;
+    if (event.key === "ArrowRight") rotation[0] += 8;
+    if (event.key === "ArrowUp") rotation[1] = Math.min(78, rotation[1] + 6);
+    if (event.key === "ArrowDown") rotation[1] = Math.max(-78, rotation[1] - 6);
+    if (event.key === "+" || event.key === "=") zoom = Math.min(2.25, zoom * 1.12);
+    if (event.key === "-") zoom = Math.max(.8, zoom / 1.12);
+    queue();
+  });
 
-  captureButton(document.getElementById("globeZoomIn"), () => {
-    zoom = clampZoom(zoom * 1.25);
-    gradientCache = null;
+  document.getElementById("globeZoomIn")?.addEventListener("click", () => {
+    zoom = Math.min(2.25, zoom * 1.17);
     queue();
   });
-  captureButton(document.getElementById("globeZoomOut"), () => {
-    zoom = clampZoom(zoom / 1.25);
-    gradientCache = null;
+  document.getElementById("globeZoomOut")?.addEventListener("click", () => {
+    zoom = Math.max(.8, zoom / 1.17);
     queue();
   });
-  captureButton(document.getElementById("globeReset"), reset);
-  captureButton(document.getElementById("globeExpand"), toggleExpanded);
-  captureButton(document.getElementById("globeFocus"), () => {
+  document.getElementById("globeReset")?.addEventListener("click", () => animateTo([...initialRotation], 1));
+  document.getElementById("globeFocus")?.addEventListener("click", () => {
     const best = bestGuess(currentView?.guesses || []);
-    if (best) focusCountry(best.code, 1.72, 440);
+    if (best) focusFeature(featureByCode.get(best.code));
   });
-
-  function refreshState({ focus = true } = {}) {
-    const next = readView();
-    const nextSignature = signature(next);
-    const changed = nextSignature !== stateSignature;
-    const previousLatest = currentView?.guesses?.at(-1)?.code || null;
-    currentView = next;
-    stateSignature = nextSignature;
-
-    const best = bestGuess(next.guesses || []);
-    const focusButton = document.getElementById("globeFocus");
-    if (focusButton) focusButton.disabled = !best;
-
-    const status = document.getElementById("globeStatus");
-    if (status) {
-      if (next.finished && next.answerCode) {
-        status.textContent = `${countryByCode.get(next.answerCode)?.name || "Country"} located`;
-      } else if (next.guesses?.length) {
-        status.textContent = `${next.guesses.length} signal${next.guesses.length === 1 ? "" : "s"} mapped · rotate to explore`;
-      } else {
-        status.textContent = kind === "cooperative" ? "Shared globe ready" : "Rotate the globe to explore";
-      }
-    }
-
-    if (changed) queue();
-    if (!focus) return;
-
-    const latest = next.guesses?.at(-1)?.code || null;
-    const target = next.finished && next.answerCode ? next.answerCode : latest;
-    if (target && (target !== latestFocusedCode || latest !== previousLatest)) {
-      latestFocusedCode = target;
-      focusCountry(target, next.finished ? undefined : Math.max(1.14, Math.min(zoom, 1.48)), next.finished ? 620 : 420);
-    }
-  }
-
-  const resizeObserver = new ResizeObserver(() => {
-    gradientCache = null;
+  document.getElementById("globeExpand")?.addEventListener("click", () => {
+    expanded = !expanded;
+    stage.classList.toggle("is-expanded", expanded);
+    document.body.classList.toggle("globe-is-expanded", expanded);
     queue();
   });
-  resizeObserver.observe(stage);
 
-  const observerTargets = [
-    document.querySelector(".guess-history"),
-    document.querySelector(".mode-scoreboard"),
-    document.querySelector(".race-scoreboard"),
-    document.querySelector(".feedback-panel")
-  ].filter(Boolean);
-  observerTargets.forEach(target => new MutationObserver(() => refreshState({ focus: true }))
-    .observe(target, { childList: true, subtree: true, characterData: true }));
+  new ResizeObserver(() => queue()).observe(stage);
+  new MutationObserver(() => {
+    syncState();
+    updateFocusControl();
+  }).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["class"] });
 
-  document.addEventListener("click", event => {
-    if (event.target.closest("button, .mode-button")) setTimeout(() => refreshState({ focus: true }), 40);
-  }, true);
-  window.addEventListener("storage", () => refreshState({ focus: false }));
-  window.addEventListener("pageshow", () => refreshState({ focus: false }));
-  window.addEventListener("nearer:statechange", () => refreshState({ focus: true }));
+  addEventListener("storage", event => {
+    if (!event.key || event.key.startsWith("nearer-")) {
+      syncState();
+      updateFocusControl();
+    }
+  });
+  addEventListener("pageshow", () => {
+    syncState(true);
+    updateFocusControl();
+  });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-      stopAnimation();
-      return;
+    if (!document.hidden) {
+      syncState(true);
+      updateFocusControl();
     }
-    refreshState({ focus: false });
-    queue();
   });
 
-  currentView = readView();
-  stateSignature = signature(currentView);
-  refreshState({ focus: false });
-  window.NEARER_PREMIUM_GLOBE = { queue, centreHome, reset, focusCountry, refresh: refreshState };
-  window.__NEARER_REAL_GLOBE_STARTED = true;
-  window.__NEARER_CANVAS_GLOBE_STARTED = true;
-  window.__NEARER_PREMIUM_GLOBE_STARTED = true;
-  window.__NEARER_PREMIUM_GLOBE_V2_STARTED = true;
+  syncState(true);
+  updateFocusControl();
   queue();
+  window.__NEARER_PREMIUM_GLOBE_V2_STARTED = true;
 })();

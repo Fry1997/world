@@ -102,8 +102,24 @@ try {
   await page.waitForSelector(".platform-mobile-dock");
   assert(await page.locator(".together-card").count() === 3, "Together did not expose all three game modes.");
 
+  const togetherModes = [
+    ["race", "__NEARER_RACE_V2_STARTED", "Same Target Race"],
+    ["cooperative", "__NEARER_COOPERATIVE_STARTED", "Cooperative Relay"],
+    ["duel", "__NEARER_DUEL_STARTED", "Hidden Country Duel"]
+  ];
+
+  for (const [route, flag, name] of togetherModes) {
+    await page.goto(`${baseUrl}/together/${route}/`, { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      runtimeFlag => document.documentElement.classList.contains("nearer-runtime-ready") && Boolean(window[runtimeFlag]),
+      flag,
+      { timeout: 35_000 }
+    );
+    assert(!((await page.locator("body").textContent()) || "").includes("could not start"), `${name} showed its failure surface.`);
+  }
+
   assert(pageErrors.length === 0, `Browser errors were raised:\n${pageErrors.join("\n")}`);
-  console.log("Mobile browser smoke test passed for gameplay, saved progress, accounts, Mastery and Together.");
+  console.log("Mobile browser smoke test passed for solo play, saved progress, accounts, Mastery and all Together modes.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
