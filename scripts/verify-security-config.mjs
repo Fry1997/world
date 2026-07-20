@@ -68,6 +68,7 @@ if (missingOrExtra.length) {
 const authorisedHashes = new Set(inlineScriptHashes);
 const generatedPages = [
   "index.html",
+  "atlas/index.html",
   "mastery/index.html",
   "together/index.html",
   "together/race/index.html",

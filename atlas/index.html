@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#06111b">
+  <base href="/">
+  <meta name="description" content="Explore every country on a detailed interactive globe with Nearer Atlas.">
+  <title>Nearer Atlas — Explore every country</title>
+  <script>(()=>{try{const saved=JSON.parse(localStorage.getItem("nearer-game-v1")||"null");const theme=localStorage.getItem("nearer-together-theme")||saved?.theme||localStorage.getItem("nearer-race-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=theme;document.documentElement.style.background=theme==="dark"?"#07111b":"#f3f1eb"}catch{document.documentElement.dataset.theme="dark"}})();</script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23101820'/%3E%3Cpath d='M18 45V19h7l14 16V19h7v26h-7L25 29v16z' fill='%23f4efdf'/%3E%3C/svg%3E">
+  <script type="module" src="/src/atlas-entry.js"></script>
+</head>
+<body class="atlas-experience">
+  <div class="nearer-safe-area-shield" aria-hidden="true"></div>
+  <div class="app-shell atlas-shell">
+    <header class="topbar platform-topbar">
+      <a class="brand" href="/" aria-label="Nearer home"><span class="brand-mark" aria-hidden="true">N</span><span><strong>NEARER</strong><small>Know the world</small></span></a>
+      <nav class="mode-switch platform-tabs" aria-label="Nearer sections">
+        <a class="mode-button" href="/">Today</a><a class="mode-button" href="/?mode=random">Random</a><a class="mode-button" href="/mastery/">Mastery</a><a class="mode-button is-active" href="/atlas/" data-platform-section="atlas" aria-current="page">Atlas</a><a class="mode-button" href="/together/">Together</a>
+      </nav>
+      <div class="topbar-actions"><button id="themeButton" class="icon-button" type="button" aria-label="Toggle dark mode"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.4 15.6A8.5 8.5 0 0 1 8.4 3.6 8.5 8.5 0 1 0 20.4 15.6Z"/></svg></button></div>
+    </header>
+    <main id="atlasApp" class="atlas-main" aria-live="polite"></main>
+    <footer><span>Natural Earth detailed borders</span><span>·</span><span>18× deep zoom</span><span>·</span><span>197 Atlas entries</span></footer>
+  </div>
+  <div id="atlasToast" class="toast" role="status" aria-live="polite"></div>
+  <div id="atlasLoading" class="atlas-loading">Opening Nearer Atlas…</div>
+</body>
+</html>
