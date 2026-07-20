@@ -1,4 +1,4 @@
-import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { defineConfig } from "vite";
 
@@ -36,13 +36,22 @@ const ignoredRootFiles = new Set([
 ]);
 
 const bundledOnlyLegacyAssets = [
-  /^chunks\/app-[^/]+\.js$/,
-  /^mastery\/mastery(?:-loader)?\.js$/
+  /^chunks\/(?:app-|runtime-)[^/]+\.js$/,
+  /^mastery\/mastery(?:-loader)?\.js$/,
+  /^guess-rules\.js$/,
+  /^guessed-country-info\.js$/,
+  /^together\/race\/chunks\/race-[^/]+\.js$/,
+  /^together\/race\/race-loader\.js$/,
+  /^together\/cooperative\/cooperative(?:-loader)?\.js$/,
+  /^together\/duel\/(?:duel|duel-loader|duel-pressure)\.js$/,
+  /^together\/shared\/(?:together-core|premium-globe-v2|polish-ui|experience(?:4|5|6|7|8|9|10)|experience8-bootstrap)\.js$/
 ];
 
 const directPlatformScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?platform\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directSoloScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/(?:app-[^"']+|runtime-\d+)\.js|runtime-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directMasteryScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/runtime-\d+\.js|mastery\/mastery-loader\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
+const directTogetherHubScript = /<script\b[^>]*\bsrc=["']together\/shared\/experience(?:7|8|9|10)\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
+const directTogetherModeScript = /<script\b[^>]*\bsrc=["'](?:chunks\/runtime-\d+\.js|together\/(?:race\/race-loader|cooperative\/cooperative-loader|duel\/duel-loader|shared\/experience8-bootstrap)\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 
 async function copyLegacyAssets(sourceDirectory = root) {
   for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
@@ -69,19 +78,6 @@ async function copyLegacyAssets(sourceDirectory = root) {
   }
 }
 
-async function patchGeneratedCompatibilityAssets() {
-  const bootstrapPath = resolve(outDir, "together/shared/experience8-bootstrap.js");
-  const bootstrap = await readFile(bootstrapPath, "utf8");
-  const legacyPlatformLoad = "if (!window.__NEARER_PLATFORM_STARTED) load(`platform.js?v=${VERSION}`).catch(console.error);";
-  const moduleAwarePlatformLoad = "if (!window.__NEARER_PLATFORM_STARTED && !window.__NEARER_PLATFORM_MODULE_PENDING) load(`platform.js?v=${VERSION}`).catch(console.error);";
-
-  if (!bootstrap.includes(legacyPlatformLoad)) {
-    throw new Error("Could not locate the Together platform compatibility loader.");
-  }
-
-  await writeFile(bootstrapPath, bootstrap.replace(legacyPlatformLoad, moduleAwarePlatformLoad));
-}
-
 function nearerCompatibilityPlugin() {
   return {
     name: "nearer-compatibility-build",
@@ -92,6 +88,10 @@ function nearerCompatibilityPlugin() {
         const filename = context?.filename ? resolve(context.filename) : "";
         const isMainPage = filename === pages.main;
         const isMasteryPage = filename === pages.mastery;
+        const isTogetherHub = filename === pages.together;
+        const isRacePage = filename === pages.race;
+        const isCooperativePage = filename === pages.cooperative;
+        const isDuelPage = filename === pages.duel;
         const tags = [
           {
             tag: "script",
@@ -105,18 +105,18 @@ function nearerCompatibilityPlugin() {
           }
         ];
 
-        if (isMainPage) {
-          tags.push({
-            tag: "script",
-            attrs: { type: "module", src: "/src/solo-entry.js" },
-            injectTo: "head"
-          });
-        }
+        const routeEntry = isMainPage ? "/src/solo-entry.js"
+          : isMasteryPage ? "/src/mastery-entry.js"
+            : isTogetherHub ? "/src/together-hub-entry.js"
+              : isRacePage ? "/src/race-entry.js"
+                : isCooperativePage ? "/src/cooperative-entry.js"
+                  : isDuelPage ? "/src/duel-entry.js"
+                    : null;
 
-        if (isMasteryPage) {
+        if (routeEntry) {
           tags.push({
             tag: "script",
-            attrs: { type: "module", src: "/src/mastery-entry.js" },
+            attrs: { type: "module", src: routeEntry },
             injectTo: "head"
           });
         }
@@ -127,13 +127,16 @@ function nearerCompatibilityPlugin() {
 
         if (isMainPage) transformedHtml = transformedHtml.replace(directSoloScript, "");
         if (isMasteryPage) transformedHtml = transformedHtml.replace(directMasteryScript, "");
+        if (isTogetherHub) transformedHtml = transformedHtml.replace(directTogetherHubScript, "");
+        if (isRacePage || isCooperativePage || isDuelPage) {
+          transformedHtml = transformedHtml.replace(directTogetherModeScript, "");
+        }
 
         return { html: transformedHtml, tags };
       }
     },
     async closeBundle() {
       await copyLegacyAssets();
-      await patchGeneratedCompatibilityAssets();
     }
   };
 }
