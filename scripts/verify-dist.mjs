@@ -46,8 +46,11 @@ const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 10) {
-  throw new Error("The route modules were not split into the expected cached assets.");
+if (javascriptAssets.length < 11) {
+  throw new Error("The route and account modules were not split into the expected cached assets.");
+}
+if (!javascriptAssets.some(name => name.startsWith("supabase-client-"))) {
+  throw new Error("The locally bundled Supabase client chunk was not generated.");
 }
 if (stylesheetAssets.length < 7) {
   throw new Error("The route styles were not split into generated cached assets.");
@@ -74,7 +77,8 @@ const requiredBundleMarkers = [
   ["__NEARER_COOPERATIVE_STARTED", "Cooperative Relay implementation"],
   ["Hidden Country Duel did not initialise.", "Hidden Country Duel entry"],
   ["__NEARER_DUEL_STARTED", "Hidden Country Duel implementation"],
-  ["NEARER_TOGETHER_CORE", "Together shared core"]
+  ["NEARER_TOGETHER_CORE", "Together shared core"],
+  ["gxtrcjuhlgkpanqndtwy.supabase.co", "Supabase account configuration"]
 ];
 
 for (const [marker, description] of requiredBundleMarkers) {
@@ -89,7 +93,9 @@ for (const forbiddenMarker of [
   "NEARER_RACE_SOURCE",
   "URL.createObjectURL",
   "new Blob([source]",
-  "(0, eval)("
+  "(0, eval)(",
+  "cdn.jsdelivr.net/npm/@supabase/supabase-js",
+  "SUPABASE_MODULE"
 ]) {
   if (bundledJavascript.includes(forbiddenMarker)) {
     throw new Error(`The generated JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
