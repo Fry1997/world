@@ -1,5 +1,6 @@
 /* Mobile shell polish: consistent controls, safe-area treatment and compact mastery cards. */
 @media (max-width: 720px) {
+  html:has(body > .app-shell),
   html:has(body.platform-shell-enabled),
   html:has(body.experience-seven),
   html:has(body.mastery-experience) {
