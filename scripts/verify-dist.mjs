@@ -17,7 +17,6 @@ const requiredFiles = [
   "together/duel/index.html",
   "chunks/runtime-01.js",
   ...runtimeTailFiles,
-  "mastery/mastery-loader.js",
   "together/race/race-loader.js",
   "together/cooperative/cooperative-loader.js",
   "together/duel/duel-loader.js",
@@ -50,12 +49,17 @@ if (/chunks\/(?:app-|runtime-\d)/.test(mainHtml) || mainHtml.includes("runtime-l
   throw new Error("The Today and Random page still contains the legacy solo script waterfall.");
 }
 
+const masteryHtml = await readFile(resolve(dist, "mastery/index.html"), "utf8");
+if (/chunks\/runtime-\d/.test(masteryHtml) || masteryHtml.includes("mastery-loader.js")) {
+  throw new Error("Regional Mastery still contains its legacy runtime waterfall.");
+}
+
 const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 6) {
-  throw new Error("The shared and solo modules were not split into cached assets.");
+if (javascriptAssets.length < 7) {
+  throw new Error("The shared, solo and Mastery modules were not split into cached assets.");
 }
 if (!stylesheetAssets.length) {
   throw new Error("The shared Vite stylesheet asset was not generated.");
@@ -74,11 +78,17 @@ if (!bundledJavascript.includes("__NEARER_PLATFORM_STARTED")) {
 if (!bundledJavascript.includes("__NEARER_CLOUD_STARTED")) {
   throw new Error("The cloud account layer is missing from the generated JavaScript assets.");
 }
-if (!bundledJavascript.includes("Nearer source modules are missing.")) {
+if (!bundledJavascript.includes("Nearer application source modules are missing.")) {
   throw new Error("The bundled solo bootstrap is missing from the generated JavaScript assets.");
 }
 if (!bundledJavascript.includes("__NEARER_PREMIUM_GLOBE_V2_STARTED")) {
   throw new Error("The solo enhancement sequence is missing from the generated JavaScript assets.");
+}
+if (!bundledJavascript.includes("Regional Mastery did not initialise.")) {
+  throw new Error("The Regional Mastery module entry is missing from the generated JavaScript assets.");
+}
+if (!bundledJavascript.includes("__NEARER_MASTERY_STARTED")) {
+  throw new Error("The Regional Mastery implementation is missing from the generated JavaScript assets.");
 }
 if (!bundledStyles.includes("nearer-account-dialog")) {
   throw new Error("The cloud account styling is missing from the generated CSS assets.");
@@ -89,7 +99,15 @@ if (!togetherBootstrap.includes("__NEARER_PLATFORM_MODULE_PENDING")) {
   throw new Error("Together can still race the bundled platform module with its legacy loader.");
 }
 
-for (const legacyFile of ["platform.js", "cloud.js", "cloud.css", "runtime-loader.js", "chunks/app-01.js"]) {
+for (const legacyFile of [
+  "platform.js",
+  "cloud.js",
+  "cloud.css",
+  "runtime-loader.js",
+  "chunks/app-01.js",
+  "mastery/mastery.js",
+  "mastery/mastery-loader.js"
+]) {
   try {
     await access(resolve(dist, legacyFile));
     throw new Error(`${legacyFile} was copied into dist instead of being bundled.`);
