@@ -60,7 +60,8 @@ const bundledStyles = (await Promise.all(
 const requiredBundleMarkers = [
   ["__NEARER_PLATFORM_STARTED", "platform shell"],
   ["__NEARER_CLOUD_STARTED", "cloud account layer"],
-  ["Nearer application source modules are missing.", "solo bootstrap"],
+  ["Nearer game data did not initialise.", "native game-data loader"],
+  ["nearer-game-v1", "solo game implementation"],
   ["__NEARER_PREMIUM_GLOBE_V2_STARTED", "adaptive globe"],
   ["Regional Mastery did not initialise.", "Regional Mastery entry"],
   ["__NEARER_MASTERY_STARTED", "Regional Mastery implementation"],
@@ -76,6 +77,19 @@ const requiredBundleMarkers = [
 for (const [marker, description] of requiredBundleMarkers) {
   if (!bundledJavascript.includes(marker)) {
     throw new Error(`The ${description} is missing from the generated JavaScript assets.`);
+  }
+}
+
+for (const forbiddenMarker of [
+  "NEARER_APP_SOURCE",
+  "NEARER_RUNTIME_SOURCE",
+  "NEARER_RACE_SOURCE",
+  "URL.createObjectURL",
+  "new Blob([source]",
+  "(0, eval)("
+]) {
+  if (bundledJavascript.includes(forbiddenMarker)) {
+    throw new Error(`The generated JavaScript still contains the obsolete runtime mechanism: ${forbiddenMarker}`);
   }
 }
 
