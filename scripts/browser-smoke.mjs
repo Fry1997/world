@@ -44,8 +44,22 @@ async function waitForRuntime(page, flag = null, timeout = 35_000) {
 }
 
 async function assertDetailedGeometry(page, label) {
-  const detailedCount = await page.evaluate(() => Number(window.__NEARER_DETAILED_GEOMETRY?.detailedCount || 0));
-  assert(detailedCount > 150, `${label}: detailed country geometry did not load.`);
+  const detail = await page.evaluate(() => {
+    const critical = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
+    const features = new Map((window.NEARER_COUNTRIES_GEOJSON?.features || []).map(feature => [feature.properties.code, feature]));
+    return {
+      source: String(window.__NEARER_DETAILED_GEOMETRY?.source || ""),
+      detailedCount: Number(window.__NEARER_DETAILED_GEOMETRY?.detailedCount || 0),
+      unresolved: window.__NEARER_DETAILED_GEOMETRY?.unresolvedMicrostates || [],
+      criticalTypes: Object.fromEntries(critical.map(code => [code, features.get(code)?.geometry?.type || null]))
+    };
+  });
+  assert(detail.source.includes("1:10m"), `${label}: the 1:10m country geometry did not load.`);
+  assert(detail.detailedCount > 150, `${label}: detailed country geometry did not load.`);
+  assert(detail.unresolved.length === 0, `${label}: critical microstates still use point fallbacks: ${detail.unresolved.join(", ")}.`);
+  for (const [code, type] of Object.entries(detail.criticalTypes)) {
+    assert(type && type !== "Point", `${label}: ${code} is not represented by a real polygon.`);
+  }
 }
 
 async function exerciseAccount(page) {
@@ -94,6 +108,21 @@ async function exerciseMastery(page, label) {
   await page.waitForFunction(() => !document.getElementById("masterySession")?.classList.contains("is-hidden"));
   await page.waitForSelector("#masteryGlobeCanvas", { state: "attached" });
   assert(Boolean(await page.evaluate(() => localStorage.getItem("nearer-mastery-session-v1"))), `${label}: Mastery did not save its session.`);
+
+  const microstateView = await page.evaluate(async () => {
+    const feature = window.NEARER_COUNTRIES_GEOJSON.features.find(item => item.properties.code === "VAT");
+    window.NEARER_MASTERY_GLOBE.focusCountry("VAT");
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    return {
+      type: feature?.geometry?.type || null,
+      zoom: window.NEARER_MASTERY_GLOBE.getZoom(),
+      point: window.NEARER_MASTERY_GLOBE.projectCountry("VAT")
+    };
+  });
+  assert(microstateView.type !== "Point", `${label}: Vatican City remains a point in Mastery.`);
+  assert(microstateView.zoom >= 700, `${label}: Mastery did not reach Vatican-scale zoom.`);
+  assert(Array.isArray(microstateView.point) && microstateView.point.every(Number.isFinite), `${label}: Vatican City could not be projected at deep zoom.`);
+
   await page.locator("#exitSessionButton").click();
 }
 
@@ -119,6 +148,12 @@ async function exerciseAtlas(page, label, mobile) {
   assert(!await page.locator("#atlasProfileContent").evaluate(node => node.classList.contains("is-hidden")), `${label}: Luxembourg profile did not open.`);
   await page.locator("#atlasFavouriteButton").click();
   assert(await page.locator("#atlasFavouriteButton").getAttribute("aria-pressed") === "true", `${label}: Atlas did not save a country.`);
+
+  await page.locator("#atlasSearch").fill("Vatican City");
+  await page.waitForSelector('#atlasSuggestions [data-atlas-country="VAT"]');
+  await page.locator('#atlasSuggestions [data-atlas-country="VAT"]').click();
+  await page.waitForFunction(() => document.getElementById("atlasCountryCode")?.textContent === "VAT");
+  await page.waitForFunction(() => Number.parseFloat(document.getElementById("atlasZoomLabel")?.textContent || "0") >= 700);
 
   if (!mobile) {
     const globe = await page.locator(".atlas-globe-panel").boundingBox();
@@ -173,7 +208,7 @@ try {
     mobile: false,
     context: { viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, isMobile: false, hasTouch: false }
   });
-  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including Atlas.");
+  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including real microstate polygons and deep zoom.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
