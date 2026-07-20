@@ -6,6 +6,7 @@ const dist = resolve(root, "dist");
 
 const pages = [
   "index.html",
+  "atlas/index.html",
   "mastery/index.html",
   "together/index.html",
   "together/race/index.html",
@@ -46,13 +47,13 @@ const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 11) {
+if (javascriptAssets.length < 13) {
   throw new Error("The route and account modules were not split into the expected cached assets.");
 }
 if (!javascriptAssets.some(name => name.startsWith("supabase-client-"))) {
   throw new Error("The locally bundled Supabase client chunk was not generated.");
 }
-if (stylesheetAssets.length < 7) {
+if (stylesheetAssets.length < 8) {
   throw new Error("The route styles were not split into generated cached assets.");
 }
 
@@ -75,6 +76,7 @@ const requiredBundleMarkers = [
   ["Nearer game data did not initialise.", "native game-data loader"],
   ["nearer-game-v1", "solo game implementation"],
   ["__NEARER_PREMIUM_GLOBE_V2_STARTED", "adaptive globe"],
+  ["__NEARER_ATLAS_STARTED", "Nearer Atlas implementation"],
   ["Regional Mastery did not initialise.", "Regional Mastery entry"],
   ["__NEARER_MASTERY_STARTED", "Regional Mastery implementation"],
   ["Same Target Race did not initialise.", "Same Target Race entry"],
@@ -118,6 +120,7 @@ for (const forbiddenMarker of [
 const requiredStyleMarkers = [
   ["nearer-account-dialog", "cloud account styling"],
   ["app-shell", "base application styling"],
+  ["atlas-shell", "Nearer Atlas styling"],
   ["mastery-shell", "Regional Mastery styling"],
   ["race-shell", "Same Target Race styling"],
   ["together-mode-shell", "Together mode styling"]
