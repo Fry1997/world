@@ -1,9 +1,10 @@
 import "./time-trial.css";
 import "./time-trial-table.css";
+import { bindFriendChallengeShare, challengeFromLocation, renderFriendChallengeInvitation } from "./time-trial-challenge.js";
 import { countrySearch, dailySequence, localDateKey, rankedAvailable, readTimeTrialState, saveResult } from "./time-trial-data.js";
 import { createTimeTrialGlobe } from "./time-trial-globe.js";
 import { clearCompetitionResult, markCompetitionVerified, queueCompetitionResult, queuedCompetitionResults } from "./time-trial-recovery.js";
-import { loadCompetitionTable, startCompetition, submitCompetition } from "./time-trial-service.js";
+import { loadCompetitionTable, loadFriendChallenge, startCompetition, submitCompetition } from "./time-trial-service.js";
 import { showCompetitionTable, showVerificationStatus } from "./time-trial-table.js";
 import { launchMarkup, lobbyMarkup, renderGuessState, resultMarkup, runningMarkup, updateRunning } from "./time-trial-view.js";
 
@@ -15,6 +16,7 @@ let timer;
 let search;
 let countries;
 let run = null;
+let friendChallengeState = null;
 
 function currentDay() {
   return readTimeTrialState().days?.[localDateKey()] || null;
@@ -68,6 +70,30 @@ function configureAccountAccess() {
   });
 }
 
+function renderInvitation() {
+  if (!friendChallengeState) return;
+  renderFriendChallengeInvitation(dialog, friendChallengeState, {
+    start: event => startRun(true, event.currentTarget),
+    signIn: () => {
+      dialog.close();
+      window.NEARER_CLOUD?.open?.();
+    }
+  });
+}
+
+async function reloadInvitation() {
+  if (!friendChallengeState?.id) return;
+  try {
+    const challenge = await loadFriendChallenge(friendChallengeState.id);
+    friendChallengeState = challenge
+      ? { id: friendChallengeState.id, challenge }
+      : { id: friendChallengeState.id, error: "This challenge is no longer available." };
+  } catch (error) {
+    friendChallengeState = { id: friendChallengeState.id, error: error.message || "This challenge could not be loaded." };
+  }
+  renderInvitation();
+}
+
 async function refreshTable(message = "") {
   if (!window.NEARER_CLOUD?.session) {
     showCompetitionTable(dialog, [], "Sign in to view today's verified results.");
@@ -88,6 +114,7 @@ function openLobby() {
   configureAccountAccess();
   bindStarts();
   dialog.showModal();
+  renderInvitation();
   refreshTable();
 }
 
@@ -274,10 +301,12 @@ async function finishRun() {
   bindClose();
   configureAccountAccess();
   bindStarts();
+  bindFriendChallengeShare(dialog);
   updateLaunch();
   if (run.ranked) showVerificationStatus(dialog, Boolean(serverResult), submissionError?.message || "");
   if (serverResult?.leaderboard) showCompetitionTable(dialog, serverResult.leaderboard);
   else refreshTable(submissionError?.message || "");
+  if (friendChallengeState) reloadInvitation();
   window.dispatchEvent(new CustomEvent("nearer:time-trial-result", { detail: result }));
 }
 
@@ -310,6 +339,8 @@ async function initialise() {
   createDialog();
   addLaunch();
   retryQueuedResults();
+  friendChallengeState = await challengeFromLocation();
+  if (friendChallengeState) openLobby();
   window.NEARER_TIME_TRIAL = { open: openLobby, startPractice: () => { openLobby(); startRun(false); } };
 }
 
