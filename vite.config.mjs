@@ -204,7 +204,7 @@ function nearerCompatibilityPlugin() {
       return null;
     },
     transform(code, id) {
-      if (id.split("?")[0] !== cloudModulePath) return null;
+      if (id !== cloudModulePath) return null;
       if (!code.includes(remoteSupabaseDeclaration) || !code.includes(remoteSupabaseImport)) {
         throw new Error("The Nearer cloud module has an unexpected Supabase import format.");
       }
