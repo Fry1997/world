@@ -1,4 +1,4 @@
-import { prepareDetailedGeometry } from './detailed-geometry.js';
+import { prepareDetailedGeometry } from './oriented-detailed-geometry.js';
 
 let runtimePromise = null;
 
