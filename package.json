@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/verify-dist.mjs && node scripts/verify-asset-budgets.mjs",
+    "build": "node scripts/verify-security-config.mjs && vite build && node scripts/verify-dist.mjs && node scripts/verify-asset-budgets.mjs",
     "preview": "vite preview",
     "smoke": "node scripts/browser-smoke.mjs"
   },
