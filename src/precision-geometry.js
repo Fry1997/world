@@ -1,4 +1,4 @@
-import precisionCollection from "./generated/precision-countries.json";
+import precisionLayerUrl from "./generated/precision-countries.json?url";
 
 const criticalMicrostates = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
 let precisionPromise = null;
@@ -6,13 +6,17 @@ let precisionPromise = null;
 export async function preparePrecisionGeometry() {
   if (window.__NEARER_PRECISION_GEOMETRY) return window.__NEARER_PRECISION_GEOMETRY;
 
-  precisionPromise ||= Promise.resolve().then(() => {
+  precisionPromise ||= (async () => {
     const existing = window.NEARER_COUNTRIES_GEOJSON;
     const gameData = window.NEARER_GAME_DATA;
     if (!existing?.features?.length || !gameData?.countries?.length) {
       throw new Error("Precision country geometry requires the Nearer geography runtime.");
     }
 
+    const response = await fetch(precisionLayerUrl, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`Could not load the precision country layer (${response.status}).`);
+    const raw = await response.text();
+    const precisionCollection = JSON.parse(raw);
     const precisionByCode = new Map(
       (precisionCollection.features || []).map(feature => [feature.properties.code, feature])
     );
@@ -58,7 +62,7 @@ export async function preparePrecisionGeometry() {
       precisionCount,
       pointFallbackCount,
       unresolvedMicrostates,
-      runtimeBytes: JSON.stringify(precisionCollection).length
+      runtimeBytes: raw.length
     };
 
     window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
@@ -66,7 +70,7 @@ export async function preparePrecisionGeometry() {
     window.__NEARER_DETAILED_GEOMETRY = detail;
     window.__NEARER_MASTERY_DETAILED_GEOMETRY = detail;
     return detail;
-  });
+  })();
 
   return precisionPromise;
 }
