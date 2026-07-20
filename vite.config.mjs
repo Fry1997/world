@@ -1,5 +1,6 @@
-import { copyFile, mkdir, readdir } from "node:fs/promises";
+import { copyFile, mkdir, readFile, readdir } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
+import { runInNewContext } from "node:vm";
 import { defineConfig } from "vite";
 
 const root = process.cwd();
@@ -13,6 +14,51 @@ const pages = {
   cooperative: resolve(root, "together/cooperative/index.html"),
   duel: resolve(root, "together/duel/index.html")
 };
+
+const sourceFiles = {
+  runtime: [
+    "chunks/runtime-01.js",
+    "chunks/runtime-02.js",
+    "chunks/runtime-03.js",
+    "chunks/runtime-04.js",
+    "chunks/runtime-05.js",
+    "chunks/runtime-06.js",
+    "chunks/runtime-tail-01.js",
+    "chunks/runtime-tail-02.js",
+    "chunks/runtime-tail-03.js",
+    "chunks/runtime-tail-04.js",
+    "chunks/runtime-tail-05.js",
+    "chunks/runtime-tail-06.js",
+    "chunks/runtime-tail-07.js",
+    "chunks/runtime-tail-08.js",
+    "chunks/runtime-tail-09.js"
+  ],
+  app: [
+    "chunks/app-01.js",
+    "chunks/app-01b.js",
+    "chunks/app-01c.js",
+    "chunks/app-01d.js",
+    "chunks/app-02.js",
+    "chunks/app-03.js",
+    "chunks/app-04.js",
+    "chunks/app-05.js"
+  ],
+  race: [
+    "together/race/chunks/race-01.js",
+    "together/race/chunks/race-02.js",
+    "together/race/chunks/race-03.js",
+    "together/race/chunks/race-04.js",
+    "together/race/chunks/race-05.js",
+    "together/race/chunks/race-06.js"
+  ]
+};
+
+const virtualModules = {
+  "virtual:nearer-runtime": "\0virtual:nearer-runtime",
+  "virtual:nearer-app": "\0virtual:nearer-app",
+  "virtual:nearer-race": "\0virtual:nearer-race"
+};
+const sourceCache = new Map();
 
 const ignoredDirectories = new Set([
   ".git",
@@ -53,6 +99,64 @@ const directMasteryScript = /<script\b[^>]*\bsrc=["'](?:\.\/)?(?:chunks\/runtime
 const directTogetherHubScript = /<script\b[^>]*\bsrc=["']together\/shared\/experience(?:7|8|9|10)\.js(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 const directTogetherModeScript = /<script\b[^>]*\bsrc=["'](?:chunks\/runtime-\d+\.js|together\/(?:race\/race-loader|cooperative\/cooperative-loader|duel\/duel-loader|shared\/experience8-bootstrap)\.js)(?:\?[^"']*)?["'][^>]*><\/script>\s*/gi;
 
+async function reconstructSource(files, globalKey) {
+  const cacheKey = `${globalKey}:${files.join(",")}`;
+  if (sourceCache.has(cacheKey)) return sourceCache.get(cacheKey);
+
+  const promise = (async () => {
+    const context = { window: {} };
+    for (const file of files) {
+      const code = await readFile(resolve(root, file), "utf8");
+      runInNewContext(code, context, { filename: file, timeout: 2_000 });
+    }
+    const source = context.window[globalKey];
+    if (typeof source !== "string" || !source.trim()) {
+      throw new Error(`Could not reconstruct ${globalKey}.`);
+    }
+    return source;
+  })();
+
+  sourceCache.set(cacheKey, promise);
+  return promise;
+}
+
+async function nativeRuntimeSource() {
+  const source = await reconstructSource(sourceFiles.runtime, "NEARER_RUNTIME_SOURCE");
+  const externalImports = /^import \* as d3 from "[^"]+";\nimport \{ feature as topoFeature \} from "[^"]+";\nimport world from "[^"]+";\n\n/;
+  const metadataMarker = "const COUNTRY_METADATA =";
+  if (!externalImports.test(source) || !source.includes(metadataMarker)) {
+    throw new Error("The reconstructed Nearer runtime has an unexpected format.");
+  }
+
+  return source
+    .replace(externalImports, [
+      'import * as d3 from "d3";',
+      'import { feature as topoFeature } from "topojson-client";',
+      'import world from "world-atlas/countries-110m.json";',
+      ""
+    ].join("\n"))
+    .replace(
+      metadataMarker,
+      "window.NEARER_D3 = d3;\nwindow.NEARER_TOPO_FEATURE = topoFeature;\nwindow.NEARER_WORLD_TOPOLOGY = world;\nconst COUNTRY_METADATA ="
+    );
+}
+
+async function nativeAppSource() {
+  const source = await reconstructSource(sourceFiles.app, "NEARER_APP_SOURCE");
+  if (!source.includes("initializeMap();")) {
+    throw new Error("The reconstructed Nearer application has an unexpected format.");
+  }
+  return source.replace("initializeMap();", "");
+}
+
+async function nativeRaceSource() {
+  const source = await reconstructSource(sourceFiles.race, "NEARER_RACE_SOURCE");
+  if (!source.includes("window.__NEARER_RACE_V2_STARTED = true")) {
+    throw new Error("The reconstructed Same Target Race source is incomplete.");
+  }
+  return source;
+}
+
 async function copyLegacyAssets(sourceDirectory = root) {
   for (const entry of await readdir(sourceDirectory, { withFileTypes: true })) {
     if (entry.name.startsWith(".") && entry.name !== ".nojekyll") continue;
@@ -82,6 +186,15 @@ function nearerCompatibilityPlugin() {
   return {
     name: "nearer-compatibility-build",
     enforce: "pre",
+    resolveId(id) {
+      return virtualModules[id] || null;
+    },
+    async load(id) {
+      if (id === virtualModules["virtual:nearer-runtime"]) return nativeRuntimeSource();
+      if (id === virtualModules["virtual:nearer-app"]) return nativeAppSource();
+      if (id === virtualModules["virtual:nearer-race"]) return nativeRaceSource();
+      return null;
+    },
     transformIndexHtml: {
       order: "pre",
       handler(html, context) {

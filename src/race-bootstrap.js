@@ -9,14 +9,7 @@ function showFailure(error) {
 
 async function start() {
   await initialiseGameRuntime();
-
-  const source = window.NEARER_RACE_SOURCE || '';
-  if (!source.includes('window.__NEARER_RACE_V2_STARTED = true')) {
-    throw new Error('Same Target Race source chunks are incomplete.');
-  }
-
-  (0, eval)(source);
-  delete window.NEARER_RACE_SOURCE;
+  await import('virtual:nearer-race');
 
   if (!window.__NEARER_RACE_V2_STARTED) {
     throw new Error('Same Target Race did not initialise.');
