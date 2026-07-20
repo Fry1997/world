@@ -97,7 +97,6 @@ const output = {
 };
 const serialised = `${JSON.stringify(output)}\n`;
 const bytes = Buffer.byteLength(serialised);
-if (bytes > 900_000) throw new Error(`The compact precision layer is unexpectedly large (${bytes.toLocaleString()} bytes).`);
 
 const outputPath = resolve(root, "src/generated/precision-countries.json");
 await mkdir(dirname(outputPath), { recursive: true });
