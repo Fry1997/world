@@ -1,18 +1,31 @@
-const endpoint = "https://gxtrcjuhlgkpanqndtwy.supabase.co/functions/v1/time-trial";
+import cloudSource from "../cloud.js?raw";
+
+const projectUrl = cloudSource.match(/const SUPABASE_URL = "([^"]+)"/)?.[1];
+const publishableKey = cloudSource.match(/const SUPABASE_KEY = "([^"]+)"/)?.[1];
+let clientPromise;
+
+async function client() {
+  if (!projectUrl || !publishableKey) throw new Error("Nearer account configuration is unavailable.");
+  clientPromise ||= import("./supabase-client.js").then(({ createClient }) => createClient(projectUrl, publishableKey, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+  }));
+  return clientPromise;
+}
 
 async function invoke(body) {
-  const token = window.NEARER_CLOUD?.session?.access_token;
-  if (!token) throw new Error("Sign in to use the daily competition.");
-  const result = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(body)
-  });
-  const data = await result.json().catch(() => ({}));
-  if (!result.ok) throw new Error(data.error || "The daily competition service could not be reached.");
+  const supabase = await client();
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) throw new Error("Sign in to use the daily competition.");
+  const { data, error } = await supabase.functions.invoke("time-trial", { body });
+  if (error) {
+    let message = error.message || "The daily competition service could not be reached.";
+    try {
+      const payload = await error.context?.json?.();
+      if (payload?.error) message = payload.error;
+    } catch {}
+    throw new Error(message);
+  }
+  if (data?.error) throw new Error(data.error);
   return data;
 }
 
