@@ -3,33 +3,20 @@ import { resolve } from "node:path";
 
 const root = process.cwd();
 const dist = resolve(root, "dist");
-const runtimeTailFiles = Array.from(
-  { length: 9 },
-  (_, index) => `chunks/runtime-tail-${String(index + 1).padStart(2, "0")}.js`
-);
 
-const requiredFiles = [
+const pages = [
   "index.html",
   "mastery/index.html",
   "together/index.html",
   "together/race/index.html",
   "together/cooperative/index.html",
-  "together/duel/index.html",
-  "chunks/runtime-01.js",
-  ...runtimeTailFiles,
-  "together/race/race-loader.js",
-  "together/cooperative/cooperative-loader.js",
-  "together/duel/duel-loader.js",
-  "together/shared/experience8-bootstrap.js"
+  "together/duel/index.html"
 ];
 
-for (const file of requiredFiles) {
-  await access(resolve(dist, file));
-}
-
-const pages = requiredFiles.filter(file => file.endsWith(".html"));
 for (const page of pages) {
+  await access(resolve(dist, page));
   const html = await readFile(resolve(dist, page), "utf8");
+
   if (html.includes('<base href="/world/">')) {
     throw new Error(`${page} still points at the legacy /world/ base path.`);
   }
@@ -40,26 +27,24 @@ for (const page of pages) {
     throw new Error(`${page} is missing the early shared-module marker.`);
   }
   if (!html.includes('type="module"') || !html.includes("/assets/")) {
-    throw new Error(`${page} is missing the generated Vite module entry.`);
+    throw new Error(`${page} is missing its generated Vite module entry.`);
+  }
+  if (/src=["'][^"']*(?:chunks\/(?:app-|runtime-)|runtime-loader|mastery-loader|race-loader|cooperative-loader|duel-loader|experience8-bootstrap)/i.test(html)) {
+    throw new Error(`${page} still contains a legacy runtime or loader request.`);
   }
 }
 
-const mainHtml = await readFile(resolve(dist, "index.html"), "utf8");
-if (/chunks\/(?:app-|runtime-\d)/.test(mainHtml) || mainHtml.includes("runtime-loader.js")) {
-  throw new Error("The Today and Random page still contains the legacy solo script waterfall.");
-}
-
-const masteryHtml = await readFile(resolve(dist, "mastery/index.html"), "utf8");
-if (/chunks\/runtime-\d/.test(masteryHtml) || masteryHtml.includes("mastery-loader.js")) {
-  throw new Error("Regional Mastery still contains its legacy runtime waterfall.");
+const togetherHubHtml = await readFile(resolve(dist, "together/index.html"), "utf8");
+if (/src=["'][^"']*together\/shared\/experience(?:7|8|9|10)\.js/i.test(togetherHubHtml)) {
+  throw new Error("The Together hub still loads its experience scripts directly.");
 }
 
 const assetNames = await readdir(resolve(dist, "assets"));
 const javascriptAssets = assetNames.filter(name => name.endsWith(".js"));
 const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 
-if (javascriptAssets.length < 7) {
-  throw new Error("The shared, solo and Mastery modules were not split into cached assets.");
+if (javascriptAssets.length < 10) {
+  throw new Error("The route modules were not split into the expected cached assets.");
 }
 if (!stylesheetAssets.length) {
   throw new Error("The shared Vite stylesheet asset was not generated.");
@@ -72,42 +57,59 @@ const bundledStyles = (await Promise.all(
   stylesheetAssets.map(name => readFile(resolve(dist, "assets", name), "utf8"))
 )).join("\n");
 
-if (!bundledJavascript.includes("__NEARER_PLATFORM_STARTED")) {
-  throw new Error("The platform shell is missing from the generated JavaScript assets.");
+const requiredBundleMarkers = [
+  ["__NEARER_PLATFORM_STARTED", "platform shell"],
+  ["__NEARER_CLOUD_STARTED", "cloud account layer"],
+  ["Nearer application source modules are missing.", "solo bootstrap"],
+  ["__NEARER_PREMIUM_GLOBE_V2_STARTED", "adaptive globe"],
+  ["Regional Mastery did not initialise.", "Regional Mastery entry"],
+  ["__NEARER_MASTERY_STARTED", "Regional Mastery implementation"],
+  ["Same Target Race did not initialise.", "Same Target Race entry"],
+  ["__NEARER_RACE_V2_STARTED", "Same Target Race implementation"],
+  ["Cooperative Relay did not initialise.", "Cooperative Relay entry"],
+  ["__NEARER_COOPERATIVE_STARTED", "Cooperative Relay implementation"],
+  ["Hidden Country Duel did not initialise.", "Hidden Country Duel entry"],
+  ["__NEARER_DUEL_STARTED", "Hidden Country Duel implementation"],
+  ["NEARER_TOGETHER_CORE", "Together shared core"]
+];
+
+for (const [marker, description] of requiredBundleMarkers) {
+  if (!bundledJavascript.includes(marker)) {
+    throw new Error(`The ${description} is missing from the generated JavaScript assets.`);
+  }
 }
-if (!bundledJavascript.includes("__NEARER_CLOUD_STARTED")) {
-  throw new Error("The cloud account layer is missing from the generated JavaScript assets.");
-}
-if (!bundledJavascript.includes("Nearer application source modules are missing.")) {
-  throw new Error("The bundled solo bootstrap is missing from the generated JavaScript assets.");
-}
-if (!bundledJavascript.includes("__NEARER_PREMIUM_GLOBE_V2_STARTED")) {
-  throw new Error("The solo enhancement sequence is missing from the generated JavaScript assets.");
-}
-if (!bundledJavascript.includes("Regional Mastery did not initialise.")) {
-  throw new Error("The Regional Mastery module entry is missing from the generated JavaScript assets.");
-}
-if (!bundledJavascript.includes("__NEARER_MASTERY_STARTED")) {
-  throw new Error("The Regional Mastery implementation is missing from the generated JavaScript assets.");
-}
+
 if (!bundledStyles.includes("nearer-account-dialog")) {
   throw new Error("The cloud account styling is missing from the generated CSS assets.");
 }
 
-const togetherBootstrap = await readFile(resolve(dist, "together/shared/experience8-bootstrap.js"), "utf8");
-if (!togetherBootstrap.includes("__NEARER_PLATFORM_MODULE_PENDING")) {
-  throw new Error("Together can still race the bundled platform module with its legacy loader.");
-}
-
-for (const legacyFile of [
+const legacyFiles = [
   "platform.js",
   "cloud.js",
   "cloud.css",
   "runtime-loader.js",
   "chunks/app-01.js",
+  "chunks/runtime-01.js",
+  "chunks/runtime-tail-01.js",
   "mastery/mastery.js",
-  "mastery/mastery-loader.js"
-]) {
+  "mastery/mastery-loader.js",
+  "guess-rules.js",
+  "guessed-country-info.js",
+  "together/race/chunks/race-01.js",
+  "together/race/race-loader.js",
+  "together/cooperative/cooperative.js",
+  "together/cooperative/cooperative-loader.js",
+  "together/duel/duel.js",
+  "together/duel/duel-loader.js",
+  "together/duel/duel-pressure.js",
+  "together/shared/together-core.js",
+  "together/shared/premium-globe-v2.js",
+  "together/shared/polish-ui.js",
+  "together/shared/experience7.js",
+  "together/shared/experience8-bootstrap.js"
+];
+
+for (const legacyFile of legacyFiles) {
   try {
     await access(resolve(dist, legacyFile));
     throw new Error(`${legacyFile} was copied into dist instead of being bundled.`);
@@ -116,9 +118,4 @@ for (const legacyFile of [
   }
 }
 
-const copiedChunks = await readdir(resolve(dist, "chunks"));
-if (copiedChunks.some(name => name.startsWith("app-"))) {
-  throw new Error("One or more solo application source fragments remain as public deployment files.");
-}
-
-console.log(`Verified ${requiredFiles.length} Nearer outputs and ${javascriptAssets.length + stylesheetAssets.length} hashed assets.`);
+console.log(`Verified ${pages.length} Nearer pages and ${javascriptAssets.length + stylesheetAssets.length} hashed assets.`);
