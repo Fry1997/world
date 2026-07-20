@@ -8,12 +8,16 @@ export async function preparePrecisionGeometry() {
 
   precisionPromise ||= Promise.resolve().then(() => {
     const existing = window.NEARER_COUNTRIES_GEOJSON;
-    if (!existing?.features?.length) {
+    const gameData = window.NEARER_GAME_DATA;
+    if (!existing?.features?.length || !gameData?.countries?.length) {
       throw new Error("Precision country geometry requires the Nearer geography runtime.");
     }
 
     const precisionByCode = new Map(
       (precisionCollection.features || []).map(feature => [feature.properties.code, feature])
+    );
+    const areaByCode = new Map(
+      gameData.countries.map(country => [country.code, Number(country.area || 0)])
     );
     let precisionCount = 0;
     let detailedCount = 0;
@@ -38,6 +42,10 @@ export async function preparePrecisionGeometry() {
       if (feature.geometry.type === "Point") pointFallbackCount += 1;
       else detailedCount += 1;
       return feature;
+    }).sort((a, b) => {
+      const areaA = areaByCode.get(a.properties.code) || Number.POSITIVE_INFINITY;
+      const areaB = areaByCode.get(b.properties.code) || Number.POSITIVE_INFINITY;
+      return areaA - areaB;
     });
 
     const featureByCode = new Map(features.map(feature => [feature.properties.code, feature]));
