@@ -38,13 +38,13 @@ replaceOnce(
   `function drawPoint(feature, fill, stroke, radiusValue = 5) { const coordinate = feature.geometry.coordinates; if (!visible(coordinate)) return; const point = projection(coordinate); if (!point) return; context.save(); context.beginPath(); context.arc(point[0], point[1], radiusValue, 0, Math.PI * 2); context.fillStyle = fill; context.fill(); context.strokeStyle = stroke; context.lineWidth = 1.7; context.stroke(); context.restore(); }
   const polygonBounds = new Map(polygonFeatures.map(feature => [feature.properties.code, d3.geoBounds(feature)]));
   function longitudeNear(value, minimum, maximum, padding) { const longitude = ((value + 540) % 360) - 180; if (minimum <= maximum) return longitude >= minimum - padding && longitude <= maximum + padding; return longitude >= minimum - padding || longitude <= maximum + padding; }
-  function featureNearView(feature) { if (zoom < 24) return true; const centre = [-rotation[0], -rotation[1]]; const latitudePadding = Math.max(.08, 220 / zoom); const longitudePadding = latitudePadding / Math.max(.2, Math.cos(centre[1] * Math.PI / 180)); const bounds = polygonBounds.get(feature.properties.code); return Boolean(bounds && centre[1] >= bounds[0][1] - latitudePadding && centre[1] <= bounds[1][1] + latitudePadding && longitudeNear(centre[0], bounds[0][0], bounds[1][0], longitudePadding)); }`,
+  function featureNearView(feature) { if (zoom < 4) return true; const centre = [-rotation[0], -rotation[1]]; const latitudePadding = Math.max(.08, 150 / zoom); const longitudePadding = latitudePadding / Math.max(.2, Math.cos(centre[1] * Math.PI / 180)); const bounds = polygonBounds.get(feature.properties.code); return Boolean(bounds && centre[1] >= bounds[0][1] - latitudePadding && centre[1] <= bounds[1][1] + latitudePadding && longitudeNear(centre[0], bounds[0][0], bounds[1][0], longitudePadding)); }`,
   "deep zoom feature culling"
 );
 
 replaceOnce(
   'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7);',
-  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); if (zoom < 24) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of polygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.22,.7/Math.sqrt(zoom/24)));',
+  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); if (zoom < 4) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of polygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.18,.7/Math.sqrt(Math.max(1,zoom/4))));',
   "deep zoom land rendering"
 );
 
