@@ -108,6 +108,39 @@ const remoteSupabaseDeclaration = 'const SUPABASE_MODULE = "https://cdn.jsdelivr
 const remoteSupabaseImport = "import(SUPABASE_MODULE)";
 const cloudApiDeclaration = "window.NEARER_CLOUD = { open: openAccount, sync: () => syncAll({ initial: false }), get session() { return session; } };";
 const cloudApiReplacement = "window.NEARER_CLOUD = { open: openAccount, sync: () => syncAll({ initial: false }), client: getClient, get session() { return session; } };";
+const cloudPayloadEquality = `  function payloadEqual(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }`;
+const cloudPayloadEqualityReplacement = `  function canonicalPayload(value) {
+    if (Array.isArray(value)) return value.map(canonicalPayload);
+    if (!value || typeof value !== "object") return value;
+    const output = {};
+    for (const key of Object.keys(value).sort()) output[key] = canonicalPayload(value[key]);
+    return output;
+  }
+
+  function payloadEqual(a, b) {
+    return JSON.stringify(canonicalPayload(a)) === JSON.stringify(canonicalPayload(b));
+  }`;
+const cloudInitialMergeCondition = "if ((initial || firstDeviceSync) && remoteUseful) {";
+const cloudInitialMergeReplacement = "if (firstDeviceSync && remoteUseful) {";
+const cloudReloadBlock = `      if (appliedRemote) {
+        showCloudToast("Cloud progress restored", "Reloading Nearer with your latest progress…");
+        setTimeout(() => location.reload(), 700);
+      }`;
+const cloudReloadReplacement = `      if (appliedRemote) {
+        const reloadKey = "nearer-cloud-reload:" + session.user.id + ":" + location.pathname;
+        const fingerprint = Object.keys(TRACKED)
+          .map(namespace => namespace + ":" + JSON.stringify(canonicalPayload(readLocal(namespace))))
+          .join("|");
+        if (sessionStorage.getItem(reloadKey) !== fingerprint) {
+          sessionStorage.setItem(reloadKey, fingerprint);
+          showCloudToast("Cloud progress restored", "Reloading Nearer with your latest progress…");
+          setTimeout(() => location.reload(), 700);
+        } else {
+          showCloudToast("Cloud progress restored", "Your latest progress is now available.");
+        }
+      }`;
 
 async function reconstructSource(files, globalKey) {
   const cacheKey = `${globalKey}:${files.join(",")}`;
@@ -207,14 +240,24 @@ function nearerCompatibilityPlugin() {
     },
     transform(code, id) {
       if (id !== cloudModulePath) return null;
-      if (!code.includes(remoteSupabaseDeclaration) || !code.includes(remoteSupabaseImport) || !code.includes(cloudApiDeclaration)) {
-        throw new Error("The Nearer cloud module has an unexpected Supabase import format.");
+      if (
+        !code.includes(remoteSupabaseDeclaration)
+        || !code.includes(remoteSupabaseImport)
+        || !code.includes(cloudApiDeclaration)
+        || !code.includes(cloudPayloadEquality)
+        || !code.includes(cloudInitialMergeCondition)
+        || !code.includes(cloudReloadBlock)
+      ) {
+        throw new Error("The Nearer cloud module has an unexpected sync or Supabase format.");
       }
       return {
         code: code
           .replace(remoteSupabaseDeclaration, "")
           .replace(remoteSupabaseImport, 'import("./src/supabase-client.js")')
-          .replace(cloudApiDeclaration, cloudApiReplacement),
+          .replace(cloudApiDeclaration, cloudApiReplacement)
+          .replace(cloudPayloadEquality, cloudPayloadEqualityReplacement)
+          .replace(cloudInitialMergeCondition, cloudInitialMergeReplacement)
+          .replace(cloudReloadBlock, cloudReloadReplacement),
         map: null
       };
     },
