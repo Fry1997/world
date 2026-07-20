@@ -1,2 +1,2 @@
-import './atlas.css';
+import './atlas-styles.js';
 import './atlas.js';
