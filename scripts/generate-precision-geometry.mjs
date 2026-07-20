@@ -58,7 +58,7 @@ for (const source of sourceFeatures) {
 }
 
 const alwaysPrecision = new Set(["VAT", "MCO", "SMR", "LIE", "AND", "LUX", "MNE"]);
-const selected = countries.filter(country => Number(country.area || 0) <= 30_000 || alwaysPrecision.has(country.code));
+const selected = countries.filter(country => Number(country.area || 0) <= 15_000 || alwaysPrecision.has(country.code));
 const outputFeatures = [];
 for (const country of selected) {
   let source = country.numeric ? sourceByNumeric.get(String(country.numeric).padStart(3, "0")) : null;
@@ -90,7 +90,7 @@ const output = {
   type: "FeatureCollection",
   properties: {
     source: "Natural Earth 1:10m via world-atlas",
-    thresholdAreaKm2: 30_000,
+    thresholdAreaKm2: 15_000,
     count: outputFeatures.length
   },
   features: outputFeatures
