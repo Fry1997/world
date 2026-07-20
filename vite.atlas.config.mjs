@@ -1,21 +1,20 @@
 import { resolve } from 'node:path';
-import { defineConfig } from 'vite';
+import baseConfig from './vite.config.mjs';
 
-const root = process.cwd();
+const existingBuild = baseConfig.build || {};
+const existingOptions = existingBuild.rolldownOptions || {};
+const existingInput = existingOptions.input || {};
 
-export default defineConfig({
-  appType: 'mpa',
-  base: '/',
+export default {
+  ...baseConfig,
   build: {
-    outDir: 'dist',
-    emptyOutDir: false,
-    target: 'baseline-widely-available',
-    cssCodeSplit: true,
-    sourcemap: false,
+    ...existingBuild,
     rolldownOptions: {
+      ...existingOptions,
       input: {
-        atlas: resolve(root, 'atlas/index.html')
+        ...existingInput,
+        atlas: resolve(process.cwd(), 'atlas/index.html')
       }
     }
   }
-});
+};
