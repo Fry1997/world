@@ -1,4 +1,5 @@
 import { initialiseGameRuntime } from './game-runtime.js';
+import { installDetailedMasteryControls, prepareDetailedMasteryGeometry } from './mastery-detailed-geometry.js';
 
 function showFailure(error) {
   console.error(error);
@@ -8,14 +9,14 @@ function showFailure(error) {
 
 async function start() {
   await initialiseGameRuntime();
-  const { installMasteryPrecision } = await import('./mastery-precision.js');
-  installMasteryPrecision();
-  await import('../mastery/mastery.js');
+  await prepareDetailedMasteryGeometry();
+  await import('./generated/mastery-runtime.js');
 
   if (!window.__NEARER_MASTERY_STARTED) {
     throw new Error('Regional Mastery did not initialise.');
   }
 
+  installDetailedMasteryControls();
   document.documentElement.classList.add('nearer-runtime-ready');
 }
 
