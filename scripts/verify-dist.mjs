@@ -32,6 +32,9 @@ for (const page of pages) {
   if (/src=["'][^"']*(?:chunks\/(?:app-|runtime-)|runtime-loader|mastery-loader|race-loader|cooperative-loader|duel-loader|experience8-bootstrap)/i.test(html)) {
     throw new Error(`${page} still contains a legacy runtime or loader request.`);
   }
+  if (/<link\b(?=[^>]*\brel=["']stylesheet["'])(?=[^>]*\bhref=["'](?!\/assets\/)[^"']+\.css)/i.test(html)) {
+    throw new Error(`${page} still contains a direct legacy stylesheet request.`);
+  }
 }
 
 const togetherHubHtml = await readFile(resolve(dist, "together/index.html"), "utf8");
@@ -46,8 +49,8 @@ const stylesheetAssets = assetNames.filter(name => name.endsWith(".css"));
 if (javascriptAssets.length < 10) {
   throw new Error("The route modules were not split into the expected cached assets.");
 }
-if (!stylesheetAssets.length) {
-  throw new Error("The shared Vite stylesheet asset was not generated.");
+if (stylesheetAssets.length < 7) {
+  throw new Error("The route styles were not split into generated cached assets.");
 }
 
 const bundledJavascript = (await Promise.all(
@@ -93,8 +96,18 @@ for (const forbiddenMarker of [
   }
 }
 
-if (!bundledStyles.includes("nearer-account-dialog")) {
-  throw new Error("The cloud account styling is missing from the generated CSS assets.");
+const requiredStyleMarkers = [
+  ["nearer-account-dialog", "cloud account styling"],
+  ["app-shell", "base application styling"],
+  ["mastery-shell", "Regional Mastery styling"],
+  ["race-shell", "Same Target Race styling"],
+  ["together-mode-shell", "Together mode styling"]
+];
+
+for (const [marker, description] of requiredStyleMarkers) {
+  if (!bundledStyles.includes(marker)) {
+    throw new Error(`The ${description} is missing from the generated CSS assets.`);
+  }
 }
 
 const legacyFiles = [
@@ -120,7 +133,29 @@ const legacyFiles = [
   "together/shared/premium-globe-v2.js",
   "together/shared/polish-ui.js",
   "together/shared/experience7.js",
-  "together/shared/experience8-bootstrap.js"
+  "together/shared/experience8-bootstrap.js",
+  "styles.css",
+  "globe.css",
+  "platform.css",
+  "performance.css",
+  "mastery/mastery.css",
+  "together/race/race.css",
+  "together/cooperative/cooperative.css",
+  "together/duel/duel.css",
+  "together/shared/mode.css",
+  "together/shared/polish.css",
+  "together/shared/prestige.css",
+  "together/shared/experience.css",
+  "together/shared/experience2.css",
+  "together/shared/experience3.css",
+  "together/shared/experience4.css",
+  "together/shared/experience5.css",
+  "together/shared/experience6.css",
+  "together/shared/experience7.css",
+  "together/shared/experience7-multiplayer.css",
+  "together/shared/experience8.css",
+  "together/shared/experience9.css",
+  "together/shared/experience10.css"
 ];
 
 for (const legacyFile of legacyFiles) {
