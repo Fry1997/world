@@ -1,4 +1,4 @@
-import detailedWorldUrl from "world-atlas/countries-50m.json?url";
+import detailedWorldUrl from "world-atlas/countries-10m.json?url";
 
 const normalise = value => String(value || "")
   .normalize("NFD")
@@ -8,6 +8,7 @@ const normalise = value => String(value || "")
   .trim()
   .replace(/\s+/g, " ");
 
+const criticalMicrostates = ["VAT", "MCO", "SMR", "LIE", "AND", "LUX"];
 let detailPromise = null;
 
 function namesFor(country) {
@@ -69,17 +70,21 @@ export async function prepareDetailedGeometry() {
           name: country.name,
           continent: country.continent,
           approximate,
-          detailScale: source ? "50m" : previous?.properties?.detailScale || "fallback"
+          detailScale: source ? "10m" : previous?.properties?.detailScale || "fallback"
         },
         geometry
       };
     });
 
+    const featureByCode = new Map(features.map(feature => [feature.properties.code, feature]));
+    const unresolvedMicrostates = criticalMicrostates.filter(code => featureByCode.get(code)?.geometry.type === "Point");
+
     window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
     window.__NEARER_DETAILED_GEOMETRY = {
-      source: "Natural Earth 1:50m via world-atlas",
+      source: "Natural Earth 1:10m via world-atlas",
       detailedCount,
-      pointFallbackCount
+      pointFallbackCount,
+      unresolvedMicrostates
     };
     window.__NEARER_MASTERY_DETAILED_GEOMETRY = window.__NEARER_DETAILED_GEOMETRY;
     return window.__NEARER_DETAILED_GEOMETRY;
