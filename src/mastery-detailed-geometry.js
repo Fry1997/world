@@ -23,6 +23,6 @@ export function installDetailedMasteryControls() {
   const badge = existing || document.createElement("div");
   badge.className = "mastery-map-detail-badge";
   badge.setAttribute("aria-hidden", "true");
-  badge.innerHTML = "<span>10m borders</span><small>900× zoom</small>";
+  badge.innerHTML = "<span>Precision borders</span><small>900× zoom</small>";
   if (!existing) stage.append(badge);
 }

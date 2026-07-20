@@ -79,6 +79,15 @@ export function createAtlasModel(gameData, geoData, d3) {
 
   const features = geoData.features.filter(feature => countryByCode.has(feature.properties.code));
   const featureByCode = new Map(features.map(feature => [feature.properties.code, feature]));
+  const polygons = features.filter(feature => feature.geometry.type !== 'Point');
+  const points = features.filter(feature => feature.geometry.type === 'Point');
+  const precisionPolygons = polygons.filter(feature => feature.properties.detailScale === '10m');
+  const basePolygons = polygons.filter(feature => feature.properties.detailScale !== '10m');
+  const hitPolygons = [...polygons].sort((a, b) => {
+    const areaA = Number(countryByCode.get(a.properties.code)?.area) || Number.POSITIVE_INFINITY;
+    const areaB = Number(countryByCode.get(b.properties.code)?.area) || Number.POSITIVE_INFINITY;
+    return areaA - areaB;
+  });
   const areaRank = [...countries].sort((a, b) => (b.area || 0) - (a.area || 0));
   const rankByCode = new Map(areaRank.map((country, index) => [country.code, index + 1]));
   const continents = [...new Set(countries.map(country => country.continent || 'Other'))].sort();
@@ -126,9 +135,12 @@ export function createAtlasModel(gameData, geoData, d3) {
     countryByName,
     features,
     featureByCode,
-    polygons: features.filter(feature => feature.geometry.type !== 'Point'),
-    points: features.filter(feature => feature.geometry.type === 'Point'),
-    worldCollection: { type: 'FeatureCollection', features: features.filter(feature => feature.geometry.type !== 'Point') },
+    polygons,
+    basePolygons,
+    precisionPolygons,
+    hitPolygons,
+    points,
+    worldCollection: { type: 'FeatureCollection', features: basePolygons },
     continents,
     areaRank,
     rankByCode,

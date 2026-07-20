@@ -22,6 +22,12 @@ replaceOnce(
 );
 
 replaceOnce(
+  'const worldCollection = { type: "FeatureCollection", features: polygonFeatures };',
+  'const precisionPolygonFeatures = polygonFeatures.filter(feature => feature.properties.detailScale === "10m"); const basePolygonFeatures = polygonFeatures.filter(feature => feature.properties.detailScale !== "10m"); const worldCollection = { type: "FeatureCollection", features: basePolygonFeatures };',
+  "precision land separation"
+);
+
+replaceOnce(
   'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? .8 : .45);',
   'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? Math.max(.08, .6 / Math.sqrt(Math.max(1, zoom))) : Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));',
   "projection precision"
@@ -44,7 +50,7 @@ replaceOnce(
 
 replaceOnce(
   'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7);',
-  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); if (zoom < 24) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of polygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.22,.7/Math.sqrt(zoom/24)));',
+  'const land = context.createLinearGradient(width*.18,height*.12,width*.78,height*.9); land.addColorStop(0,"#f2ebdf"); land.addColorStop(.54,"#e5dccf"); land.addColorStop(1,"#bfb8ad"); if (zoom < 24) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of basePolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.22,.7/Math.sqrt(zoom/24))); for (const feature of precisionPolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",zoom < 24 ? .7 : Math.max(.22,.7/Math.sqrt(zoom/24)));',
   "deep zoom land rendering"
 );
 
