@@ -1,5 +1,6 @@
 const MOBILE_BREAKPOINT = '(max-width: 720px)';
 
+let installed = false;
 let scheduled = false;
 let soloModeObserver = null;
 
@@ -22,6 +23,7 @@ function syncSoloHeader() {
   const title = header.querySelector('h1');
   const subtitle = header.querySelector('.nearer-native-subtitle');
   const dateChip = header.querySelector('.nearer-native-date');
+  const actions = header.querySelector('.nearer-native-actions');
   const newGame = document.getElementById('newGameButton');
 
   if (mode === 'random') {
@@ -36,7 +38,7 @@ function syncSoloHeader() {
     dateChip?.classList.remove('is-hidden');
   }
 
-  if (newGame) header.querySelector('.nearer-native-actions')?.append(newGame);
+  if (newGame && actions && newGame.parentElement !== actions) actions.append(newGame);
 }
 
 function installSolo() {
@@ -151,6 +153,12 @@ function scheduleInstall() {
 }
 
 export function installApprovedMobileLayout() {
+  if (installed) {
+    scheduleInstall();
+    return;
+  }
+  installed = true;
+
   installForRoute();
 
   const observer = new MutationObserver(scheduleInstall);
