@@ -14,7 +14,7 @@
     "dev": "npm run prepare:app && vite --config vite.atlas.config.mjs",
     "build": "npm run prepare:app && vite build --config vite.atlas.config.mjs && node scripts/generate-country-catalog.mjs && node scripts/verify-security-config.mjs && node scripts/verify-dist.mjs && node scripts/verify-country-catalog.mjs && node scripts/verify-asset-budgets.mjs",
     "preview": "vite preview",
-    "smoke": "node scripts/browser-smoke.mjs"
+    "smoke": "node scripts/browser-smoke.mjs && node scripts/globe-colour-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.110.7",
