@@ -14,7 +14,7 @@
     "prepare:borders": "node scripts/install-map-border-contrast.mjs",
     "prepare:app": "npm run prepare:precision && npm run prepare:mastery && npm run prepare:atlas && node scripts/fix-globe-fill-rule.mjs && npm run prepare:microstates && npm run prepare:borders",
     "dev": "npm run prepare:app && vite --config vite.atlas.config.mjs",
-    "build": "npm run prepare:app && vite build --config vite.atlas.config.mjs && node scripts/generate-country-catalog.mjs && node scripts/verify-security-config.mjs && node scripts/verify-dist.mjs && node scripts/verify-country-catalog.mjs && node scripts/verify-asset-budgets.mjs",
+    "build": "npm run prepare:app && vite build --config vite.atlas.config.mjs && node scripts/install-pwa-shell.mjs && node scripts/generate-country-catalog.mjs && node scripts/verify-security-config.mjs && node scripts/verify-dist.mjs && node scripts/verify-country-catalog.mjs && node scripts/verify-asset-budgets.mjs",
     "preview": "vite preview",
     "smoke": "node scripts/globe-colour-smoke.mjs && node scripts/browser-smoke.mjs"
   },
