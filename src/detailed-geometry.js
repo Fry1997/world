@@ -29,6 +29,7 @@ export async function prepareDetailedGeometry() {
     if (!response.ok) throw new Error(`Could not load detailed country geometry (${response.status}).`);
     const topology = await response.json();
     const sourceFeatures = topoFeature(topology, topology.objects.countries).features;
+    const landFeature = topology.objects.land ? topoFeature(topology, topology.objects.land) : null;
     const sourceByNumeric = new Map();
     const sourceByName = new Map();
 
@@ -76,10 +77,12 @@ export async function prepareDetailedGeometry() {
     });
 
     window.NEARER_COUNTRIES_GEOJSON = { type: "FeatureCollection", features };
+    if (landFeature) window.NEARER_LAND_GEOJSON = landFeature;
     window.__NEARER_DETAILED_GEOMETRY = {
       source: "Natural Earth 1:50m via world-atlas",
       detailedCount,
-      pointFallbackCount
+      pointFallbackCount,
+      dedicatedLand: Boolean(landFeature)
     };
     return window.__NEARER_DETAILED_GEOMETRY;
   })();
