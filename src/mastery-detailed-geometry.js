@@ -15,14 +15,15 @@ export function installDetailedMasteryControls() {
   if (!stage || !zoomIn || !zoomOut) return;
 
   stage.dataset.detailedGeometry = "true";
-  if (hint) hint.textContent = "Drag to move · pinch or use + to zoom from country level to microstate detail";
-  zoomIn.title = "Zoom further into the map";
+  stage.dataset.microstateMarkers = "true";
+  if (hint) hint.textContent = "Drag to move · neutral rings mark tiny places · pinch to zoom";
+  zoomIn.title = "Zoom into the map";
   zoomOut.title = "Zoom out";
 
   const existing = stage.querySelector(".mastery-map-detail-badge");
   const badge = existing || document.createElement("div");
   badge.className = "mastery-map-detail-badge";
   badge.setAttribute("aria-hidden", "true");
-  badge.innerHTML = "<span>Precision borders</span><small>900× zoom</small>";
+  badge.innerHTML = "<span>Precision borders</span><small>Tiny-place markers</small>";
   if (!existing) stage.append(badge);
 }
