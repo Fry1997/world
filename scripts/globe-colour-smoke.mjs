@@ -59,7 +59,7 @@ async function sampleGlobe(page, options) {
     const landCoordinate = feature.geometry.type === 'Point' ? feature.geometry.coordinates : d3.geoCentroid(feature);
     const context = canvas.getContext('2d');
 
-    function luminanceAt(coordinate) {
+    function sampleAt(coordinate) {
       const point = projection(coordinate);
       if (!point) return null;
       const x = Math.round(point[0] * ratioX);
@@ -67,21 +67,34 @@ async function sampleGlobe(page, options) {
       const left = Math.max(0, Math.min(canvas.width - 5, x - 2));
       const top = Math.max(0, Math.min(canvas.height - 5, y - 2));
       const pixels = context.getImageData(left, top, 5, 5).data;
-      let total = 0;
+      let luminance = 0;
+      let red = 0;
+      let green = 0;
+      let blue = 0;
       let count = 0;
       for (let index = 0; index < pixels.length; index += 4) {
         if (pixels[index + 3] < 100) continue;
-        total += .2126 * pixels[index] + .7152 * pixels[index + 1] + .0722 * pixels[index + 2];
+        red += pixels[index];
+        green += pixels[index + 1];
+        blue += pixels[index + 2];
+        luminance += .2126 * pixels[index] + .7152 * pixels[index + 1] + .0722 * pixels[index + 2];
         count += 1;
       }
-      return count ? total / count : null;
+      return count ? {
+        luminance: luminance / count,
+        rgb: [red / count, green / count, blue / count],
+        point,
+        pixel: [x, y]
+      } : null;
     }
 
     return {
-      land: luminanceAt(landCoordinate),
-      ocean: luminanceAt(oceanCoordinate),
+      land: sampleAt(landCoordinate),
+      ocean: sampleAt(oceanCoordinate),
       landCoordinate,
-      oceanCoordinate
+      oceanCoordinate,
+      rect: { width: rect.width, height: rect.height },
+      canvas: { width: canvas.width, height: canvas.height }
     };
   }, options);
 }
@@ -99,6 +112,7 @@ try {
   await page.locator('#regionGrid [data-region="europe"]').click();
   await page.waitForFunction(() => !document.getElementById('masterySession')?.classList.contains('is-hidden'));
   await waitForFrames(page);
+  await page.screenshot({ path: 'globe-mastery.png', fullPage: true });
   const mastery = await sampleGlobe(page, {
     canvasId: 'masteryGlobeCanvas',
     stageId: 'masteryGlobeStage',
@@ -107,13 +121,15 @@ try {
     landCode: 'AUT',
     oceanCoordinate: [-30, 40]
   });
-  assert(mastery && Number.isFinite(mastery.land) && Number.isFinite(mastery.ocean), 'Mastery globe colour samples were unavailable.');
-  assert(mastery.land > mastery.ocean + 35, `Mastery land/ocean colours are inverted or washed out: land ${mastery.land.toFixed(1)}, ocean ${mastery.ocean.toFixed(1)}.`);
-  assert(mastery.ocean < 145, `Mastery ocean is too bright: ${mastery.ocean.toFixed(1)}.`);
+  console.log('Mastery globe samples:', JSON.stringify(mastery));
+  assert(mastery?.land && mastery?.ocean, 'Mastery globe colour samples were unavailable.');
+  assert(mastery.land.luminance > mastery.ocean.luminance + 35, `Mastery land/ocean colours are inverted or washed out: land ${mastery.land.luminance.toFixed(1)}, ocean ${mastery.ocean.luminance.toFixed(1)}.`);
+  assert(mastery.ocean.luminance < 145, `Mastery ocean is too bright: ${mastery.ocean.luminance.toFixed(1)}.`);
 
   await page.goto(`${baseUrl}/atlas/`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.documentElement.classList.contains('nearer-runtime-ready') && window.__NEARER_ATLAS_STARTED);
   await waitForFrames(page);
+  await page.screenshot({ path: 'globe-atlas.png', fullPage: true });
   const atlas = await sampleGlobe(page, {
     canvasId: 'atlasGlobeCanvas',
     stageId: 'atlasGlobeStage',
@@ -122,12 +138,13 @@ try {
     landCode: 'NGA',
     oceanCoordinate: [-30, 0]
   });
-  assert(atlas && Number.isFinite(atlas.land) && Number.isFinite(atlas.ocean), 'Atlas globe colour samples were unavailable.');
-  assert(atlas.land > atlas.ocean + 35, `Atlas land/ocean colours are inverted or washed out: land ${atlas.land.toFixed(1)}, ocean ${atlas.ocean.toFixed(1)}.`);
-  assert(atlas.ocean < 145, `Atlas ocean is too bright: ${atlas.ocean.toFixed(1)}.`);
+  console.log('Atlas globe samples:', JSON.stringify(atlas));
+  assert(atlas?.land && atlas?.ocean, 'Atlas globe colour samples were unavailable.');
+  assert(atlas.land.luminance > atlas.ocean.luminance + 35, `Atlas land/ocean colours are inverted or washed out: land ${atlas.land.luminance.toFixed(1)}, ocean ${atlas.ocean.luminance.toFixed(1)}.`);
+  assert(atlas.ocean.luminance < 145, `Atlas ocean is too bright: ${atlas.ocean.luminance.toFixed(1)}.`);
 
   await context.close();
-  console.log(`Globe colour smoke passed. Mastery land/ocean ${mastery.land.toFixed(1)}/${mastery.ocean.toFixed(1)}; Atlas ${atlas.land.toFixed(1)}/${atlas.ocean.toFixed(1)}.`);
+  console.log(`Globe colour smoke passed. Mastery land/ocean ${mastery.land.luminance.toFixed(1)}/${mastery.ocean.luminance.toFixed(1)}; Atlas ${atlas.land.luminance.toFixed(1)}/${atlas.ocean.luminance.toFixed(1)}.`);
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill('SIGTERM');
