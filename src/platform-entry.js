@@ -1,5 +1,6 @@
 import '../cloud.css';
 import '../mobile-polish.css';
+import './product-direction.css';
 import { installAtlasNavigation } from './atlas-navigation.js';
 
 window.__NEARER_PLATFORM_MODULE_PENDING = true;

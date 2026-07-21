@@ -1,0 +1,292 @@
+:root{
+  --nearer-bg:#061523;
+  --nearer-bg-deep:#03101b;
+  --nearer-surface:#0b2030;
+  --nearer-surface-2:#10293a;
+  --nearer-line:rgba(225,235,239,.14);
+  --nearer-text:#f5f1e9;
+  --nearer-muted:#9eafb9;
+  --nearer-sand:#efe5d7;
+  --nearer-gold:#f0ae43;
+  --nearer-mint:#52d3ad;
+  --nearer-blue:#63b8ef;
+  --nearer-radius:18px;
+  --nearer-radius-lg:25px;
+}
+
+html{background:var(--nearer-bg-deep)}
+body.platform-shell-enabled{
+  min-height:100svh;
+  background:
+    radial-gradient(68rem 42rem at 52% -16%,rgba(44,99,131,.34),transparent 64%),
+    linear-gradient(180deg,#061726 0%,#06131f 54%,#03101a 100%)!important;
+  color:var(--nearer-text);
+}
+
+body.platform-shell-enabled .app-shell{
+  width:min(1160px,100%);
+  padding-inline:clamp(14px,3vw,28px);
+}
+
+body.platform-shell-enabled .topbar{
+  min-height:68px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+body.platform-shell-enabled .brand-mark{
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02))!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .platform-tabs{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  width:min(630px,100%)!important;
+  padding:4px!important;
+  border-radius:15px!important;
+  border-color:rgba(255,255,255,.1)!important;
+  background:rgba(4,15,24,.58)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .platform-tabs .mode-button{
+  min-height:38px!important;
+  border-radius:11px!important;
+  color:rgba(239,244,246,.62)!important;
+  font-size:.79rem;
+}
+
+body.platform-shell-enabled .platform-tabs .mode-button.is-active{
+  border-color:rgba(255,255,255,.1)!important;
+  background:rgba(255,255,255,.09)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.map-panel,.guess-panel,.closest-card,.history-card,.feedback-panel,.mastery-map-panel,.session-progress-card,.current-country-card,.session-queue-card,.session-tip-card,.atlas-globe-panel,.atlas-profile,.atlas-library,.atlas-index,.together-card,.together-session-note){
+  border-color:var(--nearer-line)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.primary-button,.secondary-button,.mode-button,button,a){
+  -webkit-tap-highlight-color:transparent;
+}
+
+body.platform-shell-enabled .primary-button{
+  border-color:rgba(255,255,255,.15)!important;
+  background:var(--nearer-sand)!important;
+  color:#14212a!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .secondary-button{
+  border-color:rgba(255,255,255,.13)!important;
+  background:rgba(255,255,255,.045)!important;
+  color:var(--nearer-text)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.eyebrow,.mode-status){
+  color:var(--nearer-gold)!important;
+  letter-spacing:.11em;
+}
+
+/* Solo game: make the game itself the page, not a dashboard around it. */
+body.platform-shell-enabled:has(.game-layout) main{padding-top:18px}
+body.platform-shell-enabled:has(.game-layout) .platform-launchpad{display:none!important}
+body.platform-shell-enabled:has(.game-layout) .game-heading{
+  margin-bottom:14px;
+  padding:0 2px;
+}
+body.platform-shell-enabled:has(.game-layout) .game-heading h1{
+  font-size:clamp(1.65rem,5vw,2.45rem);
+  letter-spacing:-.045em;
+}
+body.platform-shell-enabled:has(.game-layout) .game-layout{gap:14px}
+body.platform-shell-enabled:has(.game-layout) .map-panel{
+  overflow:hidden;
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(180deg,rgba(12,34,49,.95),rgba(3,15,25,.98))!important;
+}
+body.platform-shell-enabled:has(.game-layout) .map-toolbar{
+  min-height:48px;
+  background:rgba(5,18,28,.84)!important;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+body.platform-shell-enabled:has(.game-layout) .guess-panel{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(8,27,40,.86)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .search-control{
+  border-radius:13px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .closest-card,
+body.platform-shell-enabled:has(.game-layout) .history-card{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(8,27,40,.82)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .guess-history li{
+  border-radius:10px!important;
+  background:rgba(255,255,255,.025)!important;
+}
+
+/* Mastery: quiet chrome, dominant map, compact supporting information. */
+body.mastery-experience .mastery-hero,
+body.mastery-experience .mastery-intelligence{
+  box-shadow:none!important;
+}
+body.mastery-experience .mastery-passport{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(255,255,255,.035)!important;
+}
+body.mastery-experience .mastery-overview article,
+body.mastery-experience .region-card{
+  border-radius:var(--nearer-radius)!important;
+  border-color:var(--nearer-line)!important;
+  background:rgba(255,255,255,.03)!important;
+  box-shadow:none!important;
+}
+body.mastery-experience .mastery-globe-stage{
+  background:linear-gradient(160deg,#12364c,#06141f 78%)!important;
+}
+body.mastery-experience .mastery-feedback{
+  border-radius:15px!important;
+  background:rgba(10,31,45,.9)!important;
+}
+
+/* Atlas: globe and country sheet are the experience. */
+body.atlas-experience .atlas-hero{display:none!important}
+body.atlas-experience .atlas-main{padding-top:14px!important}
+body.atlas-experience .atlas-search-bar{
+  margin-bottom:10px!important;
+  padding:8px!important;
+  border-radius:15px!important;
+  background:rgba(5,18,28,.72)!important;
+  box-shadow:none!important;
+}
+body.atlas-experience .atlas-search-bar>label{display:none}
+body.atlas-experience .atlas-suggestions{left:8px!important;right:8px!important}
+body.atlas-experience .atlas-globe-panel,
+body.atlas-experience .atlas-profile{
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(180deg,rgba(12,34,49,.96),rgba(3,14,23,.99))!important;
+}
+body.atlas-experience .atlas-profile-content{padding:20px!important}
+body.atlas-experience .atlas-stat-grid article{
+  min-height:92px!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.028)!important;
+}
+body.atlas-experience .atlas-library,
+body.atlas-experience .atlas-index{
+  border-radius:var(--nearer-radius-lg)!important;
+  background:rgba(6,22,34,.82)!important;
+}
+
+/* Together: three honest local multiplayer choices, with restrained mode colour. */
+body:has(.together-main) .together-hero{
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+}
+body:has(.together-main) .together-session-note{display:none!important}
+body:has(.together-main) .mode-grid{gap:12px!important}
+body:has(.together-main) .together-card{
+  min-height:190px;
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
+}
+body:has(.together-main) .together-card:nth-child(1){--mode-accent:var(--nearer-gold)}
+body:has(.together-main) .together-card:nth-child(2){--mode-accent:var(--nearer-mint)}
+body:has(.together-main) .together-card:nth-child(3){--mode-accent:var(--nearer-blue)}
+body:has(.together-main) .together-card .mode-icon,
+body:has(.together-main) .together-card .mode-cta{color:var(--mode-accent)!important}
+body:has(.together-main) .together-note{display:none!important}
+
+@media(max-width:720px){
+  body.platform-shell-enabled .app-shell{
+    padding-inline:10px!important;
+    padding-bottom:86px!important;
+  }
+  body.platform-shell-enabled .platform-topbar{
+    min-height:50px;
+    padding-block:6px!important;
+    border-bottom:0;
+  }
+  body.platform-shell-enabled .brand span:last-child small{display:none}
+  body.platform-shell-enabled .brand-mark{width:34px!important;height:34px!important}
+  body.platform-shell-enabled .platform-mobile-dock{
+    left:8px!important;
+    right:8px!important;
+    bottom:max(7px,env(safe-area-inset-bottom))!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    min-height:64px!important;
+    padding:5px!important;
+    border-radius:18px!important;
+    border-color:rgba(255,255,255,.11)!important;
+    background:rgba(4,15,24,.93)!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.34)!important;
+  }
+  body.platform-shell-enabled .platform-mobile-dock a,
+  body.platform-shell-enabled .platform-mobile-dock button{
+    gap:2px!important;
+    border-radius:12px!important;
+    color:rgba(235,241,244,.54)!important;
+  }
+  body.platform-shell-enabled .platform-mobile-dock .is-active{
+    background:transparent!important;
+    color:var(--nearer-gold)!important;
+    box-shadow:none!important;
+  }
+  body.platform-shell-enabled .platform-mobile-dock .is-active:before{
+    content:"";
+    position:absolute;
+    top:1px;
+    width:18px;
+    height:2px;
+    border-radius:999px;
+    background:currentColor;
+  }
+  body.platform-shell-enabled .platform-mobile-dock svg{width:19px!important;height:19px!important}
+  body.platform-shell-enabled .platform-mobile-dock span{font-size:.59rem!important}
+
+  body.platform-shell-enabled:has(.game-layout) main{padding-top:4px}
+  body.platform-shell-enabled:has(.game-layout) .game-heading{padding:0 8px;margin:4px 0 10px}
+  body.platform-shell-enabled:has(.game-layout) .game-heading>div>p:last-child{display:none}
+  body.platform-shell-enabled:has(.game-layout) .game-layout{display:flex!important;flex-direction:column!important;gap:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .map-wrap{min-height:42svh!important}
+  body.platform-shell-enabled:has(.game-layout) .guess-panel{padding:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .feedback-panel{display:none!important}
+  body.platform-shell-enabled:has(.game-layout) .results-column{display:grid!important;gap:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .closest-card{order:1}
+  body.platform-shell-enabled:has(.game-layout) .history-card{order:2}
+  body.platform-shell-enabled:has(.game-layout) .stat-strip{display:none!important}
+
+  body.mastery-experience .mastery-dashboard .mastery-hero{padding:20px 8px!important}
+  body.mastery-experience .mastery-overview{grid-template-columns:repeat(2,1fr)!important}
+  body.mastery-experience .mastery-play-layout{display:block!important}
+  body.mastery-experience .mastery-session-aside{display:none!important}
+  body.mastery-experience .session-heading{padding-inline:4px!important}
+  body.mastery-experience .session-heading h1{font-size:1.85rem!important}
+  body.mastery-experience .mastery-globe-stage{min-height:55svh!important;height:55svh!important}
+  body.mastery-experience .session-progress-card{padding:12px!important}
+
+  body.atlas-experience .atlas-layout{display:block!important}
+  body.atlas-experience .atlas-globe-stage{height:54svh!important;min-height:420px!important}
+  body.atlas-experience .atlas-profile{margin-top:-18px!important;position:relative;z-index:8;min-height:0!important}
+  body.atlas-experience .atlas-profile-empty{min-height:220px!important}
+  body.atlas-experience .atlas-profile-content{padding:18px 16px 20px!important}
+  body.atlas-experience .atlas-library,
+  body.atlas-experience .atlas-index{margin-top:10px!important;padding:18px 14px!important}
+  body.atlas-experience .atlas-country-index{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:430px!important}
+
+  body:has(.together-main) .together-main{padding-top:8px!important}
+  body:has(.together-main) .together-hero-copy h1{font-size:2.15rem!important;line-height:1.02!important}
+  body:has(.together-main) .mode-grid{grid-template-columns:1fr!important}
+  body:has(.together-main) .together-card{min-height:154px!important;padding:20px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.platform-shell-enabled *{scroll-behavior:auto!important}
+}
