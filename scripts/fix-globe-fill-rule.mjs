@@ -15,6 +15,13 @@ mastery = mastery
   .replaceAll("context.fill('evenodd');", 'context.fill();');
 mastery = replaceRequired(
   mastery,
+  'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).precision(interaction ? Math.max(.08, .6 / Math.sqrt(Math.max(1, zoom))) : Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));',
+  'projection.translate([width / 2, height / 2]).scale(radius).rotate(rotation).clipAngle(zoom < 4 ? 90 : null).precision(interaction ? Math.max(.08, .6 / Math.sqrt(Math.max(1, zoom))) : Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));',
+  'Mastery local-detail clipping',
+  masteryPath
+);
+mastery = replaceRequired(
+  mastery,
   'if (zoom < 4) drawFeature(worldCollection,land,"rgba(31,45,55,.55)",.7); else for (const feature of basePolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",Math.max(.18,.7/Math.sqrt(Math.max(1,zoom/4)))); for (const feature of precisionPolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",zoom < 4 ? .7 : Math.max(.18,.7/Math.sqrt(Math.max(1,zoom/4))));',
   'for (const feature of basePolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",zoom < 4 ? .7 : Math.max(.18,.7/Math.sqrt(Math.max(1,zoom/4)))); for (const feature of precisionPolygonFeatures) if (featureNearView(feature)) drawFeature(feature,land,"rgba(31,45,55,.55)",zoom < 4 ? .7 : Math.max(.18,.7/Math.sqrt(Math.max(1,zoom/4))));',
   'individual Mastery country rendering',
@@ -25,6 +32,16 @@ let atlas = await readFile(atlasPath, 'utf8');
 atlas = atlas
   .replaceAll('context.fill("evenodd");', 'context.fill();')
   .replaceAll("context.fill('evenodd');", 'context.fill();');
+atlas = replaceRequired(
+  atlas,
+  `      .rotate(rotation)
+      .precision(Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));`,
+  `      .rotate(rotation)
+      .clipAngle(zoom < 4 ? 90 : null)
+      .precision(Math.max(.012, .38 / Math.sqrt(Math.max(1, zoom))));`,
+  'Atlas local-detail clipping',
+  atlasPath
+);
 atlas = replaceRequired(
   atlas,
   `    if (zoom < 4) {
