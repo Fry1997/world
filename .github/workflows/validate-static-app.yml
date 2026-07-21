@@ -65,4 +65,6 @@ jobs:
           path: |
             smoke.log
             time-trial-smoke.log
+            globe-mastery.png
+            globe-atlas.png
           if-no-files-found: ignore
