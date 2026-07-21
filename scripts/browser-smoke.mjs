@@ -111,18 +111,40 @@ async function exerciseMastery(page, label) {
   assert(Boolean(await page.evaluate(() => localStorage.getItem("nearer-mastery-session-v1"))), `${label}: Mastery did not save its session.`);
 
   const microstateView = await page.evaluate(async () => {
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     const feature = window.NEARER_COUNTRIES_GEOJSON.features.find(item => item.properties.code === "VAT");
+    const markers = window.NEARER_MASTERY_GLOBE.getMicrostateMarkers();
+    const vatican = markers.find(marker => marker.code === "VAT") || null;
+    const sanMarino = markers.find(marker => marker.code === "SMR") || null;
+    return {
+      type: feature?.geometry?.type || null,
+      markerCount: markers.length,
+      vatican,
+      sanMarino
+    };
+  });
+  assert(microstateView.type !== "Point", `${label}: Vatican City remains a point in Mastery.`);
+  assert(microstateView.markerCount >= 5, `${label}: Mastery did not expose the region's tiny places as neutral markers.`);
+  assert(microstateView.vatican && microstateView.sanMarino, `${label}: Vatican City or San Marino is missing from the marker layer.`);
+  assert(microstateView.vatican.hitRadius >= 14, `${label}: the Vatican City marker does not have an accessible touch target.`);
+  assert(
+    Math.hypot(
+      microstateView.vatican.point[0] - microstateView.sanMarino.point[0],
+      microstateView.vatican.point[1] - microstateView.sanMarino.point[1]
+    ) >= 20,
+    `${label}: nearby microstate markers still overlap.`
+  );
+
+  const revealView = await page.evaluate(async () => {
     window.NEARER_MASTERY_GLOBE.focusCountry("VAT");
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return {
-      type: feature?.geometry?.type || null,
       zoom: window.NEARER_MASTERY_GLOBE.getZoom(),
       point: window.NEARER_MASTERY_GLOBE.projectCountry("VAT")
     };
   });
-  assert(microstateView.type !== "Point", `${label}: Vatican City remains a point in Mastery.`);
-  assert(microstateView.zoom >= 700, `${label}: Mastery did not reach Vatican-scale zoom.`);
-  assert(Array.isArray(microstateView.point) && microstateView.point.every(Number.isFinite), `${label}: Vatican City could not be projected at deep zoom.`);
+  assert(revealView.zoom >= 12 && revealView.zoom <= 24, `${label}: Mastery reveal zoom is not a usable local view.`);
+  assert(Array.isArray(revealView.point) && revealView.point.every(Number.isFinite), `${label}: Vatican City could not be projected for reveal feedback.`);
 
   await page.locator("#exitSessionButton").click();
 }
@@ -209,7 +231,7 @@ try {
     mobile: false,
     context: { viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, isMobile: false, hasTouch: false }
   });
-  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including real microstate polygons and deep zoom.");
+  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including neutral, collision-aware microstate markers.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
