@@ -1,4 +1,4 @@
-import { preparePrecisionGeometry } from "./oriented-precision-geometry.js";
+import { preparePrecisionGeometry } from "./normalised-precision-geometry.js";
 import "./mastery-detailed-geometry.css";
 
 export async function prepareDetailedMasteryGeometry() {

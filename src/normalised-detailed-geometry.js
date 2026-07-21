@@ -1,5 +1,5 @@
 import { prepareDetailedGeometry as prepareBaseDetailedGeometry } from './detailed-geometry.js';
-import { orientCountryFeatures } from './country-geometry-orientation.js';
+import { normaliseCountryCollection } from './country-geometry-normalisation.js';
 
 export async function prepareDetailedGeometry() {
   const detail = await prepareBaseDetailedGeometry();
@@ -7,9 +7,11 @@ export async function prepareDetailedGeometry() {
   const collection = window.NEARER_COUNTRIES_GEOJSON;
   if (!collection?.features?.length || typeof d3?.geoArea !== 'function') return detail;
 
-  const features = orientCountryFeatures(collection.features, d3);
-  const windingCorrectionCount = features.filter(feature => feature.properties?.windingCorrected).length;
-  window.NEARER_COUNTRIES_GEOJSON = { type: 'FeatureCollection', features };
-  window.__NEARER_DETAILED_GEOMETRY = { ...detail, windingCorrectionCount };
+  const normalised = normaliseCountryCollection(collection, d3);
+  window.NEARER_COUNTRIES_GEOJSON = normalised.collection;
+  window.__NEARER_DETAILED_GEOMETRY = {
+    ...detail,
+    d3WindingNormalised: normalised.correctedCount
+  };
   return window.__NEARER_DETAILED_GEOMETRY;
 }
