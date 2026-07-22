@@ -1,687 +1,290 @@
 :root{
-  --nearer-bg-deep:#030d16;
-  --nearer-line:rgba(226,235,239,.13);
-  --nearer-line-strong:rgba(226,235,239,.21);
-  --nearer-text:#f7f2e9;
-  --nearer-muted:#9babb5;
-  --nearer-muted-2:#71838f;
-  --nearer-sand:#eee3d5;
-  --nearer-gold:#efa941;
-  --nearer-mint:#4fd2ad;
-  --nearer-blue:#62baf0;
-  --nearer-mode-accent:var(--nearer-gold);
+  --nearer-bg:#061523;
+  --nearer-bg-deep:#03101b;
+  --nearer-surface:#0b2030;
+  --nearer-surface-2:#10293a;
+  --nearer-line:rgba(225,235,239,.14);
+  --nearer-text:#f5f1e9;
+  --nearer-muted:#9eafb9;
+  --nearer-sand:#efe5d7;
+  --nearer-gold:#f0ae43;
+  --nearer-mint:#52d3ad;
+  --nearer-blue:#63b8ef;
+  --nearer-radius:18px;
+  --nearer-radius-lg:25px;
 }
+
 html{background:var(--nearer-bg-deep)}
 body.platform-shell-enabled{
   min-height:100svh;
+  background:
+    radial-gradient(68rem 42rem at 52% -16%,rgba(44,99,131,.34),transparent 64%),
+    linear-gradient(180deg,#061726 0%,#06131f 54%,#03101a 100%)!important;
   color:var(--nearer-text);
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
 }
-body.platform-shell-enabled *,
-body.platform-shell-enabled *::before,
-body.platform-shell-enabled *::after{box-sizing:border-box}
-body.platform-shell-enabled :is(button,a,input,select){-webkit-tap-highlight-color:transparent}
-body.platform-shell-enabled :is(.primary-button,.secondary-button){box-shadow:none!important}
-body.platform-shell-enabled .primary-button{background:var(--nearer-sand)!important;color:#13212b!important}
-body.platform-shell-enabled :is(.eyebrow,.mode-status){color:var(--nearer-mode-accent)!important}
-body.nearer-approved-solo[data-nearer-mode="daily"],
-body.nearer-approved-mastery,
-body.nearer-approved-together{--nearer-mode-accent:var(--nearer-gold)}
-body.nearer-approved-solo[data-nearer-mode="random"],
-body.nearer-approved-atlas{--nearer-mode-accent:var(--nearer-mint)}
-.nearer-native-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
-.nearer-native-copy{min-width:0}
-.nearer-native-kicker{margin:0 0 5px;color:var(--nearer-mode-accent);font-weight:820;letter-spacing:.13em}
-.nearer-native-header h1{margin:0;color:var(--nearer-text);line-height:1;letter-spacing:-.045em}
-.nearer-native-subtitle{margin:7px 0 0;color:var(--nearer-muted)}
-.nearer-native-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
-.nearer-native-date{display:grid;place-items:center;border:1px solid var(--nearer-line);border-radius:10px;background:rgba(255,255,255,.045);color:rgba(255,255,255,.72)}
-.nearer-native-date.is-hidden{display:none}
+
+body.platform-shell-enabled .app-shell{
+  width:min(1160px,100%);
+  padding-inline:clamp(14px,3vw,28px);
+}
+
+body.platform-shell-enabled .topbar{
+  min-height:68px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+body.platform-shell-enabled .brand-mark{
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02))!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .platform-tabs{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  width:min(630px,100%)!important;
+  padding:4px!important;
+  border-radius:15px!important;
+  border-color:rgba(255,255,255,.1)!important;
+  background:rgba(4,15,24,.58)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .platform-tabs .mode-button{
+  min-height:38px!important;
+  border-radius:11px!important;
+  color:rgba(239,244,246,.62)!important;
+  font-size:.79rem;
+}
+
+body.platform-shell-enabled .platform-tabs .mode-button.is-active{
+  border-color:rgba(255,255,255,.1)!important;
+  background:rgba(255,255,255,.09)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.map-panel,.guess-panel,.closest-card,.history-card,.feedback-panel,.mastery-map-panel,.session-progress-card,.current-country-card,.session-queue-card,.session-tip-card,.atlas-globe-panel,.atlas-profile,.atlas-library,.atlas-index,.together-card,.together-session-note){
+  border-color:var(--nearer-line)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.primary-button,.secondary-button,.mode-button,button,a){
+  -webkit-tap-highlight-color:transparent;
+}
+
+body.platform-shell-enabled .primary-button{
+  border-color:rgba(255,255,255,.15)!important;
+  background:var(--nearer-sand)!important;
+  color:#14212a!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled .secondary-button{
+  border-color:rgba(255,255,255,.13)!important;
+  background:rgba(255,255,255,.045)!important;
+  color:var(--nearer-text)!important;
+  box-shadow:none!important;
+}
+
+body.platform-shell-enabled :is(.eyebrow,.mode-status){
+  color:var(--nearer-gold)!important;
+  letter-spacing:.11em;
+}
+
+/* Solo game: make the game itself the page, not a dashboard around it. */
+body.platform-shell-enabled:has(.game-layout) main{padding-top:18px}
+body.platform-shell-enabled:has(.game-layout) .platform-launchpad{display:none!important}
+body.platform-shell-enabled:has(.game-layout) .game-heading{
+  margin-bottom:14px;
+  padding:0 2px;
+}
+body.platform-shell-enabled:has(.game-layout) .game-heading h1{
+  font-size:clamp(1.65rem,5vw,2.45rem);
+  letter-spacing:-.045em;
+}
+body.platform-shell-enabled:has(.game-layout) .game-layout{gap:14px}
+body.platform-shell-enabled:has(.game-layout) .map-panel{
+  overflow:hidden;
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(180deg,rgba(12,34,49,.95),rgba(3,15,25,.98))!important;
+}
+body.platform-shell-enabled:has(.game-layout) .map-toolbar{
+  min-height:48px;
+  background:rgba(5,18,28,.84)!important;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+body.platform-shell-enabled:has(.game-layout) .guess-panel{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(8,27,40,.86)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .search-control{
+  border-radius:13px!important;
+  background:rgba(255,255,255,.035)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .closest-card,
+body.platform-shell-enabled:has(.game-layout) .history-card{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(8,27,40,.82)!important;
+}
+body.platform-shell-enabled:has(.game-layout) .guess-history li{
+  border-radius:10px!important;
+  background:rgba(255,255,255,.025)!important;
+}
+
+/* Mastery: quiet chrome, dominant map, compact supporting information. */
+body.mastery-experience .mastery-hero,
+body.mastery-experience .mastery-intelligence{
+  box-shadow:none!important;
+}
+body.mastery-experience .mastery-passport{
+  border-radius:var(--nearer-radius)!important;
+  background:rgba(255,255,255,.035)!important;
+}
+body.mastery-experience .mastery-overview article,
+body.mastery-experience .region-card{
+  border-radius:var(--nearer-radius)!important;
+  border-color:var(--nearer-line)!important;
+  background:rgba(255,255,255,.03)!important;
+  box-shadow:none!important;
+}
+body.mastery-experience .mastery-globe-stage{
+  background:linear-gradient(160deg,#12364c,#06141f 78%)!important;
+}
+body.mastery-experience .mastery-feedback{
+  border-radius:15px!important;
+  background:rgba(10,31,45,.9)!important;
+}
+
+/* Atlas: globe and country sheet are the experience. */
+body.atlas-experience .atlas-hero{display:none!important}
+body.atlas-experience .atlas-main{padding-top:14px!important}
+body.atlas-experience .atlas-search-bar{
+  margin-bottom:10px!important;
+  padding:8px!important;
+  border-radius:15px!important;
+  background:rgba(5,18,28,.72)!important;
+  box-shadow:none!important;
+}
+body.atlas-experience .atlas-search-bar>label{display:none}
+body.atlas-experience .atlas-suggestions{left:8px!important;right:8px!important}
+body.atlas-experience .atlas-globe-panel,
+body.atlas-experience .atlas-profile{
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(180deg,rgba(12,34,49,.96),rgba(3,14,23,.99))!important;
+}
+body.atlas-experience .atlas-profile-content{padding:20px!important}
+body.atlas-experience .atlas-stat-grid article{
+  min-height:92px!important;
+  border-radius:13px!important;
+  background:rgba(255,255,255,.028)!important;
+}
+body.atlas-experience .atlas-library,
+body.atlas-experience .atlas-index{
+  border-radius:var(--nearer-radius-lg)!important;
+  background:rgba(6,22,34,.82)!important;
+}
+
+/* Together: three honest local multiplayer choices, with restrained mode colour. */
+body:has(.together-main) .together-hero{
+  grid-template-columns:1fr!important;
+  gap:14px!important;
+}
+body:has(.together-main) .together-session-note{display:none!important}
+body:has(.together-main) .mode-grid{gap:12px!important}
+body:has(.together-main) .together-card{
+  min-height:190px;
+  border-radius:var(--nearer-radius-lg)!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018))!important;
+}
+body:has(.together-main) .together-card:nth-child(1){--mode-accent:var(--nearer-gold)}
+body:has(.together-main) .together-card:nth-child(2){--mode-accent:var(--nearer-mint)}
+body:has(.together-main) .together-card:nth-child(3){--mode-accent:var(--nearer-blue)}
+body:has(.together-main) .together-card .mode-icon,
+body:has(.together-main) .together-card .mode-cta{color:var(--mode-accent)!important}
+body:has(.together-main) .together-note{display:none!important}
 
 @media(max-width:720px){
-  body.platform-shell-enabled{
-    background:
-      radial-gradient(32rem 25rem at 50% -4%,rgba(36,91,124,.26),transparent 68%),
-      linear-gradient(180deg,#061725 0%,#04111c 62%,#020b13 100%)!important;
-  }
-
   body.platform-shell-enabled .app-shell{
-    width:100%!important;
-    padding:0 12px calc(78px + env(safe-area-inset-bottom))!important;
+    padding-inline:10px!important;
+    padding-bottom:86px!important;
   }
-
-  body.platform-shell-enabled footer{display:none!important}
-
   body.platform-shell-enabled .platform-topbar{
-    position:absolute!important;
-    top:max(8px,env(safe-area-inset-top));
-    right:10px;
-    z-index:80;
-    width:auto!important;
-    min-height:38px!important;
-    padding:0!important;
-    border:0!important;
-    background:transparent!important;
+    min-height:50px;
+    padding-block:6px!important;
+    border-bottom:0;
   }
-  body.platform-shell-enabled .platform-topbar .brand,
-  body.platform-shell-enabled .platform-topbar .platform-tabs{display:none!important}
-  body.platform-shell-enabled .platform-topbar .topbar-actions{
-    display:flex!important;
-    gap:5px!important;
-  }
-  body.platform-shell-enabled .platform-topbar .topbar-actions > *{
-    width:36px!important;
-    height:36px!important;
-    min-width:36px!important;
-    border:1px solid var(--nearer-line)!important;
-    border-radius:11px!important;
-    background:rgba(5,18,28,.74)!important;
-    color:rgba(255,255,255,.78)!important;
-    box-shadow:none!important;
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
-  }
-  body.platform-shell-enabled .platform-topbar #unitButton,
-  body.platform-shell-enabled:not(.nearer-approved-solo) .platform-topbar .topbar-actions{
-    display:none!important;
-  }
-
-  .nearer-native-header{
-    min-height:76px;
-    margin:0 0 8px;
-    padding:max(15px,env(safe-area-inset-top)) 46px 5px 2px;
-  }
-  .nearer-native-kicker{font-size:.61rem}
-  .nearer-native-header h1{font-size:1.58rem}
-  .nearer-native-subtitle{margin-top:5px;font-size:.78rem}
-  .nearer-native-actions{position:absolute;right:12px;top:max(13px,env(safe-area-inset-top))}
-  .nearer-native-date{min-height:32px;padding-inline:9px;font-size:.65rem}
-
+  body.platform-shell-enabled .brand span:last-child small{display:none}
+  body.platform-shell-enabled .brand-mark{width:34px!important;height:34px!important}
   body.platform-shell-enabled .platform-mobile-dock{
-    position:fixed!important;
-    left:0!important;
-    right:0!important;
-    bottom:0!important;
-    z-index:1000!important;
-    display:grid!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:max(7px,env(safe-area-inset-bottom))!important;
     grid-template-columns:repeat(5,minmax(0,1fr))!important;
-    min-height:calc(62px + env(safe-area-inset-bottom))!important;
-    padding:5px 8px max(5px,env(safe-area-inset-bottom))!important;
-    border:0!important;
-    border-top:1px solid rgba(255,255,255,.1)!important;
-    border-radius:0!important;
-    background:rgba(3,13,22,.94)!important;
-    box-shadow:0 -12px 34px rgba(0,0,0,.28)!important;
-    backdrop-filter:blur(24px) saturate(1.15)!important;
-    -webkit-backdrop-filter:blur(24px) saturate(1.15)!important;
+    min-height:64px!important;
+    padding:5px!important;
+    border-radius:18px!important;
+    border-color:rgba(255,255,255,.11)!important;
+    background:rgba(4,15,24,.93)!important;
+    box-shadow:0 10px 34px rgba(0,0,0,.34)!important;
   }
   body.platform-shell-enabled .platform-mobile-dock a,
   body.platform-shell-enabled .platform-mobile-dock button{
-    position:relative;
-    gap:3px!important;
-    min-height:52px!important;
-    border-radius:11px!important;
-    color:rgba(235,241,244,.49)!important;
+    gap:2px!important;
+    border-radius:12px!important;
+    color:rgba(235,241,244,.54)!important;
   }
   body.platform-shell-enabled .platform-mobile-dock .is-active{
     background:transparent!important;
-    color:var(--nearer-mode-accent)!important;
+    color:var(--nearer-gold)!important;
     box-shadow:none!important;
   }
-  body.platform-shell-enabled .platform-mobile-dock .is-active::before{
+  body.platform-shell-enabled .platform-mobile-dock .is-active:before{
     content:"";
     position:absolute;
     top:1px;
-    width:4px;
-    height:4px;
-    border-radius:50%;
+    width:18px;
+    height:2px;
+    border-radius:999px;
     background:currentColor;
   }
-  body.platform-shell-enabled .platform-mobile-dock svg{
-    width:19px!important;
-    height:19px!important;
-    stroke-width:1.65!important;
-  }
-  body.platform-shell-enabled .platform-mobile-dock span{
-    font-size:.57rem!important;
-    font-weight:680!important;
-  }
+  body.platform-shell-enabled .platform-mobile-dock svg{width:19px!important;height:19px!important}
+  body.platform-shell-enabled .platform-mobile-dock span{font-size:.59rem!important}
 
-  body.nearer-approved-solo main{
-    width:100%;
-    max-width:560px;
-    margin-inline:auto;
-    padding-top:0!important;
-  }
-  body.nearer-approved-solo .game-heading{display:none!important}
-  body.nearer-approved-solo .game-layout{
-    display:flex!important;
-    flex-direction:column!important;
-    gap:9px!important;
-  }
-  body.nearer-approved-solo .play-column,
-  body.nearer-approved-solo .results-column{display:contents!important}
+  body.platform-shell-enabled:has(.game-layout) main{padding-top:4px}
+  body.platform-shell-enabled:has(.game-layout) .game-heading{padding:0 8px;margin:4px 0 10px}
+  body.platform-shell-enabled:has(.game-layout) .game-heading>div>p:last-child{display:none}
+  body.platform-shell-enabled:has(.game-layout) .game-layout{display:flex!important;flex-direction:column!important;gap:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .map-wrap{min-height:42svh!important}
+  body.platform-shell-enabled:has(.game-layout) .guess-panel{padding:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .feedback-panel{display:none!important}
+  body.platform-shell-enabled:has(.game-layout) .results-column{display:grid!important;gap:10px!important}
+  body.platform-shell-enabled:has(.game-layout) .closest-card{order:1}
+  body.platform-shell-enabled:has(.game-layout) .history-card{order:2}
+  body.platform-shell-enabled:has(.game-layout) .stat-strip{display:none!important}
 
-  body.nearer-approved-solo .map-panel{
-    order:1;
-    overflow:visible!important;
-    border:0!important;
-    border-radius:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-solo .map-toolbar{display:none!important}
-  body.nearer-approved-solo .map-wrap{
-    min-height:0!important;
-    height:clamp(265px,36svh,350px)!important;
-    border:0!important;
-    border-radius:0!important;
-    background:transparent!important;
-  }
-  body.nearer-approved-solo .world-map,
-  body.nearer-approved-solo #worldMap{
-    border-radius:0!important;
-    background:transparent!important;
-  }
+  body.mastery-experience .mastery-dashboard .mastery-hero{padding:20px 8px!important}
+  body.mastery-experience .mastery-overview{grid-template-columns:repeat(2,1fr)!important}
+  body.mastery-experience .mastery-play-layout{display:block!important}
+  body.mastery-experience .mastery-session-aside{display:none!important}
+  body.mastery-experience .session-heading{padding-inline:4px!important}
+  body.mastery-experience .session-heading h1{font-size:1.85rem!important}
+  body.mastery-experience .mastery-globe-stage{min-height:55svh!important;height:55svh!important}
+  body.mastery-experience .session-progress-card{padding:12px!important}
 
-  body.nearer-approved-solo .guess-panel{
-    order:2;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) 48px!important;
-    gap:7px!important;
-    padding:0!important;
-    border:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-solo .guess-panel label{
-    position:absolute!important;
-    width:1px!important;
-    height:1px!important;
-    overflow:hidden!important;
-    clip:rect(0 0 0 0)!important;
-  }
-  body.nearer-approved-solo .search-area{min-width:0}
-  body.nearer-approved-solo .search-control{
-    min-height:50px!important;
-    border:1px solid var(--nearer-line-strong)!important;
-    border-radius:13px!important;
-    background:rgba(7,24,36,.82)!important;
-  }
-  body.nearer-approved-solo #guessButton{
-    width:48px!important;
-    min-width:48px!important;
-    min-height:50px!important;
-    padding:0!important;
-    border-radius:13px!important;
-    font-size:0!important;
-  }
-  body.nearer-approved-solo #guessButton::before{
-    content:"→";
-    font-size:1.15rem;
-    font-weight:760;
-  }
-  body.nearer-approved-solo .suggestions{
-    left:0!important;
-    right:0!important;
-    border-radius:13px!important;
-  }
+  body.atlas-experience .atlas-layout{display:block!important}
+  body.atlas-experience .atlas-globe-stage{height:54svh!important;min-height:420px!important}
+  body.atlas-experience .atlas-profile{margin-top:-18px!important;position:relative;z-index:8;min-height:0!important}
+  body.atlas-experience .atlas-profile-empty{min-height:220px!important}
+  body.atlas-experience .atlas-profile-content{padding:18px 16px 20px!important}
+  body.atlas-experience .atlas-library,
+  body.atlas-experience .atlas-index{margin-top:10px!important;padding:18px 14px!important}
+  body.atlas-experience .atlas-country-index{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:430px!important}
 
-  body.nearer-approved-solo .feedback-panel{display:none!important}
-
-  body.nearer-approved-solo .closest-card{
-    order:3;
-    min-height:0!important;
-    padding:11px 12px!important;
-    border-radius:13px!important;
-    background:rgba(8,27,40,.72)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-solo .closest-label-row{
-    margin-bottom:7px!important;
-  }
-  body.nearer-approved-solo .closest-label-row::before{
-    content:"NEW GUESS";
-    color:var(--nearer-muted-2);
-    font-size:.58rem;
-    font-weight:800;
-    letter-spacing:.1em;
-  }
-  body.nearer-approved-solo #closestHeading{display:none!important}
-  body.nearer-approved-solo .closest-empty{
-    min-height:52px!important;
-    padding:0!important;
-    text-align:left!important;
-  }
-  body.nearer-approved-solo .closest-empty .radar-graphic,
-  body.nearer-approved-solo .closest-empty p{display:none!important}
-  body.nearer-approved-solo .closest-empty strong{
-    color:var(--nearer-muted);
-    font-size:.8rem!important;
-  }
-  body.nearer-approved-solo .closest-result{
-    grid-template-columns:38px minmax(0,1fr) auto!important;
-    gap:10px!important;
-  }
-  body.nearer-approved-solo .country-code-block{
-    width:38px!important;
-    height:38px!important;
-    border-radius:10px!important;
-    font-size:.67rem!important;
-  }
-  body.nearer-approved-solo .distance-orbit{display:none!important}
-
-  body.nearer-approved-solo .history-card{
-    order:4;
-    padding:12px!important;
-    border-radius:14px!important;
-    background:rgba(7,24,36,.66)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-solo .history-header{margin-bottom:7px!important}
-  body.nearer-approved-solo .history-header h2{
-    font-size:.73rem!important;
-    font-weight:680!important;
-  }
-  body.nearer-approved-solo .history-header p{
-    color:var(--nearer-muted-2)!important;
-    font-size:.58rem!important;
-  }
-  body.nearer-approved-solo .guess-history{
-    display:grid!important;
-    gap:3px!important;
-    max-height:220px;
-    overflow:auto;
-  }
-  body.nearer-approved-solo .guess-history li{
-    min-height:37px!important;
-    padding:6px 8px!important;
-    border:0!important;
-    border-radius:8px!important;
-  }
-  body.nearer-approved-solo .stat-strip{display:none!important}
-  body.nearer-approved-solo #newGameButton{
-    max-width:112px;
-    min-height:34px!important;
-    padding:0 10px!important;
-    overflow:hidden;
-    border-radius:10px!important;
-    white-space:nowrap;
-    font-size:.7rem!important;
-  }
-  body.nearer-approved-solo #newGameButton svg{width:15px}
-
-  body.nearer-approved-mastery .mastery-main{
-    padding-top:max(12px,env(safe-area-inset-top))!important;
-  }
-  body.nearer-approved-mastery .mastery-dashboard{
-    max-width:560px;
-    margin-inline:auto;
-  }
-  body.nearer-approved-mastery .mastery-hero{
-    display:block!important;
-    margin:0 0 12px!important;
-    padding:8px 2px 4px!important;
-    border:0!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .mastery-hero-copy>p:not(.eyebrow){display:none!important}
-  body.nearer-approved-mastery .mastery-hero-copy h1{
-    margin:5px 0 13px!important;
-    font-size:2rem!important;
-    line-height:1!important;
-  }
-  body.nearer-approved-mastery .mastery-passport{
-    margin-top:12px;
-    padding:15px!important;
-    border-color:var(--nearer-line)!important;
-    border-radius:16px!important;
-    background:rgba(255,255,255,.028)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .passport-mark{display:none!important}
-  body.nearer-approved-mastery .mastery-overview{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:7px!important;
-  }
-  body.nearer-approved-mastery .mastery-overview article{
-    min-height:94px!important;
-    padding:12px!important;
-    border-color:var(--nearer-line)!important;
-    border-radius:16px!important;
-    background:rgba(255,255,255,.028)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .mastery-section-heading{
-    align-items:flex-start!important;
-    margin-top:24px!important;
-  }
-  body.nearer-approved-mastery .mastery-mode-toggle{flex:0 0 auto}
-  body.nearer-approved-mastery .region-grid{
-    grid-template-columns:1fr!important;
-    gap:8px!important;
-  }
-  body.nearer-approved-mastery .region-card{
-    min-height:116px!important;
-    padding:15px!important;
-    border-color:var(--nearer-line)!important;
-    border-radius:16px!important;
-    background:rgba(255,255,255,.028)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .mastery-intelligence{display:none!important}
-
-  body.nearer-approved-mastery .mastery-session{
-    max-width:560px;
-    margin-inline:auto;
-    padding-top:max(10px,env(safe-area-inset-top))!important;
-  }
-  body.nearer-approved-mastery .session-heading{
-    align-items:flex-start!important;
-    gap:8px!important;
-    padding:0 2px 8px!important;
-  }
-  body.nearer-approved-mastery .session-heading h1{
-    margin-top:4px!important;
-    font-size:1.7rem!important;
-    line-height:1!important;
-  }
-  body.nearer-approved-mastery .session-heading>div>p:last-child{display:none!important}
-  body.nearer-approved-mastery #exitSessionButton{
-    min-height:34px!important;
-    padding:0 10px!important;
-    border-radius:10px!important;
-    font-size:.68rem!important;
-  }
-  body.nearer-approved-mastery .session-progress-card{
-    margin-bottom:8px!important;
-    padding:10px 11px!important;
-    border-color:var(--nearer-line)!important;
-    border-radius:13px!important;
-    background:rgba(8,26,39,.72)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .session-metrics{
-    gap:8px!important;
-    font-size:.61rem!important;
-  }
-  body.nearer-approved-mastery .mastery-play-layout{display:block!important}
-  body.nearer-approved-mastery .mastery-session-aside{display:none!important}
-  body.nearer-approved-mastery .mastery-map-panel{
-    overflow:hidden!important;
-    border:0!important;
-    border-radius:18px!important;
-    background:transparent!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .mastery-map-toolbar{
-    position:relative!important;
-    min-height:47px!important;
-    padding:7px 10px!important;
-    border:1px solid var(--nearer-line)!important;
-    border-radius:13px 13px 0 0!important;
-    background:rgba(7,24,36,.91)!important;
-  }
-  body.nearer-approved-mastery .mastery-globe-stage{
-    height:clamp(390px,52svh,535px)!important;
-    min-height:390px!important;
-    border-radius:0 0 18px 18px!important;
-    background:linear-gradient(160deg,#12364c,#06141f 78%)!important;
-  }
-  body.nearer-approved-mastery .mastery-globe-hint{display:none!important}
-  body.nearer-approved-mastery .mastery-feedback{
-    margin-top:8px!important;
-    padding:10px 11px!important;
-    border-radius:14px!important;
-    background:rgba(9,29,43,.9)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-mastery .mastery-feedback p{display:none!important}
-  body.nearer-approved-mastery .session-actions{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:7px!important;
-    margin-top:8px!important;
-  }
-  body.nearer-approved-mastery .session-actions button{
-    min-height:46px!important;
-    border-radius:13px!important;
-  }
-  body.nearer-approved-mastery #revealCountryButton{
-    background:var(--nearer-sand)!important;
-    color:#14212a!important;
-  }
-
-  body.nearer-approved-atlas .atlas-hero{display:none!important}
-  body.nearer-approved-atlas .atlas-main{
-    max-width:560px;
-    margin-inline:auto;
-    padding-top:0!important;
-  }
-  body.nearer-approved-atlas .nearer-native-header{margin-bottom:4px}
-  body.nearer-approved-atlas .atlas-search-bar{
-    position:relative;
-    z-index:30!important;
-    margin-bottom:8px!important;
-    padding:8px!important;
-    border:1px solid var(--nearer-line)!important;
-    border-radius:14px!important;
-    background:rgba(5,18,28,.72)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-atlas .atlas-search-bar>label{display:none!important}
-  body.nearer-approved-atlas .atlas-search-control{min-height:47px!important}
-  body.nearer-approved-atlas .atlas-suggestions{left:8px!important;right:8px!important}
-  body.nearer-approved-atlas .atlas-layout{display:block!important}
-  body.nearer-approved-atlas .atlas-globe-panel{
-    overflow:hidden!important;
-    border:0!important;
-    border-radius:20px!important;
-    background:linear-gradient(180deg,rgba(12,34,49,.96),rgba(3,14,23,.99))!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-atlas .atlas-globe-toolbar{
-    top:8px!important;
-    left:8px!important;
-    right:8px!important;
-    min-height:43px!important;
-    border-radius:12px!important;
-  }
-  body.nearer-approved-atlas .atlas-globe-toolbar>div:first-child{display:none!important}
-  body.nearer-approved-atlas .atlas-globe-stage{
-    height:clamp(375px,48svh,500px)!important;
-    min-height:375px!important;
-  }
-  body.nearer-approved-atlas .atlas-globe-hint{display:none!important}
-  body.nearer-approved-atlas .atlas-zoom{
-    right:10px!important;
-    bottom:11px!important;
-  }
-  body.nearer-approved-atlas .atlas-profile{
-    position:relative;
-    z-index:12;
-    min-height:0!important;
-    margin-top:-30px!important;
-    overflow:visible!important;
-    border-color:rgba(255,255,255,.16)!important;
-    border-radius:24px 24px 15px 15px!important;
-    background:rgba(7,23,35,.98)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-atlas .atlas-profile::before{
-    content:"";
-    position:absolute;
-    top:8px;
-    left:50%;
-    width:34px;
-    height:4px;
-    border-radius:999px;
-    background:rgba(255,255,255,.2);
-    transform:translateX(-50%);
-  }
-  body.nearer-approved-atlas .atlas-profile-empty{
-    min-height:190px!important;
-    padding:30px 18px 18px!important;
-  }
-  body.nearer-approved-atlas .atlas-compass{display:none!important}
-  body.nearer-approved-atlas .atlas-profile-content{
-    padding:28px 15px 17px!important;
-  }
-  body.nearer-approved-atlas .atlas-profile-heading h2{
-    font-size:1.65rem!important;
-  }
-  body.nearer-approved-atlas .atlas-country-summary{display:none!important}
-  body.nearer-approved-atlas .atlas-stat-grid{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:0!important;
-    margin-top:14px;
-    border-top:1px solid var(--nearer-line);
-    border-bottom:1px solid var(--nearer-line);
-  }
-  body.nearer-approved-atlas .atlas-stat-grid article{
-    min-height:78px!important;
-    padding:11px 8px!important;
-    border:0!important;
-    border-right:1px solid var(--nearer-line)!important;
-    border-radius:0!important;
-    background:transparent!important;
-  }
-  body.nearer-approved-atlas .atlas-stat-grid article:nth-child(3){border-right:0!important}
-  body.nearer-approved-atlas .atlas-stat-grid article:nth-child(4){display:none!important}
-  body.nearer-approved-atlas .atlas-stat-grid strong{font-size:.83rem!important}
-  body.nearer-approved-atlas .atlas-nearby-section{margin-top:14px!important}
-  body.nearer-approved-atlas .atlas-nearby-section .eyebrow{display:none!important}
-  body.nearer-approved-atlas .atlas-nearby-section h3{
-    margin-bottom:7px!important;
-    font-size:.78rem!important;
-  }
-  body.nearer-approved-atlas .atlas-nearby-list{
-    display:flex!important;
-    gap:5px!important;
-    overflow-x:auto;
-    padding-bottom:2px;
-  }
-  body.nearer-approved-atlas .atlas-nearby-list button{
-    display:block!important;
-    flex:0 0 auto;
-    min-height:31px!important;
-    padding:0 9px!important;
-    border-radius:999px!important;
-  }
-  body.nearer-approved-atlas .atlas-nearby-list button small,
-  body.nearer-approved-atlas .atlas-nearby-list button>b{display:none!important}
-  body.nearer-approved-atlas .atlas-nearby-list button strong{font-size:.64rem!important}
-  body.nearer-approved-atlas .atlas-profile-actions{
-    grid-template-columns:1fr!important;
-    padding-top:13px!important;
-  }
-  body.nearer-approved-atlas #atlasCopyLinkButton{display:none!important}
-  body.nearer-approved-atlas .atlas-library,
-  body.nearer-approved-atlas .atlas-index{display:none!important}
-
-  body.nearer-approved-together .together-main{
-    max-width:560px;
-    margin-inline:auto;
-    padding-top:max(18px,env(safe-area-inset-top))!important;
-  }
-  body.nearer-approved-together .together-hero{
-    grid-template-columns:1fr!important;
-    gap:12px!important;
-    margin-bottom:18px!important;
-    padding:0 2px!important;
-  }
-  body.nearer-approved-together .together-session-note,
-  body.nearer-approved-together .together-note{display:none!important}
-  body.nearer-approved-together .together-hero-copy .eyebrow{font-size:.61rem!important}
-  body.nearer-approved-together .together-hero-copy h1{
-    margin:5px 0 5px!important;
-    font-size:2rem!important;
-    line-height:1!important;
-  }
-  body.nearer-approved-together .together-intro{
-    margin:0!important;
-    color:var(--nearer-muted)!important;
-    font-size:.8rem!important;
-  }
-  body.nearer-approved-together .mode-grid{
-    grid-template-columns:1fr!important;
-    gap:10px!important;
-  }
-  body.nearer-approved-together .together-card{
-    --mode-accent:var(--nearer-gold);
-    position:relative;
-    display:grid!important;
-    grid-template-columns:48px minmax(0,1fr) 18px!important;
-    grid-template-areas:
-      "icon title arrow"
-      "icon copy arrow"
-      "icon meta arrow"!important;
-    gap:4px 12px!important;
-    min-height:128px!important;
-    padding:17px 14px!important;
-    border:1px solid color-mix(in srgb,var(--mode-accent) 29%,transparent)!important;
-    border-radius:16px!important;
-    background:
-      radial-gradient(18rem 9rem at 0 50%,color-mix(in srgb,var(--mode-accent) 18%,transparent),transparent 70%),
-      rgba(8,26,39,.82)!important;
-    box-shadow:none!important;
-  }
-  body.nearer-approved-together .together-card:nth-child(2){--mode-accent:var(--nearer-mint)}
-  body.nearer-approved-together .together-card:nth-child(3){--mode-accent:var(--nearer-blue)}
-  body.nearer-approved-together .together-card .mode-icon{
-    grid-area:icon;
-    align-self:center;
-    display:grid!important;
-    place-items:center;
-    width:46px!important;
-    height:46px!important;
-    margin:0!important;
-    border:1px solid color-mix(in srgb,var(--mode-accent) 35%,transparent);
-    border-radius:14px;
-    background:color-mix(in srgb,var(--mode-accent) 12%,transparent);
-    color:var(--mode-accent)!important;
-    font-size:1.5rem!important;
-  }
-  body.nearer-approved-together .together-card .mode-status{display:none!important}
-  body.nearer-approved-together .together-card h2{
-    grid-area:title;
-    align-self:end;
-    margin:0!important;
-    font-size:1rem!important;
-  }
-  body.nearer-approved-together .together-card p{
-    grid-area:copy;
-    margin:0!important;
-    color:var(--nearer-muted)!important;
-    font-size:.7rem!important;
-    line-height:1.35!important;
-  }
-  body.nearer-approved-together .together-card .mode-meta{
-    grid-area:meta;
-    color:color-mix(in srgb,var(--mode-accent) 80%,white)!important;
-    font-size:.61rem!important;
-  }
-  body.nearer-approved-together .together-card .mode-cta{
-    grid-area:arrow;
-    align-self:center;
-    width:18px;
-    overflow:hidden;
-    white-space:nowrap;
-    color:var(--mode-accent)!important;
-    font-size:0!important;
-  }
-  body.nearer-approved-together .together-card .mode-cta::after{
-    content:"›";
-    font-size:1.55rem;
-    line-height:1;
-  }
-}
-
-@media(max-width:390px){
-  body.nearer-approved-solo .map-wrap{height:250px!important}
-  body.nearer-approved-mastery .mastery-globe-stage{height:380px!important;min-height:380px!important}
-  body.nearer-approved-atlas .atlas-globe-stage{height:355px!important;min-height:355px!important}
+  body:has(.together-main) .together-main{padding-top:8px!important}
+  body:has(.together-main) .together-hero-copy h1{font-size:2.15rem!important;line-height:1.02!important}
+  body:has(.together-main) .mode-grid{grid-template-columns:1fr!important}
+  body:has(.together-main) .together-card{min-height:154px!important;padding:20px!important}
 }
 
 @media(prefers-reduced-motion:reduce){
