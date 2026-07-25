@@ -141,7 +141,7 @@ try {
 
   await page.goto(`${baseUrl}/together/cooperative/`, { waitUntil: "domcontentloaded" });
   await waitForRuntime(page, "__NEARER_COOPERATIVE_STARTED");
-  await page.waitForFunction(() => Array.from(document.styleSheets).some(sheet => sheet.href?.includes("experience11.css")));
+  await page.waitForFunction(() => Array.from(document.styleSheets).some(sheet => sheet.href?.includes("experience11-clarity.css")));
   await assertTextTone(page, "Cooperative setup", [
     { selector: ".mode-setup-card .mode-note", tone: "dark" },
     { selector: ".mode-setup-card label span", tone: "dark" },
@@ -166,8 +166,8 @@ try {
   await assertTextTone(page, "Cooperative active game", [
     { selector: ".mode-player-card strong", tone: "light" },
     { selector: ".mode-player-detail", tone: "light" },
-    { selector: ".player-metric span", tone: "light" },
-    { selector: ".player-metric strong", tone: "light" },
+    { selector: ".mode-player-metrics > span", tone: "light" },
+    { selector: ".mode-player-metrics > span b", tone: "light" },
     { selector: ".globe-toolbar #globeStatus", tone: "light" },
     { selector: ".mode-history-card h2", tone: "dark" },
     { selector: ".mode-history-card .history-header p", tone: "dark" },
