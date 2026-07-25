@@ -1,0 +1,78 @@
+/*
+ * Explicit foreground contracts for surfaces that the product-direction layer
+ * renders dark. Earlier experience styles still describe some of these panels
+ * as cream and can otherwise leave dark text on a dark background.
+ */
+
+body.platform-shell-enabled:has(.game-layout) :is(.guess-panel,.closest-card,.history-card,.feedback-panel){
+  color:var(--nearer-text)!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) :is(
+  .history-header h2,
+  .guess-name strong,
+  .guess-distance,
+  .closest-copy strong,
+  .closest-empty strong,
+  .feedback-panel strong
+){
+  color:var(--nearer-text)!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) :is(
+  .search-area>label,
+  .history-header p,
+  .history-empty,
+  .closest-label-row,
+  .closest-empty p,
+  .feedback-panel p
+){
+  color:var(--nearer-muted)!important;
+}
+
+/* Small metadata needs a stronger muted tone to retain 4.5:1 at desktop too. */
+body.platform-shell-enabled:has(.game-layout) :is(
+  .guess-name span,
+  .guess-distance small,
+  .count-pill
+){
+  color:#b8c5cc!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) .count-pill{
+  border:1px solid rgba(225,235,239,.13)!important;
+  background:rgba(255,255,255,.065)!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) #countryInput{
+  border-color:rgba(225,235,239,.22)!important;
+  background:rgba(3,15,25,.78)!important;
+  color:var(--nearer-text)!important;
+  caret-color:var(--nearer-text);
+}
+
+body.platform-shell-enabled:has(.game-layout) #countryInput::placeholder{
+  color:rgba(213,224,230,.64)!important;
+  opacity:1;
+}
+
+body.platform-shell-enabled:has(.game-layout) .search-control>svg{
+  stroke:var(--nearer-muted)!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) .clear-button{
+  color:var(--nearer-muted)!important;
+}
+
+/* Keep the intentionally light suggestion menu on its matching dark ink. */
+body.platform-shell-enabled:has(.game-layout) .suggestions{
+  color:#14202a!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) .suggestion-button :is(span,strong){
+  color:#14202a!important;
+}
+
+body.platform-shell-enabled:has(.game-layout) .suggestion-button small{
+  color:#69747d!important;
+}

@@ -63,6 +63,78 @@ async function assertDetailedGeometry(page, label, precision = false) {
   }
 }
 
+async function assertReadableContrast(page, label, checks) {
+  const results = await page.evaluate(entries => {
+    function parseColour(value) {
+      const match = String(value).match(/rgba?\(([^)]+)\)/i);
+      if (!match) return null;
+      const parts = match[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+      if (parts.length < 3 || parts.slice(0, 3).some(value => !Number.isFinite(value))) return null;
+      return { r: parts[0], g: parts[1], b: parts[2], a: Number.isFinite(parts[3]) ? parts[3] : 1 };
+    }
+
+    function composite(top, bottom) {
+      const alpha = top.a + bottom.a * (1 - top.a);
+      if (alpha <= 0) return { r: 255, g: 255, b: 255, a: 1 };
+      return {
+        r: (top.r * top.a + bottom.r * bottom.a * (1 - top.a)) / alpha,
+        g: (top.g * top.a + bottom.g * bottom.a * (1 - top.a)) / alpha,
+        b: (top.b * top.a + bottom.b * bottom.a * (1 - top.a)) / alpha,
+        a: alpha
+      };
+    }
+
+    function effectiveBackground(element) {
+      const chain = [];
+      for (let node = element; node; node = node.parentElement) chain.unshift(node);
+      let result = { r: 255, g: 255, b: 255, a: 1 };
+      for (const node of chain) {
+        const colour = parseColour(getComputedStyle(node).backgroundColor);
+        if (colour && colour.a > 0) result = composite(colour, result);
+      }
+      return result;
+    }
+
+    function channel(value) {
+      const normalised = value / 255;
+      return normalised <= 0.04045 ? normalised / 12.92 : ((normalised + 0.055) / 1.055) ** 2.4;
+    }
+
+    function luminance(colour) {
+      return 0.2126 * channel(colour.r) + 0.7152 * channel(colour.g) + 0.0722 * channel(colour.b);
+    }
+
+    function ratio(foreground, background) {
+      const light = Math.max(luminance(foreground), luminance(background));
+      const dark = Math.min(luminance(foreground), luminance(background));
+      return (light + 0.05) / (dark + 0.05);
+    }
+
+    return entries.map(entry => {
+      const element = document.querySelector(entry.selector);
+      if (!element) return { ...entry, missing: true };
+      const foreground = parseColour(getComputedStyle(element).color);
+      const background = effectiveBackground(element);
+      return {
+        ...entry,
+        missing: false,
+        foreground: getComputedStyle(element).color,
+        background: `rgb(${Math.round(background.r)}, ${Math.round(background.g)}, ${Math.round(background.b)})`,
+        ratio: foreground ? ratio(foreground, background) : 0
+      };
+    });
+  }, checks);
+
+  const failures = results.filter(result => result.missing || result.ratio < result.minimum);
+  assert(
+    failures.length === 0,
+    `${label}: unreadable contrast detected:\n${failures.map(result => {
+      if (result.missing) return `  - ${result.selector}: element missing`;
+      return `  - ${result.selector}: ${result.ratio.toFixed(2)}:1 (${result.foreground} on ${result.background}), expected ${result.minimum}:1`;
+    }).join("\n")}`
+  );
+}
+
 async function exerciseAccount(page) {
   await page.locator("#nearerAccountButton").click();
   await page.waitForSelector("#nearerAccountDialog[open]");
@@ -97,6 +169,22 @@ async function exerciseSolo(page, label, mobile) {
   await page.locator('#suggestions [role="option"], #suggestions > *').first().click();
   if (Number(await page.locator("#guessCount").textContent()) === 0) await page.locator("#guessButton").click();
   await page.waitForFunction(() => Number(document.getElementById("guessCount")?.textContent || 0) > 0);
+
+  await assertReadableContrast(page, `${label} solo game`, [
+    { selector: ".search-area > label", minimum: 4.5 },
+    { selector: "#countryInput", minimum: 4.5 },
+    { selector: ".closest-label-row", minimum: 4.5 },
+    { selector: ".closest-copy strong", minimum: 4.5 },
+    { selector: ".history-header h2", minimum: 4.5 },
+    { selector: ".history-header p", minimum: 4.5 },
+    { selector: ".count-pill", minimum: 4.5 },
+    { selector: ".guess-row:first-child .guess-rank", minimum: 4.5 },
+    { selector: ".guess-row:first-child .guess-name strong", minimum: 4.5 },
+    { selector: ".guess-row:first-child .guess-name span", minimum: 4.5 },
+    { selector: ".guess-row:first-child .guess-distance", minimum: 4.5 },
+    { selector: ".guess-row:first-child .guess-distance small", minimum: 4.5 }
+  ]);
+
   await exerciseAccount(page);
 }
 
@@ -231,7 +319,7 @@ try {
     mobile: false,
     context: { viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1, isMobile: false, hasTouch: false }
   });
-  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including neutral, collision-aware microstate markers.");
+  console.log("Mobile and desktop browser smoke tests passed for every Nearer route, including readable solo-game contrast and neutral, collision-aware microstate markers.");
 } finally {
   await browser?.close();
   if (server.exitCode === null) server.kill("SIGTERM");
