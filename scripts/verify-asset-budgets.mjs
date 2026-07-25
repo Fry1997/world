@@ -34,7 +34,7 @@ const budgets = [
     label: "stylesheet",
     filter: name => name.endsWith(".css"),
     largestRaw: 80 * kibibyte,
-    totalRaw: 260 * kibibyte,
+    totalRaw: 262 * kibibyte,
     largestGzip: 18 * kibibyte,
     totalGzip: 60 * kibibyte
   }

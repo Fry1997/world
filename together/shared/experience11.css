@@ -1,0 +1,317 @@
+/* Final surface contracts for Together. Loaded after every earlier experience layer. */
+:root{
+  --e11-ink:#15212b;
+  --e11-muted:#5e6a73;
+  --e11-cream:#f6f0e8;
+  --e11-cream-2:#e9e1d8;
+  --e11-navy:#071925;
+  --e11-navy-2:#102b3d;
+  --e11-text:#fff9f1;
+  --e11-text-muted:#b9c7cf;
+  --e11-line:rgba(225,238,246,.18);
+}
+
+body.together-experience{
+  overflow-x:hidden;
+}
+
+body.together-experience .app-shell,
+body.together-experience main,
+body.together-experience .mode-game,
+body.together-experience .mode-layout,
+body.together-experience .mode-play-column,
+body.together-experience .mode-results-column{
+  min-width:0;
+  max-width:100%;
+}
+
+/* Light setup surfaces must always carry dark copy. */
+body.together-experience .mode-setup-card,
+body.together-experience .setup-card{
+  border-color:rgba(27,42,53,.2)!important;
+  background:linear-gradient(145deg,#faf6f0,#e9e2da)!important;
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) :is(h2,h3,strong,label),
+body.together-experience :is(.mode-setup-card,.setup-card) .mode-control-row label span,
+body.together-experience :is(.mode-setup-card,.setup-card) .player-name-grid label span{
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) :is(.mode-note,.setup-note,.mode-setup-copy,.setup-copy,p){
+  color:var(--e11-muted)!important;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) :is(input,select){
+  border-color:rgba(27,42,53,.22)!important;
+  background:#fffaf4!important;
+  color:var(--e11-ink)!important;
+  caret-color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) :is(input,select)::placeholder{
+  color:#76818a!important;
+  opacity:1;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) .primary-button{
+  border-color:#132330!important;
+  background:linear-gradient(145deg,#172b39,#06131e)!important;
+  color:#fff9f1!important;
+}
+
+body.together-experience :is(.mode-setup-card,.setup-card) .secondary-button{
+  border-color:rgba(27,42,53,.22)!important;
+  background:rgba(255,255,255,.46)!important;
+  color:var(--e11-ink)!important;
+}
+
+/* Pass/privacy screens deliberately use a light card with explicit foregrounds. */
+body.together-experience :is(.pass-card,.secret-card){
+  border-color:rgba(255,255,255,.78)!important;
+  background:
+    radial-gradient(circle at 50% 0,rgba(91,174,145,.1),transparent 36%),
+    linear-gradient(150deg,#fffaf4,#e9e2da)!important;
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.pass-card,.secret-card) :is(h2,strong){
+  color:var(--e11-ink)!important;
+  text-shadow:none!important;
+}
+
+body.together-experience :is(.pass-card,.secret-card)>p:not(.eyebrow){
+  color:var(--e11-muted)!important;
+}
+
+body.together-experience :is(.pass-card,.secret-card) .eyebrow{
+  color:#cb8b25!important;
+}
+
+body.together-experience :is(.pass-lock,.secret-lock){
+  border-color:rgba(53,153,124,.5)!important;
+  background:linear-gradient(145deg,#14303b,#071822)!important;
+  color:#fff9f1!important;
+}
+
+body.together-experience .pass-standing,
+body.together-experience .pass-standings>div{
+  border-color:rgba(225,238,246,.2)!important;
+  background:linear-gradient(145deg,#334552,#1b2b36)!important;
+  color:#fff9f1!important;
+}
+
+body.together-experience .pass-standing span,
+body.together-experience .pass-standings>div span{
+  color:#c3d0d7!important;
+}
+
+body.together-experience :is(.pass-card,.secret-card) .primary-button{
+  border-color:#132330!important;
+  background:linear-gradient(145deg,#172b39,#06131e)!important;
+  color:#fff9f1!important;
+}
+
+/* Scoreboards remain dark; metric tiles no longer fall back to pale grey. */
+body.together-experience :is(.mode-player-card,.race-player-card){
+  min-width:0!important;
+  border-color:var(--e11-line)!important;
+  background:linear-gradient(145deg,rgba(21,48,65,.98),rgba(5,18,28,.99))!important;
+  color:var(--e11-text)!important;
+}
+
+body.together-experience :is(.mode-player-card,.race-player-card).is-active{
+  border-color:color-mix(in srgb,var(--player-colour,#ee7459) 70%,rgba(255,255,255,.22))!important;
+  box-shadow:inset 3px 0 0 var(--player-colour,#ee7459),inset 0 1px 0 rgba(255,255,255,.08),0 14px 32px rgba(0,6,11,.25)!important;
+}
+
+body.together-experience :is(.mode-player-card,.race-player-card) :is(h3,strong,b){
+  color:var(--e11-text)!important;
+}
+
+body.together-experience :is(.mode-player-card,.race-player-card) :is(p,span,.mode-player-detail,.race-trend){
+  color:var(--e11-text-muted)!important;
+}
+
+body.together-experience :is(.player-metric,.mode-player-metrics>div,.race-player-metrics>div){
+  border:1px solid rgba(225,238,246,.12)!important;
+  background:rgba(255,255,255,.07)!important;
+  color:var(--e11-text)!important;
+}
+
+body.together-experience :is(.player-metric,.mode-player-metrics>div,.race-player-metrics>div) span{
+  color:#c3d0d7!important;
+}
+
+body.together-experience :is(.player-metric,.mode-player-metrics>div,.race-player-metrics>div) :is(strong,b){
+  color:var(--e11-text)!important;
+}
+
+/* Guessing is a light input surface; keep every field and label on dark ink. */
+body.together-experience :is(.mode-guess-panel,.race-guess-panel){
+  border-color:rgba(255,255,255,.72)!important;
+  background:linear-gradient(145deg,#fffaf4,#e8e0d7)!important;
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) .search-area>label{
+  color:var(--e11-muted)!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) .search-control{
+  border-color:rgba(27,42,53,.2)!important;
+  background:#fffaf4!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) input{
+  color:var(--e11-ink)!important;
+  caret-color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) input::placeholder{
+  color:#74808a!important;
+  opacity:1;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) .search-control>svg{
+  stroke:#66747e!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) .primary-button{
+  border-color:rgba(27,42,53,.12)!important;
+  background:#efe4d4!important;
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-guess-panel,.race-guess-panel) .secondary-button{
+  border-color:rgba(27,42,53,.22)!important;
+  background:rgba(255,255,255,.55)!important;
+  color:var(--e11-ink)!important;
+}
+
+/* Globe controls must remain dark over the globe, never pale grey with white copy. */
+body.together-experience :is(.globe-toolbar,.map-toolbar){
+  border-color:rgba(225,238,246,.18)!important;
+  background:linear-gradient(180deg,rgba(8,25,37,.98),rgba(5,17,27,.96))!important;
+  color:#eef5f7!important;
+}
+
+body.together-experience :is(.globe-toolbar,.map-toolbar) :is(span,strong){
+  color:inherit!important;
+}
+
+body.together-experience :is(.globe-action,.globe-zoom,.globe-zoom button){
+  border-color:rgba(225,238,246,.22)!important;
+  background:#091b28!important;
+  color:#fff9f1!important;
+}
+
+/* History is light; rules and guidance are dark. */
+body.together-experience :is(.mode-history-card,.race-history-card){
+  border-color:rgba(255,255,255,.72)!important;
+  background:linear-gradient(145deg,#f8f3ec,#ded8d0)!important;
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-history-card,.race-history-card) :is(h2,strong,.guess-distance){
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-history-card,.race-history-card) :is(p,span,small,.history-empty){
+  color:var(--e11-muted)!important;
+}
+
+body.together-experience :is(.mode-history-card,.race-history-card) .count-pill{
+  border:1px solid rgba(27,42,53,.45)!important;
+  background:rgba(255,255,255,.35)!important;
+  color:#34434e!important;
+}
+
+body.together-experience :is(.mode-rules-card,.race-rules-card,.mode-pressure-card){
+  border-color:var(--e11-line)!important;
+  background:linear-gradient(145deg,rgba(21,45,60,.98),rgba(6,20,30,.99))!important;
+  color:var(--e11-text)!important;
+}
+
+body.together-experience :is(.mode-rules-card,.race-rules-card,.mode-pressure-card) :is(h2,strong){
+  color:var(--e11-text)!important;
+}
+
+body.together-experience :is(.mode-rules-card,.race-rules-card,.mode-pressure-card) p:last-child{
+  color:var(--e11-text-muted)!important;
+}
+
+body.together-experience :is(.mode-rules-card,.race-rules-card,.mode-pressure-card) .eyebrow{
+  color:#f0b451!important;
+}
+
+/* Light result dialogs need matching dark secondary actions. */
+body.together-experience :is(.mode-result-dialog,.race-result-dialog){
+  color:var(--e11-ink)!important;
+}
+
+body.together-experience :is(.mode-result-dialog,.race-result-dialog) .secondary-button{
+  border-color:rgba(27,42,53,.22)!important;
+  background:rgba(255,255,255,.46)!important;
+  color:var(--e11-ink)!important;
+}
+
+@media(max-width:680px){
+  body.together-experience .mode-heading-row,
+  body.together-experience .race-heading-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:start!important;
+    gap:12px!important;
+  }
+
+  body.together-experience :is(.mode-heading-row,.race-heading-row)>div{
+    min-width:0;
+  }
+
+  body.together-experience :is(.mode-heading-row,.race-heading-row) h1{
+    font-size:clamp(2.25rem,11vw,3.45rem)!important;
+    overflow-wrap:anywhere;
+  }
+
+  body.together-experience :is(.mode-heading-row,.race-heading-row)>.secondary-button{
+    min-width:0!important;
+    padding-inline:14px!important;
+    white-space:nowrap;
+  }
+
+  body.together-experience :is(.mode-scoreboard,.race-scoreboard){
+    width:100%!important;
+    margin-inline:0!important;
+    padding-inline:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    overflow:visible!important;
+  }
+
+  body.together-experience :is(.mode-player-card,.race-player-card){
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  body.together-experience :is(.mode-globe-stage,.race-globe-stage){
+    height:min(68svh,590px)!important;
+    min-height:470px!important;
+  }
+
+  body.together-experience :is(.mode-guess-panel,.race-guess-panel){
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+
+  body.together-experience :is(.mode-turn-actions,.race-turn-actions){
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+  }
+
+  body.together-experience :is(.mode-turn-actions,.race-turn-actions) button{
+    width:100%!important;
+    min-width:0!important;
+  }
+}
