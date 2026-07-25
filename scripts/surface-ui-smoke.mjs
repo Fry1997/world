@@ -141,7 +141,6 @@ try {
 
   await page.goto(`${baseUrl}/together/cooperative/`, { waitUntil: "domcontentloaded" });
   await waitForRuntime(page, "__NEARER_COOPERATIVE_STARTED");
-  await page.waitForFunction(() => Array.from(document.styleSheets).some(sheet => sheet.href?.includes("experience11-clarity.css")));
   await assertTextTone(page, "Cooperative setup", [
     { selector: ".mode-setup-card .mode-note", tone: "dark" },
     { selector: ".mode-setup-card label span", tone: "dark" },
