@@ -23,14 +23,20 @@ body.platform-shell-enabled:has(.game-layout) :is(
   .search-area>label,
   .history-header p,
   .history-empty,
-  .guess-name span,
-  .guess-distance small,
   .closest-label-row,
   .closest-empty p,
-  .feedback-panel p,
-  .count-pill
+  .feedback-panel p
 ){
   color:var(--nearer-muted)!important;
+}
+
+/* Small metadata needs a stronger muted tone to retain 4.5:1 at desktop too. */
+body.platform-shell-enabled:has(.game-layout) :is(
+  .guess-name span,
+  .guess-distance small,
+  .count-pill
+){
+  color:#b8c5cc!important;
 }
 
 body.platform-shell-enabled:has(.game-layout) .count-pill{
