@@ -37,6 +37,7 @@
     loadStyle(`together/shared/experience9.css?v=${VERSION}`);
     loadStyle(`together/shared/experience10.css?v=${VERSION}`);
     loadStyle("together/shared/experience11.css?v=20260725-contrast1");
+    loadStyle("together/shared/experience11-clarity.css?v=20260725-contrast1");
 
     if (!window.__NEARER_PREMIUM_GLOBE_V2_STARTED) {
       await load(`together/shared/premium-globe-v2.js?v=${VERSION}`);
