@@ -76,3 +76,28 @@ body.platform-shell-enabled:has(.game-layout) .suggestion-button :is(span,strong
 body.platform-shell-enabled:has(.game-layout) .suggestion-button small{
   color:#69747d!important;
 }
+
+/* Solo dialogs are light surfaces. Prevent the dark app shell from supplying
+   white secondary-action text, as happened to the result dialog's Close button. */
+body.platform-shell-enabled .dialog-card{
+  background-color:#f4ede4!important;
+  color:#14202a!important;
+}
+
+body.platform-shell-enabled .dialog-card :is(h2,strong){
+  color:#14202a!important;
+}
+
+body.platform-shell-enabled .dialog-card :is(.dialog-copy,.win-stats span,.instruction-list p){
+  color:#5f6b74!important;
+}
+
+body.platform-shell-enabled .dialog-card .secondary-button{
+  border-color:rgba(20,32,42,.22)!important;
+  background:rgba(255,255,255,.42)!important;
+  color:#14202a!important;
+}
+
+body.platform-shell-enabled .dialog-card .secondary-button:disabled{
+  color:#6e7880!important;
+}
