@@ -7,6 +7,11 @@ body.together-experience :is(.globe-toolbar,.map-toolbar){background-color:#0719
 body.together-experience :is(.mode-history-card,.race-history-card){background-color:#ece6de!important}
 body.together-experience :is(.mode-rules-card,.race-rules-card,.mode-pressure-card){background-color:#0b2130!important}
 
+body.together-experience .pass-standing strong,
+body.together-experience .pass-standings>div strong{
+  color:#fff9f1!important;
+}
+
 body.together-experience :is(.mode-player-metrics,.race-player-metrics){
   display:flex!important;
   flex-wrap:wrap!important;
